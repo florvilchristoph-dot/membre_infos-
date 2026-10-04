@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MEDFAH — Gestion des membres</title>
+<style>
+:root{--blue:#173dcc;--red:#d91d16;--bg:#f4f6fb;--card:#fff;--text:#172033}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:#fff;border-bottom:4px solid var(--blue);padding:12px 22px;display:flex;align-items:center;gap:16px}header img{width:72px;height:72px;object-fit:contain}header h1{font-size:20px;margin:0;color:var(--blue)}header p{margin:4px 0 0;color:#666}
+nav{display:flex;gap:8px;flex-wrap:wrap;padding:14px 22px;background:#fff}button{border:0;border-radius:8px;padding:10px 14px;cursor:pointer;background:var(--blue);color:#fff;font-weight:600}button.secondary{background:#e9edff;color:var(--blue)}
+main{max-width:1100px;margin:20px auto;padding:0 18px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}.stat{background:var(--card);padding:18px;border-radius:14px;box-shadow:0 3px 14px #0000000d}.stat b{font-size:28px;color:var(--blue)}
+section{background:#fff;border-radius:14px;padding:20px;margin-top:18px;box-shadow:0 3px 14px #0000000d}h2{margin-top:0}.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}label{font-size:13px;font-weight:bold}input,select{width:100%;padding:11px;border:1px solid #ccd2df;border-radius:8px;margin-top:5px}table{width:100%;border-collapse:collapse;margin-top:14px}th,td{padding:11px;border-bottom:1px solid #eee;text-align:left}th{color:var(--blue)}
+.card{max-width:520px;margin:16px auto;border:3px solid var(--blue);border-radius:18px;padding:18px;background:#fff;position:relative}.card .top{display:flex;align-items:center;gap:12px}.card img{width:70px}.card h3{color:var(--blue);margin:0}.badge{display:inline-block;background:#eaf0ff;color:var(--blue);padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold}.muted{color:#666;font-size:13px}
+.hidden{display:none}.footer{text-align:center;color:#777;padding:25px}
+</style>
+</head>
+<body>
+<header><img src="logo-medfah.jpg" alt="Logo MEDFAH"><div><h1>Mission Église de Dieu de la Foi Apostolique d’Haïti — MEDFAH</h1><p>Logiciel de gestion des membres et cartes de persévérance</p></div></header>
+<nav>
+<button onclick="show('dashboard')">Tableau de bord</button><button onclick="show('members')">Membres</button><button onclick="show('card')">Carte de persévérance</button><button onclick="show('data')">Données de l’église</button>
+</nav>
+<main>
+<section id="dashboard"><h2>Tableau de bord</h2><div class="grid"><div class="stat">Membres enregistrés<br><b id="count">0</b></div><div class="stat">Cartes actives<br><b id="active">0</b></div><div class="stat">Églises/assemblées<br><b>1</b></div></div><p class="muted">Cette première version utilise le navigateur pour enregistrer les données localement. Nous pourrons ensuite ajouter une vraie base de données, comptes utilisateurs, recherche et impression.</p></section>
+<section id="members" class="hidden"><h2>Ajouter un membre</h2><div class="form"><label>Nom complet<input id="name" placeholder="Ex. Jean Pierre"></label><label>Date de naissance<input id="dob" type="date"></label><label>Téléphone<input id="phone" placeholder="+509 ..."></label><label>Assemblée<input id="church" placeholder="Nom de l’assemblée"></label><label>Numéro de carte<input id="cardno" placeholder="MEDFAH-0001"></label><label>Statut<select id="status"><option>Actif</option><option>Inactif</option></select></label></div><br><button onclick="addMember()">Enregistrer le membre</button><table><thead><tr><th>Nom</th><th>Assemblée</th><th>Carte</th><th>Statut</th></tr></thead><tbody id="rows"></tbody></table></section>
+<section id="card" class="hidden"><h2>Carte de persévérance</h2><div class="card"><div class="top"><img src="logo-medfah.jpg"><div><h3>CARTE DE PERSÉVÉRANCE</h3><span class="badge">MEDFAH</span></div></div><hr><p><b>Nom :</b> <span id="cname">—</span></p><p><b>N° carte :</b> <span id="cnum">—</span></p><p><b>Assemblée :</b> <span id="cchurch">—</span></p><p><b>Statut :</b> <span id="cstatus">—</span></p><p class="muted">Document provisoire — à personnaliser selon les règles officielles de la MEDFAH.</p></div></section>
+<section id="data" class="hidden"><h2>Données de l’église</h2><div class="form"><label>Nom officiel<input value="Mission Église de Dieu de la Foi Apostolique d’Haïti (MEDFAH)"></label><label>Pasteur<input placeholder="Nom du pasteur"></label><label>Adresse<input placeholder="Adresse de l’assemblée"></label><label>Téléphone<input placeholder="Téléphone de l’église"></label></div></section>
+</main><div class="footer">MEDFAH — Prototype 1.0</div>
+<script>
+let members=JSON.parse(localStorage.getItem('medfah_members')||'[]');
+function show(id){['dashboard','members','card','data'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id));render();}
+function addMember(){const m={name:document.getElementById('name').value.trim(),dob:document.getElementById('dob').value,phone:document.getElementById('phone').value,church:document.getElementById('church').value,cardno:document.getElementById('cardno').value,status:document.getElementById('status').value};if(!m.name||!m.cardno){alert('Veuillez entrer au moins le nom et le numéro de carte.');return}members.push(m);localStorage.setItem('medfah_members',JSON.stringify(members));document.getElementById('cname').textContent=m.name;document.getElementById('cnum').textContent=m.cardno;document.getElementById('cchurch').textContent=m.church||'—';document.getElementById('cstatus').textContent=m.status;show('members');}
+function render(){document.getElementById('count').textContent=members.length;document.getElementById('active').textContent=members.filter(m=>m.status==='Actif').length;document.getElementById('rows').innerHTML=members.map(m=>`<tr><td>${esc(m.name)}</td><td>${esc(m.church||'—')}</td><td>${esc(m.cardno)}</td><td>${esc(m.status)}</td></tr>`).join('');}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}render();
+</script></body></html>
