@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/scanner", "destination": "/scanner.html" },
+    { "source": "/membre", "destination": "/membre.html" },
+    { "source": "/medfah", "destination": "/medfah.html" }
+  ]
+}
