@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eskane QR Code - MEDFAH</title>
+    <!-- Si w gen yon fichye script ki itilize export/import, sèvi ak type="module" -->
+    <script type="module" src="app.js"></script>
+    
+    <!-- Bibliyotèk html5-qrcode nan CDN -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)),
+                        url('image.png') no-repeat center center fixed;
+            background-size: contain;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-top: 20px;
+        }
+        h1 {
+            color: #0d47a1;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        #reader {
+            width: 100% !important;
+            border: none !important;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #result {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 10px;
+            background-color: #0d47a1;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            margin-top: 20px;
+            box-sizing: border-box;
+        }
+        .btn:hover {
+            background-color: #002171;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Eskane Kat Manm nan</h1>
+        <div id="reader"></div>
+        <div id="result"></div>
+        <a href="index.html" class="btn">Retounen nan Akèy la</a>
+    </div>
+
+    <!-- Script pou jere kamera a -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const resultContainer = document.getElementById('result');
+            
+            // Itilize anotasyon JSDoc pou bay TypeScript tip done yo nan yon fichye HTML / JS nòmal
+            /**
+             * @param {string} decodedText
+             */
+            function onScanSuccess(decodedText) {
+                console.log(`Kòd jwenn: ${decodedText}`);
+                resultContainer.innerHTML = `<p style="color: green;">Manm idantifye! Y ap redirije w...</p>`;
+                
+                html5QrCode.stop().then(() => {
+                    window.location.href = `membres.html?id=${encodeURIComponent(decodedText.trim())}`;
+                }).catch(() => {
+                    window.location.href = `membres.html?id=${encodeURIComponent(decodedText.trim())}`;
+                });
+            }
+
+            function onScanFailure() {
+                // Erè yo nòmal lè kamera a poko wè yon kòd devan l
+            }
+
+            const html5QrCode = new Html5Qrcode("reader");
+            
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                onScanSuccess,
+                onScanFailure
+            ).catch((/** @type {any} */ err) => {
+                console.error("Echèk pou louvri kamera a:", err);
+                resultContainer.innerHTML = `<p style="color: red;">Echèk pou limen kamera a. Tcheke pèmisyon yo.</p>`;
+            });
+        });
+    </script>
+
+</body>
+</html>
