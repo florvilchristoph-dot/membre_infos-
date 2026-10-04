@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MEDFAH - Akèy</title>
+  
+  <!-- SCRIPT POU HTML5 QRCODE -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      /* Background ki gen imaj ou an ak yon kouch blanch transparan anlè l */
+      background: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)),
+                  url('image.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    header h1 {
+      color: #0d47a1;
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1.1rem;
+      color: #555;
+    }
+
+    .main-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 800px;
+      margin: 40px 0;
+    }
+
+    .btn-card {
+      background: #ffffff;
+      border: 2px solid #0d47a1;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      text-decoration: none;
+      color: #0d47a1;
+      font-weight: bold;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.2s, background-color 0.2s;
+    }
+
+    .btn-card:hover {
+      background-color: #0d47a1;
+      color: #ffffff;
+      transform: translateY(-3px);
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #777;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Bienvenue sur MEDFAH</h1>
+    <p>Platfòm jesyon ak verifikasyon manm yo</p>
+  </header>
+
+  <main class="main-actions">
+    <a href="scan.html" class="btn-card">📷 Scanner QR Code</a>
+    <a href="verify.html" class="btn-card">🔍 Vérifier Carte</a>
+    <a href="membres.html" class="btn-card">📋 Liste des Membres</a>
+    <a href="admin.html" class="btn-card">⚙ Administration</a>
+  </main>
+
+  <footer>
+    &copy; 2026 MEDFAH - Tout dwa rezeve.
+  </footer>
+
+  <!-- SCRIPT SUPABASE AK CONFIG -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
