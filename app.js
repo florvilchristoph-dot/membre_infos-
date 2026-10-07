@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const TABLE = "membre_infos";
 
+
     // ----------------------------------------------------------
     // 2. VERIFICATION
     // ----------------------------------------------------------
@@ -29,29 +30,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!SUPABASE_ANON_KEY) {
         console.error("Clé Supabase manquante.");
+
         afficherMessage(
             "La clé Supabase n'est pas encore configurée.",
             "error"
         );
+
         return;
     }
 
+
     // ----------------------------------------------------------
     // 3. RECUPERER L'ID DANS L'URL
-    // Exemple : membreinfos.vercel.app/?id=12
     // ----------------------------------------------------------
 
-    const params = new URLSearchParams(window.location.search);
-    const membreId = params.get("id");
+    const params =
+        new URLSearchParams(window.location.search);
+
+    const membreId =
+        params.get("id");
+
 
     // ----------------------------------------------------------
     // 4. CHARGER LES DONNEES
     // ----------------------------------------------------------
 
     if (membreId) {
+
         chargerMembre(membreId);
+
     } else {
+
         chargerMembres();
+
     }
 
 
@@ -61,49 +72,109 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function chargerMembre(id) {
 
-        afficherMessage("Chargement du dossier du membre...");
+        afficherMessage(
+            "Chargement du dossier du membre..."
+        );
 
         try {
 
             const url =
                 `${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${encodeURIComponent(id)}&select=*`;
 
-            const response = await fetch(url, {
-                method: "GET",
-                headers: {
-                    "apikey": SUPABASE_ANON_KEY,
-                    "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-                    "Content-Type": "application/json"
-                }
-            });
+            const response =
+                await fetch(url, {
+
+                    method: "GET",
+
+                    headers: {
+
+                        "apikey": SUPABASE_ANON_KEY,
+
+                        "Authorization":
+                            `Bearer ${SUPABASE_ANON_KEY}`,
+
+                        "Content-Type":
+                            "application/json"
+
+                    }
+
+                });
+
 
             if (!response.ok) {
+
                 throw new Error(
                     `Erreur Supabase : ${response.status}`
                 );
+
             }
 
-            const data = await response.json();
+
+            const data =
+                await response.json();
+
+
+            // --------------------------------------------------
+            // VERIFICATION DES DONNEES RECUES
+            // --------------------------------------------------
+
+            console.log(
+                "======================================"
+            );
+
+            console.log(
+                "DONNEES RECUES DE SUPABASE :",
+                data
+            );
+
+            console.log(
+                "COLONNES DU MEMBRE :",
+                data[0] ? Object.keys(data[0]) : []
+            );
+
+            console.log(
+                "PRENOM :",
+                data[0]?.prenom
+            );
+
+            console.log(
+                "TELEPHONE :",
+                data[0]?.telephone
+            );
+
+            console.log(
+                "======================================"
+            );
+
 
             if (!data || data.length === 0) {
+
                 afficherMessage(
                     "Aucun membre trouvé.",
                     "error"
                 );
+
                 return;
             }
 
+
             afficherDossier(data[0]);
+
 
         } catch (error) {
 
-            console.error(error);
+            console.error(
+                "ERREUR :",
+                error
+            );
 
             afficherMessage(
                 "Impossible de charger le dossier du membre.",
                 "error"
             );
+
         }
+
     }
 
 
@@ -113,41 +184,72 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function chargerMembres() {
 
-        afficherMessage("Chargement des membres...");
+        afficherMessage(
+            "Chargement des membres..."
+        );
 
         try {
 
             const url =
                 `${SUPABASE_URL}/rest/v1/${TABLE}?select=*&order=id.desc`;
 
-            const response = await fetch(url, {
-                method: "GET",
-                headers: {
-                    "apikey": SUPABASE_ANON_KEY,
-                    "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-                    "Content-Type": "application/json"
-                }
-            });
+
+            const response =
+                await fetch(url, {
+
+                    method: "GET",
+
+                    headers: {
+
+                        "apikey":
+                            SUPABASE_ANON_KEY,
+
+                        "Authorization":
+                            `Bearer ${SUPABASE_ANON_KEY}`,
+
+                        "Content-Type":
+                            "application/json"
+
+                    }
+
+                });
+
 
             if (!response.ok) {
+
                 throw new Error(
                     `Erreur Supabase : ${response.status}`
                 );
+
             }
 
-            const data = await response.json();
+
+            const data =
+                await response.json();
+
+
+            console.log(
+                "LISTE DES MEMBRES :",
+                data
+            );
+
 
             afficherListe(data);
 
+
         } catch (error) {
 
-            console.error(error);
+            console.error(
+                error
+            );
 
             afficherMessage(
                 "Impossible de charger les membres.",
                 "error"
             );
+
         }
+
     }
 
 
@@ -157,71 +259,142 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function afficherListe(membres) {
 
-        const zone = obtenirZone();
+        const zone =
+            obtenirZone();
+
 
         if (!membres.length) {
 
             zone.innerHTML = `
+
                 <div class="message">
+
                     Aucun membre enregistré.
+
                 </div>
+
             `;
 
             return;
         }
 
+
         let html = `
+
             <div class="medfah-header">
+
                 <h1>MEDFAH</h1>
+
                 <h2>DOSSIER DES MEMBRES</h2>
-                <p>Mission Église de Dieu de la Foi Apostolique d'Haïti</p>
+
+                <p>
+                    Mission Église de Dieu de la Foi Apostolique d'Haïti
+                </p>
+
             </div>
 
+
             <div class="membre-liste">
+
         `;
+
 
         membres.forEach(membre => {
 
             html += `
+
                 <div class="membre-card">
 
                     <h3>
-                        ${echapper(membre.prenom || "")}
-                        ${echapper(membre.nom || "")}
+
+                        ${echapper(
+                            membre.prenom ||
+                            membre.Prenom ||
+                            membre.prénom ||
+                            ""
+                        )}
+
+                        ${echapper(
+                            membre.nom ||
+                            membre.Nom ||
+                            ""
+                        )}
+
                     </h3>
 
+
                     <p>
+
                         <strong>Code :</strong>
-                        ${echapper(membre.code || "-")}
+
+                        ${echapper(
+                            membre.code || "-"
+                        )}
+
                     </p>
 
+
                     <p>
+
                         <strong>Fonction :</strong>
-                        ${echapper(membre.fonction || "-")}
+
+                        ${echapper(
+                            membre.fonction || "-"
+                        )}
+
                     </p>
 
+
                     <p>
+
                         <strong>Téléphone :</strong>
-                        ${echapper(membre.telefone || "-")}
+
+                        ${echapper(
+                            membre.telephone ||
+                            membre.telefone ||
+                            membre.phone ||
+                            "-"
+                        )}
+
                     </p>
 
+
                     <p>
+
                         <strong>Status :</strong>
-                        ${echapper(membre.status || "-")}
+
+                        ${echapper(
+                            membre.status || "-"
+                        )}
+
                     </p>
+
 
                     <button
                         onclick="window.location.href='?id=${membre.id}'">
+
                         DOSSIER DU MEMBRE
+
                     </button>
 
+
                 </div>
+
             `;
+
         });
 
-        html += `</div>`;
 
-        zone.innerHTML = html;
+        html += `
+
+            </div>
+
+        `;
+
+
+        zone.innerHTML =
+            html;
+
     }
 
 
@@ -231,16 +404,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function afficherDossier(membre) {
 
-        const zone = obtenirZone();
+        const zone =
+            obtenirZone();
+
 
         zone.innerHTML = `
 
             <div class="medfah-header">
+
                 <h1>MEDFAH</h1>
+
                 <h2>DOSSIER DU MEMBRE</h2>
+
                 <p>
                     Mission Église de Dieu de la Foi Apostolique d'Haïti
                 </p>
+
             </div>
 
 
@@ -248,30 +427,71 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <section class="dossier-section">
 
-                <h2>Informations personnelles</h2>
+                <h2>
+                    Informations personnelles
+                </h2>
+
 
                 <div class="grid">
 
-                    ${champ("Code", membre.code)}
 
-                    ${champ("N° carte", membre.numero_carte)}
+                    ${champ(
+                        "Code",
+                        membre.code
+                    )}
 
-                    ${champ("Nom", membre.nom)}
 
-                    ${champ("Prénom", membre.prenom)}
+                    ${champ(
+                        "N° carte",
+                        membre.numero_carte
+                    )}
 
-                    ${champ("Sexe", membre.sexe)}
 
-                    ${champ("Date de naissance", membre.date_naissance)}
+                    ${champ(
+                        "Nom",
+                        membre.nom ||
+                        membre.Nom
+                    )}
 
-                    ${champ("Lieu de naissance", membre.lieu_naissance)}
 
-                    ${champ("Nationalité", membre.nationalite)}
+                    ${champ(
+                        "Prénom",
+                        membre.prenom ||
+                        membre.Prenom ||
+                        membre.prénom ||
+                        membre.first_name
+                    )}
+
+
+                    ${champ(
+                        "Sexe",
+                        membre.sexe
+                    )}
+
+
+                    ${champ(
+                        "Date de naissance",
+                        membre.date_naissance
+                    )}
+
+
+                    ${champ(
+                        "Lieu de naissance",
+                        membre.lieu_naissance
+                    )}
+
+
+                    ${champ(
+                        "Nationalité",
+                        membre.nationalite
+                    )}
+
 
                     ${champ(
                         "Situation matrimoniale",
                         membre.situation_matrimoniale
                     )}
+
 
                 </div>
 
@@ -282,26 +502,57 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <section class="dossier-section">
 
-                <h2>Contact</h2>
+                <h2>
+                    Contact
+                </h2>
+
 
                 <div class="grid">
 
-                    ${champ("Téléphone", membre.telefone)}
+
+                    ${champ(
+                        "Téléphone",
+                        membre.telephone ||
+                        membre.telefone ||
+                        membre.phone
+                    )}
+
 
                     ${champ(
                         "Téléphone secondaire",
                         membre.telephone_secondaire
                     )}
 
-                    ${champ("WhatsApp", membre.whatsapp)}
 
-                    ${champ("Email", membre.email)}
+                    ${champ(
+                        "WhatsApp",
+                        membre.whatsapp
+                    )}
 
-                    ${champ("Adresse", membre.adresse)}
 
-                    ${champ("Commune", membre.commune)}
+                    ${champ(
+                        "Email",
+                        membre.email
+                    )}
 
-                    ${champ("Département", membre.departement)}
+
+                    ${champ(
+                        "Adresse",
+                        membre.adresse
+                    )}
+
+
+                    ${champ(
+                        "Commune",
+                        membre.commune
+                    )}
+
+
+                    ${champ(
+                        "Département",
+                        membre.departement
+                    )}
+
 
                 </div>
 
@@ -312,20 +563,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <section class="dossier-section">
 
-                <h2>Informations familiales</h2>
+                <h2>
+                    Informations familiales
+                </h2>
+
 
                 <div class="grid">
 
-                    ${champ("Nom du père", membre.nom_pere)}
 
-                    ${champ("Nom de la mère", membre.nom_mere)}
+                    ${champ(
+                        "Nom du père",
+                        membre.nom_pere
+                    )}
 
-                    ${champ("Nom du conjoint", membre.nom_conjoint)}
+
+                    ${champ(
+                        "Nom de la mère",
+                        membre.nom_mere
+                    )}
+
+
+                    ${champ(
+                        "Nom du conjoint",
+                        membre.nom_conjoint
+                    )}
+
 
                     ${champ(
                         "Nombre d'enfants",
                         membre.nombre_enfants
                     )}
+
 
                 </div>
 
@@ -336,39 +604,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <section class="dossier-section">
 
-                <h2>Vie spirituelle</h2>
+                <h2>
+                    Vie spirituelle
+                </h2>
+
 
                 <div class="grid">
+
 
                     ${champ(
                         "Date d'adhésion",
                         membre.date_adhesion
                     )}
 
+
                     ${champ(
                         "Date de conversion",
                         membre.date_conversion
                     )}
+
 
                     ${champ(
                         "Date de baptême",
                         membre.date_bapteme
                     )}
 
+
                     ${champ(
                         "Pasteur responsable",
                         membre.pasteur_responsable
                     )}
+
 
                     ${champ(
                         "Formation biblique",
                         membre.formation_biblique
                     )}
 
+
                     ${champ(
                         "Groupe d'église",
                         membre.groupe_eglise
                     )}
+
 
                 </div>
 
@@ -379,17 +657,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <section class="dossier-section">
 
-                <h2>Ministères et responsabilités</h2>
+                <h2>
+                    Ministères et responsabilités
+                </h2>
+
 
                 <div class="grid">
 
-                    ${champ("Fonction", membre.fonction)}
 
-                    ${champ("Profession", membre.profession)}
+                    ${champ(
+                        "Fonction",
+                        membre.fonction
+                    )}
 
-                    ${champ("Assemblée", membre.assemblee)}
 
-                    ${champ("Status", membre.status)}
+                    ${champ(
+                        "Profession",
+                        membre.profession
+                    )}
+
+
+                    ${champ(
+                        "Assemblée",
+                        membre.assemblee
+                    )}
+
+
+                    ${champ(
+                        "Status",
+                        membre.status
+                    )}
+
 
                 </div>
 
@@ -400,24 +698,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <section class="dossier-section">
 
-                <h2>Personne à contacter en cas d'urgence</h2>
+                <h2>
+                    Personne à contacter en cas d'urgence
+                </h2>
+
 
                 <div class="grid">
+
 
                     ${champ(
                         "Nom",
                         membre.personne_urgence
                     )}
 
+
                     ${champ(
                         "Téléphone",
                         membre.telephone_urgence
                     )}
 
+
                     ${champ(
                         "Relation",
                         membre.relation_urgence
                     )}
+
 
                 </div>
 
@@ -428,12 +733,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <section class="dossier-section">
 
-                <h2>Suivi / Observations</h2>
+                <h2>
+                    Suivi / Observations
+                </h2>
+
 
                 <div class="observation">
 
                     ${echapper(
-                        membre.observations || "Aucune observation."
+                        membre.observations ||
+                        "Aucune observation."
                     )}
 
                 </div>
@@ -441,18 +750,31 @@ document.addEventListener("DOMContentLoaded", () => {
             </section>
 
 
+            <!-- ACTIONS -->
+
             <div class="actions">
 
-                <button onclick="window.print()">
+
+                <button
+                    onclick="window.print()">
+
                     IMPRIMER
+
                 </button>
 
-                <button onclick="window.history.back()">
+
+                <button
+                    onclick="window.history.back()">
+
                     RETOUR
+
                 </button>
+
 
             </div>
+
         `;
+
     }
 
 
@@ -463,22 +785,34 @@ document.addEventListener("DOMContentLoaded", () => {
     function champ(label, valeur) {
 
         return `
+
             <div class="champ">
 
-                <strong>${label}</strong>
+                <strong>
+                    ${label}
+                </strong>
+
 
                 <span>
+
                     ${echapper(
+
                         valeur === null ||
                         valeur === undefined ||
                         valeur === ""
+
                             ? "-"
+
                             : valeur
+
                     )}
+
                 </span>
 
             </div>
+
         `;
+
     }
 
 
@@ -489,20 +823,35 @@ document.addEventListener("DOMContentLoaded", () => {
     function obtenirZone() {
 
         let zone =
+
             document.getElementById("app") ||
-            document.getElementById("membres-container") ||
-            document.getElementById("app-container");
+
+            document.getElementById(
+                "membres-container"
+            ) ||
+
+            document.getElementById(
+                "app-container"
+            );
+
 
         if (!zone) {
 
-            zone = document.createElement("main");
+            zone =
+                document.createElement("main");
 
-            zone.id = "app";
+            zone.id =
+                "app";
 
-            document.body.appendChild(zone);
+            document.body.appendChild(
+                zone
+            );
+
         }
 
+
         return zone;
+
     }
 
 
@@ -510,15 +859,25 @@ document.addEventListener("DOMContentLoaded", () => {
     // MESSAGE
     // ==========================================================
 
-    function afficherMessage(message, type = "") {
+    function afficherMessage(
+        message,
+        type = ""
+    ) {
 
-        const zone = obtenirZone();
+        const zone =
+            obtenirZone();
+
 
         zone.innerHTML = `
+
             <div class="message ${type}">
+
                 ${echapper(message)}
+
             </div>
+
         `;
+
     }
 
 
@@ -528,12 +887,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function echapper(texte) {
 
-        return String(texte ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+        return String(
+            texte ?? ""
+        )
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
     }
 
 });
