@@ -8,22 +8,49 @@ html = r'''<!DOCTYPE html>
 <title>MEDFAH — Gestion des membres</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f4f6fb;color:#182235}
-header{background:#fff;padding:22px 18px 18px;border-bottom:5px solid #2145c7}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f4f6fb;
+  color:#182235;
+  position:relative;
+}
+
+/* Logo MEDFAH en arrière-plan */
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:url("logo-medfah.jpg");
+  background-repeat:no-repeat;
+  background-position:center center;
+  background-size:420px auto;
+  opacity:.08;
+  pointer-events:none;
+  z-index:0;
+}
+
+header,nav,main{
+  position:relative;
+  z-index:1;
+}
+
+header{background:rgba(255,255,255,.96);padding:22px 18px 18px;border-bottom:5px solid #2145c7}
 .top{display:flex;gap:18px;align-items:center;max-width:1100px;margin:auto}
 .logo{width:125px;height:85px;object-fit:contain}
 .brand h1{margin:0;color:#2145c7;font-size:30px;line-height:1.15}
 .brand p{margin:12px 0 0;color:#666;font-size:20px}
-nav{background:#fff;padding:28px 18px 24px}
+nav{background:rgba(255,255,255,.96);padding:28px 18px 24px}
 .nav{max-width:1100px;margin:auto;display:flex;gap:14px;flex-wrap:wrap}
 button,.btn{border:0;border-radius:14px;background:#2145c7;color:#fff;padding:15px 24px;font-size:18px;font-weight:bold;cursor:pointer;text-decoration:none}
 button:hover,.btn:hover{background:#17379f}
 button.secondary{background:#667085}
 main{max-width:1100px;margin:35px auto;padding:0 18px}
-.panel{background:#fff;border-radius:26px;padding:32px;box-shadow:0 5px 25px rgba(0,0,0,.06);margin-bottom:24px}
+.panel{background:rgba(255,255,255,.96);border-radius:26px;padding:32px;box-shadow:0 5px 25px rgba(0,0,0,.06);margin-bottom:24px}
 h2{font-size:34px;margin:0 0 25px}
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.card{background:#fff;border-radius:22px;padding:30px;box-shadow:0 5px 22px rgba(0,0,0,.06)}
+.card{background:rgba(255,255,255,.97);border-radius:22px;padding:30px;box-shadow:0 5px 22px rgba(0,0,0,.06)}
 .card .label{font-size:21px}
 .number{font-size:54px;color:#2145c7;font-weight:bold;margin-top:10px}
 .note{font-size:18px;color:#666;line-height:1.5}
@@ -39,11 +66,13 @@ th{background:#f0f3fa}
 .status{margin:15px 0;padding:12px;border-radius:10px;background:#eef4ff;color:#2145c7}
 .danger{background:#c62828}
 .small{font-size:14px;color:#667085}
+
 @media(max-width:750px){
  .top{align-items:flex-start}.logo{width:120px}.brand h1{font-size:29px}.brand p{font-size:18px}
  .cards{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}
  .panel{padding:24px 18px}h2{font-size:30px}
  table{font-size:14px;display:block;overflow-x:auto}
+ body::before{background-size:300px auto}
 }
 </style>
 </head>
@@ -51,7 +80,7 @@ th{background:#f0f3fa}
 
 <header>
   <div class="top">
-    <img class="logo" src="logo.png" alt="Logo MEDFAH"
+    <img class="logo" src="logo-medfah.jpg" alt="Logo MEDFAH"
          onerror="this.style.display='none'">
     <div class="brand">
       <h1>Mission Église de Dieu de la Foi Apostolique d’Haïti — MEDFAH</h1>
@@ -162,7 +191,6 @@ th{background:#f0f3fa}
 
 </main>
 
-<!-- Ton config.js doit définir window.SUPABASE_URL et window.SUPABASE_ANON_KEY -->
 <script src="config.js"></script>
 
 <script>
@@ -314,4 +342,4 @@ loadDashboard();
 
 path = Path("/mnt/data/medfah.html")
 path.write_text(html, encoding="utf-8")
-print(path)
+print(f"Fichier créé : {path}")
