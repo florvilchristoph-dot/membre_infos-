@@ -4,17 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Espas Manm - MEDFAH</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)),
-                        url('image.png') no-repeat center center fixed;
+            background: linear-gradient(
+                rgba(255, 255, 255, 0.88),
+                rgba(255, 255, 255, 0.88)
+            ),
+            url('image.png') no-repeat center center fixed;
+
             background-size: contain;
             margin: 0;
             padding: 20px;
             color: #333;
             min-height: 100vh;
         }
+
         .container {
             max-width: 600px;
             margin: 40px auto;
@@ -23,22 +29,27 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+
         h1 {
             color: #007bff;
             text-align: center;
         }
+
         .member-info {
             margin-top: 20px;
         }
+
         .member-info p {
             font-size: 16px;
             margin: 10px 0;
             border-bottom: 1px solid #eee;
             padding-bottom: 8px;
         }
+
         .member-info strong {
             color: #555;
         }
+
         .btn {
             display: block;
             width: 100%;
@@ -54,74 +65,215 @@
             margin-top: 20px;
             box-sizing: border-box;
         }
+
         .btn:hover {
             background-color: #0056b3;
         }
     </style>
 </head>
+
 <body>
 
-    <div class="container">
-        <h1>Enfòmasyon Manm</h1>
-        
-        <div id="loading" style="text-align: center;">Chajman enfòmasyon yo...</div>
+<div class="container">
 
-        <div class="member-info" id="memberDetails" style="display: none;">
-            <p><strong>Non :</strong> <span id="nomMember"></span></p>
-            <p><strong>Prenon :</strong> <span id="prenomMember"></span></p>
-            <p><strong>Imèl :</strong> <span id="emailMember"></span></p>
-            <p><strong>Telefòn :</strong> <span id="telMember"></span></p>
-            <p><strong>Estati :</strong> <span id="statusMember"></span></p>
-        </div>
+    <h1>Enfòmasyon Manm</h1>
 
-        <a href="index.html" class="btn">Retounen nan Akèy la</a>
+    <div id="loading" style="text-align:center;">
+        Chajman enfòmasyon yo...
     </div>
 
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-        import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
+    <div class="member-info" id="memberDetails" style="display:none;">
 
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        <p>
+            <strong>Non :</strong>
+            <span id="nomMember"></span>
+        </p>
 
-        async function loadMemberData() {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const memberId = urlParams.get('id');
+        <p>
+            <strong>Prenon :</strong>
+            <span id="prenomMember"></span>
+        </p>
 
-                if (!memberId) {
-                    document.getElementById('loading').innerText = "Okenn manm pa idantifye.";
-                    return;
-                }
+        <p>
+            <strong>Imèl :</strong>
+            <span id="emailMember"></span>
+        </p>
 
-                let { data, error } = await supabase
-                    .from('Membre_infos')
-                    .select('*')
-                    .eq('id', memberId)
-                    .single();
+        <p>
+            <strong>Telefòn :</strong>
+            <span id="telMember"></span>
+        </p>
 
-                if (error) throw error;
+        <p>
+            <strong>Estati :</strong>
+            <span id="statusMember"></span>
+        </p>
 
-                if (data) {
-                    document.getElementById('nomMember').innerText = data.nom || 'Pa afiche';
-                    document.getElementById('prenomMember').innerText = data.prenom || 'Pa afiche';
-                    document.getElementById('emailMember').innerText = data.email || 'Pa afiche';
-                    document.getElementById('telMember').innerText = data.telephone || 'Pa afiche';
-                    document.getElementById('statusMember').innerText = data.status || 'Aktif';
+    </div>
 
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('memberDetails').style.display = 'block';
-                } else {
-                    document.getElementById('loading').innerText = "Nou pa jwenn enfòmasyon manm sa a.";
-                }
+    <a href="index.html" class="btn">
+        Retounen nan Akèy la
+    </a>
 
-            } catch (err) {
-                console.error("Erè:", err.message);
-                document.getElementById('loading').innerText = "Gen yon erè pandan y ap chaje done yo.";
-            }
+</div>
+
+
+<script type="module">
+
+    import { createClient }
+    from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    import {
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+    } from './config.js';
+
+
+    const supabase = createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+    );
+
+
+    // Fonksyon pou jwenn yon kolòn
+    // menm si non an gen aksan oswa majiskil
+    function getField(data, fieldName) {
+
+        if (!data) return '';
+
+        // Premye esè: non nòmal la
+        if (data[fieldName] !== undefined &&
+            data[fieldName] !== null) {
+
+            return data[fieldName];
         }
 
-        loadMemberData();
-    </script>
+        // Chèche lòt fòm non kolòn nan
+        const normalize = (text) => {
+
+            return String(text)
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .replace(/[_\s-]/g, "");
+
+        };
+
+        const wanted = normalize(fieldName);
+
+        const key = Object.keys(data).find(
+            k => normalize(k) === wanted
+        );
+
+        if (key) {
+            return data[key];
+        }
+
+        return '';
+    }
+
+
+    async function loadMemberData() {
+
+        try {
+
+            const urlParams =
+                new URLSearchParams(window.location.search);
+
+            const memberId =
+                urlParams.get('id');
+
+
+            if (!memberId) {
+
+                document.getElementById('loading').innerText =
+                    "Okenn manm pa idantifye.";
+
+                return;
+            }
+
+
+            const { data, error } = await supabase
+
+                .from('Membre_infos')
+
+                .select('*')
+
+                .eq('id', memberId)
+
+                .single();
+
+
+            if (error) {
+
+                console.error("Supabase:", error);
+
+                throw error;
+            }
+
+
+            if (data) {
+
+                console.log("DONE MANM NAN:", data);
+                console.log(
+                    "KOLÒN YO:",
+                    Object.keys(data)
+                );
+
+
+                // NON
+                document.getElementById('nomMember').innerText =
+                    getField(data, 'nom') || 'Pa afiche';
+
+
+                // PRENON
+                document.getElementById('prenomMember').innerText =
+                    getField(data, 'prenom') || 'Pa afiche';
+
+
+                // EMAIL
+                document.getElementById('emailMember').innerText =
+                    getField(data, 'email') || 'Pa afiche';
+
+
+                // TELEFÒN
+                document.getElementById('telMember').innerText =
+                    getField(data, 'telephone') || 'Pa afiche';
+
+
+                // ESTATI
+                document.getElementById('statusMember').innerText =
+                    getField(data, 'status') || 'Aktif';
+
+
+                document.getElementById('loading').style.display =
+                    'none';
+
+                document.getElementById('memberDetails').style.display =
+                    'block';
+
+            } else {
+
+                document.getElementById('loading').innerText =
+                    "Nou pa jwenn enfòmasyon manm sa a.";
+
+            }
+
+        } catch (err) {
+
+            console.error("Erè:", err);
+
+            document.getElementById('loading').innerText =
+                "Gen yon erè pandan y ap chaje done yo.";
+
+        }
+
+    }
+
+
+    loadMemberData();
+
+</script>
 
 </body>
 </html>
