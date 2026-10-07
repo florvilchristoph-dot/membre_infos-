@@ -1,35 +1,317 @@
-<!doctype html>
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MEDFAH — Gestion des membres</title>
 <style>
-:root{--blue:#173dcc;--red:#d91d16;--bg:#f4f6fb;--card:#fff;--text:#172033}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
-header{background:#fff;border-bottom:4px solid var(--blue);padding:12px 22px;display:flex;align-items:center;gap:16px}header img{width:72px;height:72px;object-fit:contain}header h1{font-size:20px;margin:0;color:var(--blue)}header p{margin:4px 0 0;color:#666}
-nav{display:flex;gap:8px;flex-wrap:wrap;padding:14px 22px;background:#fff}button{border:0;border-radius:8px;padding:10px 14px;cursor:pointer;background:var(--blue);color:#fff;font-weight:600}button.secondary{background:#e9edff;color:var(--blue)}
-main{max-width:1100px;margin:20px auto;padding:0 18px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}.stat{background:var(--card);padding:18px;border-radius:14px;box-shadow:0 3px 14px #0000000d}.stat b{font-size:28px;color:var(--blue)}
-section{background:#fff;border-radius:14px;padding:20px;margin-top:18px;box-shadow:0 3px 14px #0000000d}h2{margin-top:0}.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}label{font-size:13px;font-weight:bold}input,select{width:100%;padding:11px;border:1px solid #ccd2df;border-radius:8px;margin-top:5px}table{width:100%;border-collapse:collapse;margin-top:14px}th,td{padding:11px;border-bottom:1px solid #eee;text-align:left}th{color:var(--blue)}
-.card{max-width:520px;margin:16px auto;border:3px solid var(--blue);border-radius:18px;padding:18px;background:#fff;position:relative}.card .top{display:flex;align-items:center;gap:12px}.card img{width:70px}.card h3{color:var(--blue);margin:0}.badge{display:inline-block;background:#eaf0ff;color:var(--blue);padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold}.muted{color:#666;font-size:13px}
-.hidden{display:none}.footer{text-align:center;color:#777;padding:25px}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f6fb;color:#182235}
+header{background:#fff;padding:22px 18px 18px;border-bottom:5px solid #2145c7}
+.top{display:flex;gap:18px;align-items:center;max-width:1100px;margin:auto}
+.logo{width:125px;height:85px;object-fit:contain}
+.brand h1{margin:0;color:#2145c7;font-size:30px;line-height:1.15}
+.brand p{margin:12px 0 0;color:#666;font-size:20px}
+nav{background:#fff;padding:28px 18px 24px}
+.nav{max-width:1100px;margin:auto;display:flex;gap:14px;flex-wrap:wrap}
+button,.btn{border:0;border-radius:14px;background:#2145c7;color:#fff;padding:15px 24px;font-size:18px;font-weight:bold;cursor:pointer;text-decoration:none}
+button:hover,.btn:hover{background:#17379f}
+button.secondary{background:#667085}
+main{max-width:1100px;margin:35px auto;padding:0 18px}
+.panel{background:#fff;border-radius:26px;padding:32px;box-shadow:0 5px 25px rgba(0,0,0,.06);margin-bottom:24px}
+h2{font-size:34px;margin:0 0 25px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.card{background:#fff;border-radius:22px;padding:30px;box-shadow:0 5px 22px rgba(0,0,0,.06)}
+.card .label{font-size:21px}
+.number{font-size:54px;color:#2145c7;font-weight:bold;margin-top:10px}
+.note{font-size:18px;color:#666;line-height:1.5}
+.hidden{display:none!important}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+input,select,textarea{width:100%;padding:14px;border:1px solid #d0d5dd;border-radius:10px;font-size:17px}
+textarea{min-height:100px}
+label{font-weight:bold;display:block;margin-bottom:7px}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
+th{background:#f0f3fa}
+.status{margin:15px 0;padding:12px;border-radius:10px;background:#eef4ff;color:#2145c7}
+.danger{background:#c62828}
+.small{font-size:14px;color:#667085}
+@media(max-width:750px){
+ .top{align-items:flex-start}.logo{width:120px}.brand h1{font-size:29px}.brand p{font-size:18px}
+ .cards{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}
+ .panel{padding:24px 18px}h2{font-size:30px}
+ table{font-size:14px;display:block;overflow-x:auto}
+}
 </style>
 </head>
 <body>
-<header><img src="logo-medfah.jpg" alt="Logo MEDFAH"><div><h1>Mission Église de Dieu de la Foi Apostolique d’Haïti — MEDFAH</h1><p>Logiciel de gestion des membres et cartes de persévérance</p></div></header>
+
+<header>
+  <div class="top">
+    <img class="logo" src="logo.png" alt="Logo MEDFAH"
+         onerror="this.style.display='none'">
+    <div class="brand">
+      <h1>Mission Église de Dieu de la Foi Apostolique d’Haïti — MEDFAH</h1>
+      <p>Logiciel de gestion des membres et cartes de persévérance</p>
+    </div>
+  </div>
+</header>
+
 <nav>
-<button onclick="show('dashboard')">Tableau de bord</button><button onclick="show('members')">Membres</button><button onclick="show('card')">Carte de persévérance</button><button onclick="show('data')">Données de l’église</button>
+  <div class="nav">
+    <button onclick="showPage('dashboard')">Tableau de bord</button>
+    <button onclick="showPage('membres')">Membres</button>
+    <button onclick="showPage('cartes')">Carte de persévérance</button>
+    <button onclick="showPage('eglise')">Données de l’église</button>
+  </div>
 </nav>
+
 <main>
-<section id="dashboard"><h2>Tableau de bord</h2><div class="grid"><div class="stat">Membres enregistrés<br><b id="count">0</b></div><div class="stat">Cartes actives<br><b id="active">0</b></div><div class="stat">Églises/assemblées<br><b>1</b></div></div><p class="muted">Cette première version utilise le navigateur pour enregistrer les données localement. Nous pourrons ensuite ajouter une vraie base de données, comptes utilisateurs, recherche et impression.</p></section>
-<section id="members" class="hidden"><h2>Ajouter un membre</h2><div class="form"><label>Nom complet<input id="name" placeholder="Ex. Jean Pierre"></label><label>Date de naissance<input id="dob" type="date"></label><label>Téléphone<input id="phone" placeholder="+509 ..."></label><label>Assemblée<input id="church" placeholder="Nom de l’assemblée"></label><label>Numéro de carte<input id="cardno" placeholder="MEDFAH-0001"></label><label>Statut<select id="status"><option>Actif</option><option>Inactif</option></select></label></div><br><button onclick="addMember()">Enregistrer le membre</button><table><thead><tr><th>Nom</th><th>Assemblée</th><th>Carte</th><th>Statut</th></tr></thead><tbody id="rows"></tbody></table></section>
-<section id="card" class="hidden"><h2>Carte de persévérance</h2><div class="card"><div class="top"><img src="logo-medfah.jpg"><div><h3>CARTE DE PERSÉVÉRANCE</h3><span class="badge">MEDFAH</span></div></div><hr><p><b>Nom :</b> <span id="cname">—</span></p><p><b>N° carte :</b> <span id="cnum">—</span></p><p><b>Assemblée :</b> <span id="cchurch">—</span></p><p><b>Statut :</b> <span id="cstatus">—</span></p><p class="muted">Document provisoire — à personnaliser selon les règles officielles de la MEDFAH.</p></div></section>
-<section id="data" class="hidden"><h2>Données de l’église</h2><div class="form"><label>Nom officiel<input value="Mission Église de Dieu de la Foi Apostolique d’Haïti (MEDFAH)"></label><label>Pasteur<input placeholder="Nom du pasteur"></label><label>Adresse<input placeholder="Adresse de l’assemblée"></label><label>Téléphone<input placeholder="Téléphone de l’église"></label></div></section>
-</main><div class="footer">MEDFAH — Prototype 1.0</div>
+
+<section id="dashboard" class="page">
+  <div class="panel">
+    <h2>Tableau de bord</h2>
+    <div class="cards">
+      <div class="card">
+        <div class="label">Membres enregistrés</div>
+        <div id="countMembers" class="number">—</div>
+      </div>
+      <div class="card">
+        <div class="label">Cartes actives</div>
+        <div id="countCards" class="number">—</div>
+      </div>
+      <div class="card">
+        <div class="label">Églises/assemblées</div>
+        <div id="countChurches" class="number">—</div>
+      </div>
+    </div>
+    <p class="note" id="connectionStatus">Connexion à la base de données en cours...</p>
+  </div>
+</section>
+
+<section id="membres" class="page hidden">
+  <div class="panel">
+    <h2>Dossier des membres</h2>
+    <div id="memberStatus" class="status">Chargement...</div>
+    <div class="actions">
+      <button onclick="loadMembers()">Actualiser</button>
+      <button onclick="showPage('ajout')">+ Ajouter un membre</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Code</th><th>Nom</th><th>Prénom</th><th>Téléphone</th><th>Adresse</th><th>Fonction</th></tr></thead>
+        <tbody id="membersBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="ajout" class="page hidden">
+  <div class="panel">
+    <h2>Ajouter un membre</h2>
+    <div id="addStatus" class="status">Remplissez les informations.</div>
+    <div class="form-grid">
+      <div><label>Nom</label><input id="nom" type="text"></div>
+      <div><label>Prénom</label><input id="prenom" type="text"></div>
+      <div><label>Adresse</label><input id="adresse" type="text"></div>
+      <div><label>Téléphone</label><input id="telephone" type="text"></div>
+      <div><label>Fonction</label><input id="fonction" type="text"></div>
+      <div><label>Code membre</label><input id="code" type="text"></div>
+      <div><label>Numéro de carte</label><input id="numero_carte" type="text"></div>
+      <div><label>Email</label><input id="email" type="email"></div>
+    </div>
+    <div class="actions">
+      <button onclick="addMember()">Enregistrer le membre</button>
+      <button class="secondary" onclick="showPage('membres')">Retour</button>
+    </div>
+  </div>
+</section>
+
+<section id="cartes" class="page hidden">
+  <div class="panel">
+    <h2>Carte de persévérance</h2>
+    <p class="note">Cette section est prête à recevoir les cartes depuis Supabase. Le compteur du tableau de bord cherchera automatiquement une table de cartes disponible.</p>
+    <div class="actions">
+      <button onclick="loadCardCount()">Actualiser les cartes</button>
+    </div>
+    <div id="cardStatus" class="status">En attente...</div>
+  </div>
+</section>
+
+<section id="eglise" class="page hidden">
+  <div class="panel">
+    <h2>Données de l’église</h2>
+    <div class="form-grid">
+      <div><label>Nom de l’église</label><input id="churchName" type="text" placeholder="MEDFAH"></div>
+      <div><label>Pasteur</label><input id="churchPastor" type="text" placeholder="Nom du pasteur"></div>
+      <div><label>Adresse</label><input id="churchAddress" type="text" placeholder="Adresse"></div>
+      <div><label>Téléphone</label><input id="churchPhone" type="text" placeholder="Téléphone"></div>
+      <div><label>Email</label><input id="churchEmail" type="email" placeholder="Email"></div>
+      <div><label>Responsable</label><input id="churchResponsible" type="text" placeholder="Responsable"></div>
+    </div>
+    <div class="actions">
+      <button onclick="saveChurch()">Enregistrer</button>
+      <button class="secondary" onclick="loadChurch()">Charger les données</button>
+    </div>
+    <div id="churchStatus" class="status">Les données seront enregistrées dans la table donnees_eglise si elle existe.</div>
+  </div>
+</section>
+
+</main>
+
+<!-- Ton config.js doit définir window.SUPABASE_URL et window.SUPABASE_ANON_KEY -->
+<script src="config.js"></script>
+
 <script>
-let members=JSON.parse(localStorage.getItem('medfah_members')||'[]');
-function show(id){['dashboard','members','card','data'].forEach(x=>document.getElementById(x).classList.toggle('hidden',x!==id));render();}
-function addMember(){const m={name:document.getElementById('name').value.trim(),dob:document.getElementById('dob').value,phone:document.getElementById('phone').value,church:document.getElementById('church').value,cardno:document.getElementById('cardno').value,status:document.getElementById('status').value};if(!m.name||!m.cardno){alert('Veuillez entrer au moins le nom et le numéro de carte.');return}members.push(m);localStorage.setItem('medfah_members',JSON.stringify(members));document.getElementById('cname').textContent=m.name;document.getElementById('cnum').textContent=m.cardno;document.getElementById('cchurch').textContent=m.church||'—';document.getElementById('cstatus').textContent=m.status;show('members');}
-function render(){document.getElementById('count').textContent=members.length;document.getElementById('active').textContent=members.filter(m=>m.status==='Actif').length;document.getElementById('rows').innerHTML=members.map(m=>`<tr><td>${esc(m.name)}</td><td>${esc(m.church||'—')}</td><td>${esc(m.cardno)}</td><td>${esc(m.status)}</td></tr>`).join('');}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}render();
-</script></body></html>
+const MEMBERS_TABLE = 'membre_infos';
+const CARD_TABLES = ['cartes_perseverance','carte_perseverance','cartes_persévérance'];
+const CHURCH_TABLE = 'donnees_eglise';
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+  const page=document.getElementById(id);
+  if(page) page.classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='membres') loadMembers();
+  if(id==='dashboard') loadDashboard();
+}
+
+function getConfig(){
+  const url=window.SUPABASE_URL;
+  const key=window.SUPABASE_ANON_KEY;
+  if(!url || !key) throw new Error('SUPABASE_URL ou SUPABASE_ANON_KEY manque dans config.js');
+  return {url:url.replace(/\/$/,''),key};
+}
+
+async function api(path, options={}){
+  const {url,key}=getConfig();
+  const headers=Object.assign({
+    'apikey':key,
+    'Authorization':'Bearer '+key,
+    'Content-Type':'application/json'
+  }, options.headers||{});
+  const res=await fetch(url+'/rest/v1/'+path,{...options,headers});
+  if(!res.ok){
+    const txt=await res.text();
+    throw new Error(txt || ('Erreur HTTP '+res.status));
+  }
+  return res.status===204 ? null : res.json();
+}
+
+async function loadDashboard(){
+  try{
+    const members=await api(MEMBERS_TABLE+'?select=id');
+    document.getElementById('countMembers').textContent=members.length;
+    await loadCardCount(true);
+    document.getElementById('countChurches').textContent='1';
+    document.getElementById('connectionStatus').textContent='Connexion Supabase réussie.';
+  }catch(e){
+    document.getElementById('connectionStatus').textContent='Erreur de connexion : '+e.message;
+  }
+}
+
+async function loadCardCount(silent=false){
+  const status=document.getElementById('cardStatus');
+  for(const table of CARD_TABLES){
+    try{
+      const rows=await api(table+'?select=id');
+      document.getElementById('countCards').textContent=rows.length;
+      if(!silent && status) status.textContent='Table trouvée : '+table+' — '+rows.length+' carte(s).';
+      return;
+    }catch(e){}
+  }
+  document.getElementById('countCards').textContent='0';
+  if(!silent && status) status.textContent='Aucune table de cartes trouvée. Vérifie le nom de la table dans Supabase.';
+}
+
+async function loadMembers(){
+  const body=document.getElementById('membersBody');
+  const status=document.getElementById('memberStatus');
+  body.innerHTML='';
+  status.textContent='Chargement des membres...';
+  try{
+    const rows=await api(MEMBERS_TABLE+'?select=id,code,nom,prenom,telephone,adresse,fonction&order=nom.asc');
+    if(!rows.length){
+      body.innerHTML='<tr><td colspan="6">Aucun membre enregistré.</td></tr>';
+    }else{
+      rows.forEach(m=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML='<td>'+esc(m.code)+'</td><td>'+esc(m.nom)+'</td><td>'+esc(m.prenom)+'</td><td>'+esc(m.telephone)+'</td><td>'+esc(m.adresse)+'</td><td>'+esc(m.fonction)+'</td>';
+        body.appendChild(tr);
+      });
+    }
+    status.textContent=rows.length+' membre(s) chargé(s).';
+  }catch(e){ status.textContent='Erreur : '+e.message; }
+}
+
+async function addMember(){
+  const status=document.getElementById('addStatus');
+  const data={
+    nom:v('nom'),prenom:v('prenom'),adresse:v('adresse'),telephone:v('telephone'),
+    fonction:v('fonction'),code:v('code'),numero_carte:v('numero_carte'),email:v('email')
+  };
+  if(!data.nom || !data.prenom){
+    status.textContent='Le nom et le prénom sont obligatoires.';
+    return;
+  }
+  status.textContent='Enregistrement...';
+  try{
+    await api(MEMBERS_TABLE,{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify(data)});
+    status.textContent='Membre enregistré avec succès.';
+    ['nom','prenom','adresse','telephone','fonction','code','numero_carte','email'].forEach(id=>document.getElementById(id).value='');
+    loadDashboard();
+  }catch(e){ status.textContent='Erreur : '+e.message; }
+}
+
+async function loadChurch(){
+  const status=document.getElementById('churchStatus');
+  try{
+    const rows=await api(CHURCH_TABLE+'?select=*&limit=1');
+    if(rows.length){
+      const d=rows[0];
+      setv('churchName',d.nom||d.nom_eglise||'');
+      setv('churchPastor',d.pasteur||'');
+      setv('churchAddress',d.adresse||'');
+      setv('churchPhone',d.telephone||'');
+      setv('churchEmail',d.email||'');
+      setv('churchResponsible',d.responsable||'');
+      status.textContent='Données chargées.';
+    }else status.textContent='Aucune donnée trouvée.';
+  }catch(e){ status.textContent='Impossible de charger : '+e.message; }
+}
+
+async function saveChurch(){
+  const status=document.getElementById('churchStatus');
+  const data={
+    nom:v('churchName'),pasteur:v('churchPastor'),adresse:v('churchAddress'),
+    telephone:v('churchPhone'),email:v('churchEmail'),responsable:v('churchResponsible')
+  };
+  try{
+    const old=await api(CHURCH_TABLE+'?select=id&limit=1');
+    if(old.length){
+      await api(CHURCH_TABLE+'?id=eq.'+encodeURIComponent(old[0].id),{method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify(data)});
+    }else{
+      await api(CHURCH_TABLE,{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify(data)});
+    }
+    status.textContent='Données de l’église enregistrées.';
+  }catch(e){ status.textContent='Erreur : '+e.message; }
+}
+
+function v(id){return document.getElementById(id).value.trim()}
+function setv(id,value){document.getElementById(id).value=value||''}
+function esc(x){
+  return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+loadDashboard();
+</script>
+</body>
+</html>
+'''
+
+path = Path("/mnt/data/medfah.html")
+path.write_text(html, encoding="utf-8")
+print(path)
