@@ -1,418 +1,2255 @@
-from pathlib import Path
-
-html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>MEDFAH — Gestion des membres</title>
+
 <style>
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+}
+
 body{
-  margin:0;font-family:Arial,sans-serif;background:#f4f6fb;color:#182235;
-  position:relative;min-height:100vh
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f4f6fb;
+  color:#182235;
+  position:relative;
+  min-height:100vh;
 }
+
 body::before{
-  content:"";position:fixed;inset:0;background-image:url("logo-medfah.jpg");
-  background-repeat:no-repeat;background-position:center;background-size:420px auto;
-  opacity:.08;pointer-events:none;z-index:0
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:url("logo-medfah.jpg");
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:420px auto;
+  opacity:.08;
+  pointer-events:none;
+  z-index:0;
 }
-header,nav,main,footer{position:relative;z-index:1}
-header{background:rgba(255,255,255,.97);padding:18px;border-bottom:5px solid #2145c7}
-.top{display:flex;gap:18px;align-items:center;max-width:1150px;margin:auto}
-.logo{width:120px;height:85px;object-fit:contain}
-.brand h1{margin:0;color:#2145c7;font-size:28px;line-height:1.15}
-.brand p{margin:9px 0 0;color:#667085;font-size:18px}
-nav{background:rgba(255,255,255,.97);padding:15px 18px;box-shadow:0 3px 12px rgba(0,0,0,.05)}
-.nav{max-width:1150px;margin:auto;display:flex;gap:10px;flex-wrap:wrap}
-button,.btn{
- border:0;border-radius:12px;background:#2145c7;color:#fff;padding:13px 18px;
- font-size:16px;font-weight:bold;cursor:pointer;text-decoration:none
+
+header,nav,main,footer{
+  position:relative;
+  z-index:1;
 }
-button:hover,.btn:hover{background:#17379f}
-button.secondary{background:#667085}
-button.danger{background:#c62828}
-main{max-width:1150px;margin:28px auto;padding:0 18px}
-.page.hidden{display:none!important}
+
+header{
+  background:rgba(255,255,255,.97);
+  padding:18px;
+  border-bottom:5px solid #2145c7;
+}
+
+.top{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  max-width:1150px;
+  margin:auto;
+}
+
+.logo{
+  width:120px;
+  height:85px;
+  object-fit:contain;
+}
+
+.brand h1{
+  margin:0;
+  color:#2145c7;
+  font-size:28px;
+  line-height:1.15;
+}
+
+.brand p{
+  margin:9px 0 0;
+  color:#667085;
+  font-size:18px;
+}
+
+nav{
+  background:rgba(255,255,255,.97);
+  padding:15px 18px;
+  box-shadow:0 3px 12px rgba(0,0,0,.05);
+}
+
+.nav{
+  max-width:1150px;
+  margin:auto;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+button,
+.btn{
+  border:0;
+  border-radius:12px;
+  background:#2145c7;
+  color:#fff;
+  padding:13px 18px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+  text-decoration:none;
+}
+
+button:hover,
+.btn:hover{
+  background:#17379f;
+}
+
+button.secondary{
+  background:#667085;
+}
+
+button.danger{
+  background:#c62828;
+}
+
+main{
+  max-width:1150px;
+  margin:28px auto;
+  padding:0 18px;
+}
+
+.page.hidden{
+  display:none!important;
+}
+
 .panel{
- background:rgba(255,255,255,.96);border-radius:22px;padding:26px;
- box-shadow:0 5px 25px rgba(0,0,0,.07);margin-bottom:22px
+  background:rgba(255,255,255,.96);
+  border-radius:22px;
+  padding:26px;
+  box-shadow:0 5px 25px rgba(0,0,0,.07);
+  margin-bottom:22px;
 }
-h2{font-size:30px;margin:0 0 20px;color:#182235}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.card{background:rgba(255,255,255,.98);border-radius:18px;padding:24px;box-shadow:0 4px 18px rgba(0,0,0,.06);border-left:5px solid #2145c7}
-.card .label{font-size:17px;color:#667085}
-.number{font-size:48px;color:#2145c7;font-weight:bold;margin-top:8px}
-.note{font-size:16px;color:#667085;line-height:1.5}
-.status{margin:15px 0;padding:12px;border-radius:10px;background:#eef4ff;color:#2145c7}
-.status.ok{background:#ecfdf3;color:#087443}
-.status.error{background:#fff1f2;color:#b42318}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
-input,select,textarea{
- width:100%;padding:13px;border:1px solid #d0d5dd;border-radius:10px;
- font-size:16px;background:#fff
+
+h2{
+  font-size:30px;
+  margin:0 0 20px;
+  color:#182235;
 }
-textarea{min-height:100px}
-label{font-weight:bold;display:block;margin-bottom:6px}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;margin-top:18px;min-width:780px}
-th,td{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
-th{background:#f0f3fa;color:#182235}
-tr:hover td{background:#f8faff}
-.badge{display:inline-block;padding:5px 9px;border-radius:20px;background:#ecfdf3;color:#087443;font-weight:bold}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.card{
+  background:rgba(255,255,255,.98);
+  border-radius:18px;
+  padding:24px;
+  box-shadow:0 4px 18px rgba(0,0,0,.06);
+  border-left:5px solid #2145c7;
+}
+
+.card .label{
+  font-size:17px;
+  color:#667085;
+}
+
+.number{
+  font-size:48px;
+  color:#2145c7;
+  font-weight:bold;
+  margin-top:8px;
+}
+
+.note{
+  font-size:16px;
+  color:#667085;
+  line-height:1.5;
+}
+
+.status{
+  margin:15px 0;
+  padding:12px;
+  border-radius:10px;
+  background:#eef4ff;
+  color:#2145c7;
+}
+
+.status.ok{
+  background:#ecfdf3;
+  color:#087443;
+}
+
+.status.error{
+  background:#fff1f2;
+  color:#b42318;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:18px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
+}
+
+input,
+select,
+textarea{
+  width:100%;
+  padding:13px;
+  border:1px solid #d0d5dd;
+  border-radius:10px;
+  font-size:16px;
+  background:#fff;
+}
+
+textarea{
+  min-height:100px;
+}
+
+label{
+  font-weight:bold;
+  display:block;
+  margin-bottom:6px;
+}
+
+.table-wrap{
+  overflow-x:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:18px;
+  min-width:900px;
+}
+
+th,
+td{
+  padding:12px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
+}
+
+th{
+  background:#f0f3fa;
+  color:#182235;
+}
+
+tr:hover td{
+  background:#f8faff;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  background:#ecfdf3;
+  color:#087443;
+  font-weight:bold;
+}
+
 .member-card{
- border:1px solid #e4e7ec;border-radius:16px;padding:18px;margin-top:15px;
- background:#fff
+  border:1px solid #e4e7ec;
+  border-radius:16px;
+  padding:18px;
+  margin-top:15px;
+  background:#fff;
 }
-.member-card h3{margin:0 0 8px;color:#2145c7}
-.member-card p{margin:5px 0}
-.empty{text-align:center;color:#667085;padding:25px}
-.camera-box{display:none;margin-top:18px}
-.camera-box.active{display:block}
-video{width:100%;max-width:520px;border-radius:16px;background:#111}
-#qrResult{font-weight:bold;margin-top:12px}
-footer{text-align:center;color:#667085;padding:15px 18px 35px}
-.small{font-size:13px;color:#667085}
+
+.member-card h3{
+  margin:0 0 8px;
+  color:#2145c7;
+}
+
+.member-card p{
+  margin:5px 0;
+}
+
+.empty{
+  text-align:center;
+  color:#667085;
+  padding:25px;
+}
+
+.camera-box{
+  display:none;
+  margin-top:18px;
+}
+
+.camera-box.active{
+  display:block;
+}
+
+video{
+  width:100%;
+  max-width:520px;
+  border-radius:16px;
+  background:#111;
+}
+
+#qrResult{
+  font-weight:bold;
+  margin-top:12px;
+}
+
+footer{
+  text-align:center;
+  color:#667085;
+  padding:15px 18px 35px;
+}
+
+.small{
+  font-size:13px;
+  color:#667085;
+}
+
+/* Bouton dossier */
+.dossier-btn{
+  background:#2145c7;
+  padding:9px 13px;
+  border-radius:9px;
+  font-size:14px;
+  white-space:nowrap;
+}
+
+.dossier-btn:hover{
+  background:#17379f;
+}
+
 @media(max-width:750px){
- .top{align-items:flex-start}.logo{width:95px;height:75px}
- .brand h1{font-size:23px}.brand p{font-size:15px}
- .cards{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}
- .panel{padding:20px 15px}h2{font-size:26px}
- .nav button{width:100%}
- body::before{background-size:300px auto}
+
+  .top{
+    align-items:flex-start;
+  }
+
+  .logo{
+    width:95px;
+    height:75px;
+  }
+
+  .brand h1{
+    font-size:23px;
+  }
+
+  .brand p{
+    font-size:15px;
+  }
+
+  .cards{
+    grid-template-columns:1fr;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .panel{
+    padding:20px 15px;
+  }
+
+  h2{
+    font-size:26px;
+  }
+
+  .nav button{
+    width:100%;
+  }
+
+  body::before{
+    background-size:300px auto;
+  }
 }
 </style>
 </head>
+
 <body>
 
 <header>
- <div class="top">
-  <img class="logo" src="logo-medfah.jpg" alt="Logo MEDFAH" onerror="this.style.display='none'">
-  <div class="brand">
-   <h1>Mission Église de Dieu de la Foi Apostolique d’Haïti — MEDFAH</h1>
-   <p>Plateforme de gestion, vérification des membres et cartes de persévérance</p>
+
+  <div class="top">
+
+    <img
+      class="logo"
+      src="logo-medfah.jpg"
+      alt="Logo MEDFAH"
+      onerror="this.style.display='none'"
+    >
+
+    <div class="brand">
+
+      <h1>
+        Mission Église de Dieu de la Foi Apostolique d’Haïti — MEDFAH
+      </h1>
+
+      <p>
+        Plateforme de gestion, vérification des membres et cartes de persévérance
+      </p>
+
+    </div>
+
   </div>
- </div>
+
 </header>
 
+
 <nav>
- <div class="nav">
-  <button onclick="showPage('dashboard')">🏠 Tableau de bord</button>
-  <button onclick="showPage('membres')">📋 Liste des Membres</button>
-  <button onclick="showPage('scanner')">📷 Scanner QR Code</button>
-  <button onclick="showPage('verifier')">🔎 Vérifier Carte</button>
-  <button onclick="showPage('eglise')">⚙️ Administration</button>
- </div>
+
+  <div class="nav">
+
+    <button onclick="showPage('dashboard')">
+      🏠 Tableau de bord
+    </button>
+
+    <button onclick="showPage('membres')">
+      📋 Liste des Membres
+    </button>
+
+    <button onclick="showPage('scanner')">
+      📷 Scanner QR Code
+    </button>
+
+    <button onclick="showPage('verifier')">
+      🔎 Vérifier Carte
+    </button>
+
+    <button onclick="showPage('eglise')">
+      ⚙️ Administration
+    </button>
+
+  </div>
+
 </nav>
+
 
 <main>
 
+
+<!-- ===================================================== -->
+<!-- TABLEAU DE BORD -->
+<!-- ===================================================== -->
+
 <section id="dashboard" class="page">
- <div class="panel">
-  <h2>Tableau de bord MEDFAH</h2>
-  <div class="cards">
-   <div class="card"><div class="label">Membres enregistrés</div><div id="countMembers" class="number">—</div></div>
-   <div class="card"><div class="label">Cartes actives</div><div id="countCards" class="number">—</div></div>
-   <div class="card"><div class="label">Église / Assemblée</div><div id="countChurches" class="number">1</div></div>
+
+  <div class="panel">
+
+    <h2>
+      Tableau de bord MEDFAH
+    </h2>
+
+    <div class="cards">
+
+      <div class="card">
+
+        <div class="label">
+          Membres enregistrés
+        </div>
+
+        <div
+          id="countMembers"
+          class="number">
+          —
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <div class="label">
+          Cartes actives
+        </div>
+
+        <div
+          id="countCards"
+          class="number">
+          —
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <div class="label">
+          Église / Assemblée
+        </div>
+
+        <div
+          id="countChurches"
+          class="number">
+          1
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <p
+      class="note"
+      id="connectionStatus">
+
+      Connexion à Supabase en cours...
+
+    </p>
+
   </div>
-  <p class="note" id="connectionStatus">Connexion à Supabase en cours...</p>
- </div>
+
 </section>
+
+
+<!-- ===================================================== -->
+<!-- LISTE DES MEMBRES -->
+<!-- ===================================================== -->
 
 <section id="membres" class="page hidden">
- <div class="panel">
-  <h2>📋 Dossier des membres</h2>
-  <div id="memberStatus" class="status">Chargement...</div>
-  <div class="actions">
-   <button onclick="loadMembers()">🔄 Actualiser</button>
-   <button onclick="showPage('ajout')">➕ Ajouter un membre</button>
+
+  <div class="panel">
+
+    <h2>
+      📋 Dossier des membres
+    </h2>
+
+
+    <div
+      id="memberStatus"
+      class="status">
+
+      Chargement...
+
+    </div>
+
+
+    <div class="actions">
+
+      <button onclick="loadMembers()">
+        🔄 Actualiser
+      </button>
+
+      <button onclick="showPage('ajout')">
+        ➕ Ajouter un membre
+      </button>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Code
+            </th>
+
+            <th>
+              Nom
+            </th>
+
+            <th>
+              Prénom
+            </th>
+
+            <th>
+              Téléphone
+            </th>
+
+            <th>
+              Adresse
+            </th>
+
+            <th>
+              Fonction
+            </th>
+
+            <th>
+              Dossier
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody id="membersBody">
+
+        </tbody>
+
+      </table>
+
+    </div>
+
   </div>
-  <div class="table-wrap">
-   <table>
-    <thead><tr><th>Code</th><th>Nom</th><th>Prénom</th><th>Téléphone</th><th>Adresse</th><th>Fonction</th><th>Action</th></tr></thead>
-    <tbody id="membersBody"></tbody>
-   </table>
-  </div>
- </div>
+
 </section>
+
+
+<!-- ===================================================== -->
+<!-- AJOUTER UN MEMBRE -->
+<!-- ===================================================== -->
 
 <section id="ajout" class="page hidden">
- <div class="panel">
-  <h2>➕ Ajouter un membre</h2>
-  <div id="addStatus" class="status">Remplissez les informations.</div>
-  <div class="form-grid">
-   <div><label>Nom</label><input id="nom"></div>
-   <div><label>Prénom</label><input id="prenom"></div>
-   <div><label>Adresse</label><input id="adresse"></div>
-   <div><label>Téléphone</label><input id="telephone"></div>
-   <div><label>Fonction</label><input id="fonction"></div>
-   <div><label>Code membre</label><input id="code"></div>
-   <div><label>Numéro de carte</label><input id="numero_carte"></div>
-   <div><label>Email</label><input id="email" type="email"></div>
+
+  <div class="panel">
+
+    <h2>
+      ➕ Ajouter un membre
+    </h2>
+
+
+    <div
+      id="addStatus"
+      class="status">
+
+      Remplissez les informations.
+
+    </div>
+
+
+    <div class="form-grid">
+
+      <div>
+
+        <label>
+          Nom
+        </label>
+
+        <input id="nom">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Prénom
+        </label>
+
+        <input id="prenom">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Adresse
+        </label>
+
+        <input id="adresse">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Téléphone
+        </label>
+
+        <input id="telephone">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Fonction
+        </label>
+
+        <input id="fonction">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Code membre
+        </label>
+
+        <input id="code">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Numéro de carte
+        </label>
+
+        <input id="numero_carte">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Email
+        </label>
+
+        <input
+          id="email"
+          type="email">
+
+      </div>
+
+    </div>
+
+
+    <div class="actions">
+
+      <button onclick="addMember()">
+        💾 Enregistrer le membre
+      </button>
+
+      <button
+        class="secondary"
+        onclick="showPage('membres')">
+
+        Retour
+
+      </button>
+
+    </div>
+
   </div>
-  <div class="actions">
-   <button onclick="addMember()">💾 Enregistrer le membre</button>
-   <button class="secondary" onclick="showPage('membres')">Retour</button>
-  </div>
- </div>
+
 </section>
+
+
+<!-- ===================================================== -->
+<!-- SCANNER -->
+<!-- ===================================================== -->
 
 <section id="scanner" class="page hidden">
- <div class="panel">
-  <h2>📷 Scanner QR Code</h2>
-  <p class="note">Le scanner utilise la caméra du téléphone lorsque le navigateur le permet.</p>
-  <div class="actions">
-   <button onclick="startScanner()">📷 Démarrer la caméra</button>
-   <button class="secondary" onclick="stopScanner()">Arrêter</button>
+
+  <div class="panel">
+
+    <h2>
+      📷 Scanner QR Code
+    </h2>
+
+
+    <p class="note">
+
+      Le scanner utilise la caméra du téléphone lorsque le navigateur le permet.
+
+    </p>
+
+
+    <div class="actions">
+
+      <button onclick="startScanner()">
+        📷 Démarrer la caméra
+      </button>
+
+      <button
+        class="secondary"
+        onclick="stopScanner()">
+
+        Arrêter
+
+      </button>
+
+    </div>
+
+
+    <div
+      id="cameraBox"
+      class="camera-box">
+
+      <video
+        id="qrVideo"
+        playsinline>
+      </video>
+
+
+      <div
+        id="qrResult"
+        class="status">
+
+        Recherche d’un QR Code...
+
+      </div>
+
+    </div>
+
+
+    <div id="scanMember"></div>
+
   </div>
-  <div id="cameraBox" class="camera-box">
-   <video id="qrVideo" playsinline></video>
-   <div id="qrResult" class="status">Recherche d’un QR Code...</div>
-  </div>
-  <div id="scanMember"></div>
- </div>
+
 </section>
+
+
+<!-- ===================================================== -->
+<!-- VERIFIER -->
+<!-- ===================================================== -->
 
 <section id="verifier" class="page hidden">
- <div class="panel">
-  <h2>🔎 Vérifier Carte / Membre</h2>
-  <p class="note">Entrez le code du membre ou le numéro de carte pour rechercher dans Supabase.</p>
-  <div class="form-grid">
-   <div><label>Code membre</label><input id="verifyCode" placeholder="ex. medfah0001"></div>
-   <div><label>Numéro de carte</label><input id="verifyCard" placeholder="Numéro de carte"></div>
+
+  <div class="panel">
+
+    <h2>
+      🔎 Vérifier Carte / Membre
+    </h2>
+
+
+    <p class="note">
+
+      Entrez le code du membre ou le numéro de carte pour rechercher dans Supabase.
+
+    </p>
+
+
+    <div class="form-grid">
+
+      <div>
+
+        <label>
+          Code membre
+        </label>
+
+        <input
+          id="verifyCode"
+          placeholder="ex. medfah0001">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Numéro de carte
+        </label>
+
+        <input
+          id="verifyCard"
+          placeholder="Numéro de carte">
+
+      </div>
+
+    </div>
+
+
+    <div class="actions">
+
+      <button onclick="verifyMember()">
+        🔎 Vérifier
+      </button>
+
+      <button
+        class="secondary"
+        onclick="clearVerify()">
+
+        Effacer
+
+      </button>
+
+    </div>
+
+
+    <div
+      id="verifyStatus"
+      class="status">
+
+      Aucune recherche effectuée.
+
+    </div>
+
+
+    <div id="verifyResult"></div>
+
   </div>
-  <div class="actions">
-   <button onclick="verifyMember()">🔎 Vérifier</button>
-   <button class="secondary" onclick="clearVerify()">Effacer</button>
-  </div>
-  <div id="verifyStatus" class="status">Aucune recherche effectuée.</div>
-  <div id="verifyResult"></div>
- </div>
+
 </section>
+
+
+<!-- ===================================================== -->
+<!-- CARTES -->
+<!-- ===================================================== -->
 
 <section id="cartes" class="page hidden">
- <div class="panel">
-  <h2>Carte de persévérance</h2>
-  <p class="note">Gestion des cartes enregistrées dans Supabase.</p>
-  <div class="actions"><button onclick="loadCardCount()">🔄 Actualiser les cartes</button></div>
-  <div id="cardStatus" class="status">En attente...</div>
- </div>
+
+  <div class="panel">
+
+    <h2>
+      Carte de persévérance
+    </h2>
+
+
+    <p class="note">
+
+      Gestion des cartes enregistrées dans Supabase.
+
+    </p>
+
+
+    <div class="actions">
+
+      <button onclick="loadCardCount()">
+        🔄 Actualiser les cartes
+      </button>
+
+    </div>
+
+
+    <div
+      id="cardStatus"
+      class="status">
+
+      En attente...
+
+    </div>
+
+  </div>
+
 </section>
 
+
+<!-- ===================================================== -->
+<!-- ADMINISTRATION -->
+<!-- ===================================================== -->
+
 <section id="eglise" class="page hidden">
- <div class="panel">
-  <h2>⚙️ Administration — Données de l’église</h2>
-  <div class="form-grid">
-   <div><label>Nom de l’église</label><input id="churchName" placeholder="MEDFAH"></div>
-   <div><label>Pasteur</label><input id="churchPastor" placeholder="Nom du pasteur"></div>
-   <div><label>Adresse</label><input id="churchAddress" placeholder="Adresse"></div>
-   <div><label>Téléphone</label><input id="churchPhone" placeholder="Téléphone"></div>
-   <div><label>Email</label><input id="churchEmail" type="email" placeholder="Email"></div>
-   <div><label>Responsable</label><input id="churchResponsible" placeholder="Responsable"></div>
+
+  <div class="panel">
+
+    <h2>
+      ⚙️ Administration — Données de l’église
+    </h2>
+
+
+    <div class="form-grid">
+
+      <div>
+
+        <label>
+          Nom de l’église
+        </label>
+
+        <input
+          id="churchName"
+          placeholder="MEDFAH">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Pasteur
+        </label>
+
+        <input
+          id="churchPastor"
+          placeholder="Nom du pasteur">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Adresse
+        </label>
+
+        <input
+          id="churchAddress"
+          placeholder="Adresse">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Téléphone
+        </label>
+
+        <input
+          id="churchPhone"
+          placeholder="Téléphone">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Email
+        </label>
+
+        <input
+          id="churchEmail"
+          type="email"
+          placeholder="Email">
+
+      </div>
+
+
+      <div>
+
+        <label>
+          Responsable
+        </label>
+
+        <input
+          id="churchResponsible"
+          placeholder="Responsable">
+
+      </div>
+
+    </div>
+
+
+    <div class="actions">
+
+      <button onclick="saveChurch()">
+        💾 Enregistrer
+      </button>
+
+      <button
+        class="secondary"
+        onclick="loadChurch()">
+
+        📥 Charger les données
+
+      </button>
+
+    </div>
+
+
+    <div
+      id="churchStatus"
+      class="status">
+
+      Prêt.
+
+    </div>
+
   </div>
-  <div class="actions">
-   <button onclick="saveChurch()">💾 Enregistrer</button>
-   <button class="secondary" onclick="loadChurch()">📥 Charger les données</button>
-  </div>
-  <div id="churchStatus" class="status">Prêt.</div>
- </div>
+
 </section>
+
 
 </main>
 
-<footer>© 2026 MEDFAH — Tous droits réservés.</footer>
+
+<footer>
+
+  © 2026 MEDFAH — Tous droits réservés.
+
+</footer>
+
+
+<!-- ===================================================== -->
+<!-- CONFIGURATION -->
+<!-- ===================================================== -->
 
 <script src="config.js"></script>
+
+
 <script>
-const MEMBERS_TABLE='membre_infos';
-const CARD_TABLES=['cartes_perseverance','carte_perseverance','cartes_persévérance'];
-const CHURCH_TABLE='donnees_eglise';
-let scannerStream=null, scannerTimer=null;
+
+const MEMBERS_TABLE = 'membre_infos';
+
+const CARD_TABLES = [
+  'cartes_perseverance',
+  'carte_perseverance',
+  'cartes_persévérance'
+];
+
+const CHURCH_TABLE = 'donnees_eglise';
+
+let scannerStream = null;
+let scannerTimer = null;
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
 
 function showPage(id){
- document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
- const page=document.getElementById(id);
- if(page) page.classList.remove('hidden');
- window.scrollTo({top:0,behavior:'smooth'});
- if(id==='dashboard') loadDashboard();
- if(id==='membres') loadMembers();
- if(id==='scanner') stopScanner();
- if(id==='eglise') loadChurch();
+
+  document
+    .querySelectorAll('.page')
+    .forEach(p => p.classList.add('hidden'));
+
+  const page = document.getElementById(id);
+
+  if(page){
+    page.classList.remove('hidden');
+  }
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
+
+
+  if(id === 'dashboard'){
+    loadDashboard();
+  }
+
+
+  if(id === 'membres'){
+    loadMembers();
+  }
+
+
+  if(id === 'scanner'){
+    stopScanner();
+  }
+
+
+  if(id === 'eglise'){
+    loadChurch();
+  }
+
 }
+
+
+/* =====================================================
+   CONFIG SUPABASE
+===================================================== */
 
 function getConfig(){
- const url=window.SUPABASE_URL, key=window.SUPABASE_ANON_KEY;
- if(!url||!key) throw new Error('SUPABASE_URL ou SUPABASE_ANON_KEY manque dans config.js');
- return {url:url.replace(/\/$/,''),key};
+
+  const url = window.SUPABASE_URL;
+  const key = window.SUPABASE_ANON_KEY;
+
+
+  if(!url || !key){
+
+    throw new Error(
+      'SUPABASE_URL ou SUPABASE_ANON_KEY manque dans config.js'
+    );
+
+  }
+
+
+  return {
+    url:url.replace(/\/$/,''),
+    key:key
+  };
+
 }
 
-async function api(path,options={}){
- const {url,key}=getConfig();
- const headers=Object.assign({
-  apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'
- },options.headers||{});
- const res=await fetch(url+'/rest/v1/'+path,{...options,headers});
- if(!res.ok){const txt=await res.text();throw new Error(txt||('Erreur HTTP '+res.status));}
- return res.status===204?null:res.json();
+
+/* =====================================================
+   API SUPABASE
+===================================================== */
+
+async function api(path, options = {}){
+
+  const {
+    url,
+    key
+  } = getConfig();
+
+
+  const headers = Object.assign({
+
+    apikey:key,
+
+    Authorization:'Bearer ' + key,
+
+    'Content-Type':'application/json'
+
+  }, options.headers || {});
+
+
+  const res = await fetch(
+    url + '/rest/v1/' + path,
+    {
+      ...options,
+      headers
+    }
+  );
+
+
+  if(!res.ok){
+
+    const txt = await res.text();
+
+    throw new Error(
+      txt || ('Erreur HTTP ' + res.status)
+    );
+
+  }
+
+
+  return res.status === 204
+    ? null
+    : res.json();
+
 }
+
+
+/* =====================================================
+   TABLEAU DE BORD
+===================================================== */
 
 async function loadDashboard(){
- try{
-  const members=await api(MEMBERS_TABLE+'?select=id');
-  document.getElementById('countMembers').textContent=members.length;
-  await loadCardCount(true);
-  document.getElementById('connectionStatus').textContent='✅ Connexion Supabase réussie.';
-  document.getElementById('connectionStatus').className='note';
- }catch(e){
-  document.getElementById('connectionStatus').textContent='❌ Erreur de connexion : '+e.message;
- }
+
+  try{
+
+    const members =
+      await api(
+        MEMBERS_TABLE + '?select=id'
+      );
+
+
+    document.getElementById(
+      'countMembers'
+    ).textContent = members.length;
+
+
+    await loadCardCount(true);
+
+
+    document.getElementById(
+      'connectionStatus'
+    ).textContent =
+      '✅ Connexion Supabase réussie.';
+
+
+    document.getElementById(
+      'connectionStatus'
+    ).className = 'note';
+
+
+  }catch(e){
+
+    document.getElementById(
+      'connectionStatus'
+    ).textContent =
+      '❌ Erreur de connexion : ' + e.message;
+
+  }
+
 }
 
-async function loadCardCount(silent=false){
- const status=document.getElementById('cardStatus');
- for(const table of CARD_TABLES){
-  try{
-   const rows=await api(table+'?select=id');
-   document.getElementById('countCards').textContent=rows.length;
-   if(!silent&&status)status.textContent='Table trouvée : '+table+' — '+rows.length+' carte(s).';
-   return;
-  }catch(e){}
- }
- document.getElementById('countCards').textContent='0';
- if(!silent&&status)status.textContent='Aucune table de cartes trouvée.';
+
+/* =====================================================
+   NOMBRE CARTES
+===================================================== */
+
+async function loadCardCount(silent = false){
+
+  const status =
+    document.getElementById('cardStatus');
+
+
+  for(const table of CARD_TABLES){
+
+    try{
+
+      const rows =
+        await api(
+          table + '?select=id'
+        );
+
+
+      document.getElementById(
+        'countCards'
+      ).textContent = rows.length;
+
+
+      if(!silent && status){
+
+        status.textContent =
+          'Table trouvée : ' +
+          table +
+          ' — ' +
+          rows.length +
+          ' carte(s).';
+
+      }
+
+
+      return;
+
+    }catch(e){}
+
+  }
+
+
+  document.getElementById(
+    'countCards'
+  ).textContent = '0';
+
+
+  if(!silent && status){
+
+    status.textContent =
+      'Aucune table de cartes trouvée.';
+
+  }
+
 }
+
+
+/* =====================================================
+   LISTE DES MEMBRES
+===================================================== */
 
 async function loadMembers(){
- const body=document.getElementById('membersBody'),status=document.getElementById('memberStatus');
- body.innerHTML='';status.textContent='Chargement des membres...';
- try{
-  const rows=await api(MEMBERS_TABLE+'?select=id,code,nom,prenom,telephone,adresse,fonction&order=nom.asc');
-  if(!rows.length)body.innerHTML='<tr><td colspan="7" class="empty">Aucun membre enregistré.</td></tr>';
-  else rows.forEach(m=>{
-   const tr=document.createElement('tr');
-   tr.innerHTML='<td>'+esc(m.code)+'</td><td>'+esc(m.nom)+'</td><td>'+esc(m.prenom)+'</td><td>'+esc(m.telephone)+'</td><td>'+esc(m.adresse)+'</td><td>'+esc(m.fonction)+'</td><td><button onclick="verifyByCode(\''+jsesc(m.code)+'\')">Voir</button></td>';
-   body.appendChild(tr);
-  });
-  status.textContent='✅ '+rows.length+' membre(s) chargé(s).';status.className='status ok';
- }catch(e){status.textContent='❌ Erreur : '+e.message;status.className='status error';}
+
+  const body =
+    document.getElementById('membersBody');
+
+  const status =
+    document.getElementById('memberStatus');
+
+
+  body.innerHTML = '';
+
+  status.textContent =
+    'Chargement des membres...';
+
+
+  try{
+
+    const rows =
+      await api(
+        MEMBERS_TABLE +
+        '?select=id,code,nom,prenom,telephone,adresse,fonction' +
+        '&order=nom.asc'
+      );
+
+
+    if(!rows.length){
+
+      body.innerHTML =
+        '<tr>' +
+        '<td colspan="7" class="empty">' +
+        'Aucun membre enregistré.' +
+        '</td>' +
+        '</tr>';
+
+    }
+
+
+    else{
+
+      rows.forEach(m => {
+
+        const tr =
+          document.createElement('tr');
+
+
+        /*
+          IMPORTANT :
+
+          Chaque membre reçoit automatiquement
+          son propre bouton.
+
+          Nous utilisons l'ID Supabase du membre.
+        */
+
+        tr.innerHTML =
+
+          '<td>' +
+          esc(m.code) +
+          '</td>' +
+
+          '<td>' +
+          esc(m.nom) +
+          '</td>' +
+
+          '<td>' +
+          esc(m.prenom) +
+          '</td>' +
+
+          '<td>' +
+          esc(m.telephone) +
+          '</td>' +
+
+          '<td>' +
+          esc(m.adresse) +
+          '</td>' +
+
+          '<td>' +
+          esc(m.fonction) +
+          '</td>' +
+
+          '<td>' +
+
+          '<button ' +
+
+          'class="dossier-btn" ' +
+
+          'onclick="openMember(\'' +
+          jsesc(m.id) +
+          '\')">' +
+
+          '📂 Dossier' +
+
+          '</button>' +
+
+          '</td>';
+
+
+        body.appendChild(tr);
+
+      });
+
+    }
+
+
+    status.textContent =
+      '✅ ' +
+      rows.length +
+      ' membre(s) chargé(s).';
+
+
+    status.className =
+      'status ok';
+
+
+  }catch(e){
+
+    status.textContent =
+      '❌ Erreur : ' +
+      e.message;
+
+
+    status.className =
+      'status error';
+
+  }
+
 }
+
+
+/* =====================================================
+   OUVRIR LE DOSSIER DU MEMBRE
+===================================================== */
+
+function openMember(id){
+
+  if(!id){
+
+    alert(
+      'ID du membre manquant.'
+    );
+
+    return;
+
+  }
+
+
+  /*
+    Exemple :
+
+    membre.html?id=123
+
+    Le même système fonctionne
+    avec 10, 300 ou 1000 membres.
+  */
+
+  window.location.href =
+    'membre.html?id=' +
+    encodeURIComponent(id);
+
+}
+
+
+/* =====================================================
+   VERIFICATION PAR CODE
+===================================================== */
 
 function verifyByCode(code){
- showPage('verifier');document.getElementById('verifyCode').value=code||'';verifyMember();
+
+  showPage('verifier');
+
+  document.getElementById(
+    'verifyCode'
+  ).value = code || '';
+
+
+  verifyMember();
+
 }
+
+
+/* =====================================================
+   VERIFIER MEMBRE
+===================================================== */
 
 async function verifyMember(){
- const code=v('verifyCode'),card=v('verifyCard'),status=document.getElementById('verifyStatus'),result=document.getElementById('verifyResult');
- result.innerHTML='';
- if(!code&&!card){status.textContent='Entrez un code membre ou un numéro de carte.';return;}
- status.textContent='Recherche...';
- try{
-  let query='select=*';
-  if(code) query+='&code=eq.'+encodeURIComponent(code);
-  else query+='&numero_carte=eq.'+encodeURIComponent(card);
-  const rows=await api(MEMBERS_TABLE+'?'+query+'&limit=1');
-  if(!rows.length){
-   status.textContent='❌ Aucun membre trouvé.';status.className='status error';return;
+
+  const code =
+    v('verifyCode');
+
+  const card =
+    v('verifyCard');
+
+
+  const status =
+    document.getElementById(
+      'verifyStatus'
+    );
+
+
+  const result =
+    document.getElementById(
+      'verifyResult'
+    );
+
+
+  result.innerHTML = '';
+
+
+  if(!code && !card){
+
+    status.textContent =
+      'Entrez un code membre ou un numéro de carte.';
+
+    return;
+
   }
-  const m=rows[0];
-  status.textContent='✅ Carte / membre vérifié.';status.className='status ok';
-  result.innerHTML='<div class="member-card"><h3>'+esc((m.prenom||'')+' '+(m.nom||''))+'</h3>'+
-   '<p><b>Code :</b> '+esc(m.code)+'</p><p><b>Carte :</b> '+esc(m.numero_carte)+'</p>'+
-   '<p><b>Téléphone :</b> '+esc(m.telephone)+'</p><p><b>Adresse :</b> '+esc(m.adresse)+'</p>'+
-   '<p><b>Fonction :</b> '+esc(m.fonction)+'</p><p><b>Statut :</b> <span class="badge">'+esc(m.status||'actif')+'</span></p></div>';
- }catch(e){status.textContent='❌ Erreur : '+e.message;status.className='status error';}
+
+
+  status.textContent =
+    'Recherche...';
+
+
+  try{
+
+    let query =
+      'select=*';
+
+
+    if(code){
+
+      query +=
+        '&code=eq.' +
+        encodeURIComponent(code);
+
+    }
+
+    else{
+
+      query +=
+        '&numero_carte=eq.' +
+        encodeURIComponent(card);
+
+    }
+
+
+    const rows =
+      await api(
+        MEMBERS_TABLE +
+        '?' +
+        query +
+        '&limit=1'
+      );
+
+
+    if(!rows.length){
+
+      status.textContent =
+        '❌ Aucun membre trouvé.';
+
+      status.className =
+        'status error';
+
+      return;
+
+    }
+
+
+    const m = rows[0];
+
+
+    status.textContent =
+      '✅ Carte / membre vérifié.';
+
+    status.className =
+      'status ok';
+
+
+    result.innerHTML =
+
+      '<div class="member-card">' +
+
+      '<h3>' +
+
+      esc(
+        (m.prenom || '') +
+        ' ' +
+        (m.nom || '')
+      ) +
+
+      '</h3>' +
+
+      '<p><b>Code :</b> ' +
+      esc(m.code) +
+      '</p>' +
+
+      '<p><b>Carte :</b> ' +
+      esc(m.numero_carte) +
+      '</p>' +
+
+      '<p><b>Téléphone :</b> ' +
+      esc(m.telephone) +
+      '</p>' +
+
+      '<p><b>Adresse :</b> ' +
+      esc(m.adresse) +
+      '</p>' +
+
+      '<p><b>Fonction :</b> ' +
+      esc(m.fonction) +
+      '</p>' +
+
+      '<p><b>Statut :</b> ' +
+
+      '<span class="badge">' +
+
+      esc(
+        m.status || 'actif'
+      ) +
+
+      '</span>' +
+
+      '</p>' +
+
+      '<div class="actions">' +
+
+      '<button onclick="openMember(\'' +
+      jsesc(m.id) +
+      '\')">' +
+
+      '📂 Ouvrir le dossier complet' +
+
+      '</button>' +
+
+      '</div>' +
+
+      '</div>';
+
+  }
+
+
+  catch(e){
+
+    status.textContent =
+      '❌ Erreur : ' +
+      e.message;
+
+    status.className =
+      'status error';
+
+  }
+
 }
+
+
+/* =====================================================
+   EFFACER VERIFICATION
+===================================================== */
 
 function clearVerify(){
- document.getElementById('verifyCode').value='';
- document.getElementById('verifyCard').value='';
- document.getElementById('verifyResult').innerHTML='';
- document.getElementById('verifyStatus').textContent='Aucune recherche effectuée.';
+
+  document.getElementById(
+    'verifyCode'
+  ).value = '';
+
+
+  document.getElementById(
+    'verifyCard'
+  ).value = '';
+
+
+  document.getElementById(
+    'verifyResult'
+  ).innerHTML = '';
+
+
+  document.getElementById(
+    'verifyStatus'
+  ).textContent =
+    'Aucune recherche effectuée.';
+
 }
+
+
+/* =====================================================
+   AJOUTER MEMBRE
+===================================================== */
 
 async function addMember(){
- const status=document.getElementById('addStatus');
- const data={nom:v('nom'),prenom:v('prenom'),adresse:v('adresse'),telephone:v('telephone'),fonction:v('fonction'),code:v('code'),numero_carte:v('numero_carte'),email:v('email')};
- if(!data.nom||!data.prenom){status.textContent='Le nom et le prénom sont obligatoires.';return;}
- status.textContent='Enregistrement...';
- try{
-  await api(MEMBERS_TABLE,{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(data)});
-  status.textContent='✅ Membre enregistré avec succès.';status.className='status ok';
-  ['nom','prenom','adresse','telephone','fonction','code','numero_carte','email'].forEach(id=>document.getElementById(id).value='');
-  loadDashboard();
- }catch(e){status.textContent='❌ Erreur : '+e.message;status.className='status error';}
+
+  const status =
+    document.getElementById(
+      'addStatus'
+    );
+
+
+  const data = {
+
+    nom:v('nom'),
+
+    prenom:v('prenom'),
+
+    adresse:v('adresse'),
+
+    telephone:v('telephone'),
+
+    fonction:v('fonction'),
+
+    code:v('code'),
+
+    numero_carte:v('numero_carte'),
+
+    email:v('email')
+
+  };
+
+
+  if(!data.nom || !data.prenom){
+
+    status.textContent =
+      'Le nom et le prénom sont obligatoires.';
+
+    return;
+
+  }
+
+
+  status.textContent =
+    'Enregistrement...';
+
+
+  try{
+
+    await api(
+      MEMBERS_TABLE,
+      {
+        method:'POST',
+
+        headers:{
+          Prefer:'return=minimal'
+        },
+
+        body:JSON.stringify(data)
+      }
+    );
+
+
+    status.textContent =
+      '✅ Membre enregistré avec succès.';
+
+    status.className =
+      'status ok';
+
+
+    [
+      'nom',
+      'prenom',
+      'adresse',
+      'telephone',
+      'fonction',
+      'code',
+      'numero_carte',
+      'email'
+    ].forEach(id => {
+
+      document.getElementById(
+        id
+      ).value = '';
+
+    });
+
+
+    loadDashboard();
+
+
+    setTimeout(
+      () => showPage('membres'),
+      1000
+    );
+
+
+  }catch(e){
+
+    status.textContent =
+      '❌ Erreur : ' +
+      e.message;
+
+    status.className =
+      'status error';
+
+  }
+
 }
+
+
+/* =====================================================
+   DONNEES EGLISE
+===================================================== */
 
 async function loadChurch(){
- const status=document.getElementById('churchStatus');
- try{
-  const rows=await api(CHURCH_TABLE+'?select=*&limit=1');
-  if(rows.length){
-   const d=rows[0];
-   setv('churchName',d.nom||d.nom_eglise||'');setv('churchPastor',d.pasteur||'');
-   setv('churchAddress',d.adresse||'');setv('churchPhone',d.telephone||'');
-   setv('churchEmail',d.email||'');setv('churchResponsible',d.responsable||'');
-   status.textContent='✅ Données chargées.';status.className='status ok';
-  }else status.textContent='Aucune donnée trouvée.';
- }catch(e){status.textContent='❌ Impossible de charger : '+e.message;status.className='status error';}
+
+  const status =
+    document.getElementById(
+      'churchStatus'
+    );
+
+
+  try{
+
+    const rows =
+      await api(
+        CHURCH_TABLE +
+        '?select=*&limit=1'
+      );
+
+
+    if(rows.length){
+
+      const d = rows[0];
+
+
+      setv(
+        'churchName',
+        d.nom || d.nom_eglise || ''
+      );
+
+
+      setv(
+        'churchPastor',
+        d.pasteur || ''
+      );
+
+
+      setv(
+        'churchAddress',
+        d.adresse || ''
+      );
+
+
+      setv(
+        'churchPhone',
+        d.telephone || ''
+      );
+
+
+      setv(
+        'churchEmail',
+        d.email || ''
+      );
+
+
+      setv(
+        'churchResponsible',
+        d.responsable || ''
+      );
+
+
+      status.textContent =
+        '✅ Données chargées.';
+
+      status.className =
+        'status ok';
+
+    }
+
+    else{
+
+      status.textContent =
+        'Aucune donnée trouvée.';
+
+    }
+
+
+  }catch(e){
+
+    status.textContent =
+      '❌ Impossible de charger : ' +
+      e.message;
+
+    status.className =
+      'status error';
+
+  }
+
 }
+
+
+/* =====================================================
+   ENREGISTRER EGLISE
+===================================================== */
 
 async function saveChurch(){
- const status=document.getElementById('churchStatus');
- const data={nom:v('churchName'),pasteur:v('churchPastor'),adresse:v('churchAddress'),telephone:v('churchPhone'),email:v('churchEmail'),responsable:v('churchResponsible')};
- try{
-  const old=await api(CHURCH_TABLE+'?select=id&limit=1');
-  if(old.length) await api(CHURCH_TABLE+'?id=eq.'+encodeURIComponent(old[0].id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify(data)});
-  else await api(CHURCH_TABLE,{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify(data)});
-  status.textContent='✅ Données de l’église enregistrées.';status.className='status ok';
- }catch(e){status.textContent='❌ Erreur : '+e.message;status.className='status error';}
+
+  const status =
+    document.getElementById(
+      'churchStatus'
+    );
+
+
+  const data = {
+
+    nom:v('churchName'),
+
+    pasteur:v('churchPastor'),
+
+    adresse:v('churchAddress'),
+
+    telephone:v('churchPhone'),
+
+    email:v('churchEmail'),
+
+    responsable:v('churchResponsible')
+
+  };
+
+
+  try{
+
+    const old =
+      await api(
+        CHURCH_TABLE +
+        '?select=id&limit=1'
+      );
+
+
+    if(old.length){
+
+      await api(
+
+        CHURCH_TABLE +
+        '?id=eq.' +
+        encodeURIComponent(
+          old[0].id
+        ),
+
+        {
+          method:'PATCH',
+
+          headers:{
+            Prefer:'return=minimal'
+          },
+
+          body:JSON.stringify(data)
+        }
+
+      );
+
+    }
+
+    else{
+
+      await api(
+
+        CHURCH_TABLE,
+
+        {
+          method:'POST',
+
+          headers:{
+            Prefer:'return=minimal'
+          },
+
+          body:JSON.stringify(data)
+        }
+
+      );
+
+    }
+
+
+    status.textContent =
+      '✅ Données de l’église enregistrées.';
+
+    status.className =
+      'status ok';
+
+
+  }catch(e){
+
+    status.textContent =
+      '❌ Erreur : ' +
+      e.message;
+
+    status.className =
+      'status error';
+
+  }
+
 }
+
+
+/* =====================================================
+   SCANNER QR CODE
+===================================================== */
 
 async function startScanner(){
- const box=document.getElementById('cameraBox'),video=document.getElementById('qrVideo'),result=document.getElementById('qrResult');
- if(!('BarcodeDetector' in window)){
-  result.textContent='⚠️ Ce navigateur ne prend pas en charge le scanner QR automatique. Utilisez « Vérifier Carte » pour entrer le code manuellement.';
-  box.classList.add('active');return;
- }
- try{
-  scannerStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});
-  video.srcObject=scannerStream;await video.play();box.classList.add('active');
-  const detector=new BarcodeDetector({formats:['qr_code']});
-  scannerTimer=setInterval(async()=>{
-   if(video.readyState<2)return;
-   try{
-    const codes=await detector.detect(video);
-    if(codes.length&&codes[0].rawValue){
-     const value=codes[0].rawValue;
-     result.textContent='✅ QR Code détecté : '+value;
-     stopScanner();
-     document.getElementById('verifyCode').value=value;
-     showPage('verifier');
-     verifyMember();
-    }
-   }catch(e){}
-  },500);
- }catch(e){box.classList.add('active');result.textContent='❌ Impossible d’accéder à la caméra : '+e.message;}
+
+  const box =
+    document.getElementById(
+      'cameraBox'
+    );
+
+
+  const video =
+    document.getElementById(
+      'qrVideo'
+    );
+
+
+  const result =
+    document.getElementById(
+      'qrResult'
+    );
+
+
+  if(!('BarcodeDetector' in window)){
+
+    result.textContent =
+      '⚠️ Ce navigateur ne prend pas en charge le scanner QR automatique. Utilisez « Vérifier Carte » pour entrer le code manuellement.';
+
+    box.classList.add('active');
+
+    return;
+
+  }
+
+
+  try{
+
+    scannerStream =
+      await navigator.mediaDevices.getUserMedia({
+
+        video:{
+          facingMode:{
+            ideal:'environment'
+          }
+        }
+
+      });
+
+
+    video.srcObject =
+      scannerStream;
+
+
+    await video.play();
+
+
+    box.classList.add('active');
+
+
+    const detector =
+      new BarcodeDetector({
+        formats:['qr_code']
+      });
+
+
+    scannerTimer =
+      setInterval(
+        async () => {
+
+          if(video.readyState < 2){
+            return;
+          }
+
+
+          try{
+
+            const codes =
+              await detector.detect(video);
+
+
+            if(
+              codes.length &&
+              codes[0].rawValue
+            ){
+
+              const value =
+                codes[0].rawValue;
+
+
+              result.textContent =
+                '✅ QR Code détecté : ' +
+                value;
+
+
+              stopScanner();
+
+
+              document.getElementById(
+                'verifyCode'
+              ).value = value;
+
+
+              showPage(
+                'verifier'
+              );
+
+
+              verifyMember();
+
+            }
+
+          }catch(e){}
+
+        },
+        500
+      );
+
+
+  }catch(e){
+
+    box.classList.add('active');
+
+
+    result.textContent =
+      '❌ Impossible d’accéder à la caméra : ' +
+      e.message;
+
+  }
+
 }
+
+
+/* =====================================================
+   ARRETER SCANNER
+===================================================== */
 
 function stopScanner(){
- if(scannerTimer){clearInterval(scannerTimer);scannerTimer=null;}
- if(scannerStream){scannerStream.getTracks().forEach(t=>t.stop());scannerStream=null;}
- const video=document.getElementById('qrVideo');if(video)video.srcObject=null;
+
+  if(scannerTimer){
+
+    clearInterval(
+      scannerTimer
+    );
+
+    scannerTimer = null;
+
+  }
+
+
+  if(scannerStream){
+
+    scannerStream
+      .getTracks()
+      .forEach(
+        t => t.stop()
+      );
+
+    scannerStream = null;
+
+  }
+
+
+  const video =
+    document.getElementById(
+      'qrVideo'
+    );
+
+
+  if(video){
+
+    video.srcObject = null;
+
+  }
+
 }
 
-function v(id){return (document.getElementById(id)?.value||'').trim()}
-function setv(id,value){if(document.getElementById(id))document.getElementById(id).value=value||''}
-function esc(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
-function jsesc(x){return String(x??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
+
+/* =====================================================
+   PETITES FONCTIONS
+===================================================== */
+
+function v(id){
+
+  return (
+    document
+      .getElementById(id)
+      ?.value || ''
+  ).trim();
+
+}
+
+
+function setv(id,value){
+
+  if(
+    document.getElementById(id)
+  ){
+
+    document.getElementById(id)
+      .value = value || '';
+
+  }
+
+}
+
+
+function esc(x){
+
+  return String(
+    x ?? ''
+  ).replace(
+    /[&<>"']/g,
+    c => ({
+
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#039;'
+
+    }[c])
+  );
+
+}
+
+
+function jsesc(x){
+
+  return String(
+    x ?? ''
+  )
+  .replace(
+    /\\/g,
+    '\\\\'
+  )
+  .replace(
+    /'/g,
+    "\\'"
+  );
+
+}
+
+
+/* =====================================================
+   DEMARRAGE
+===================================================== */
 
 loadDashboard();
+
 </script>
+
 </body>
 </html>
-'''
-
-path = Path("/mnt/data/medfah.html")
-path.write_text(html, encoding="utf-8")
-print(f"Fichier créé : {path}")
