@@ -1,13 +1,13 @@
-// ============================================================
-// MEDFAH - APPLICATION MEMBRE
-// Connexion avec Supabase
-// ============================================================
+// ======================================================
+// MEDFAH - GESTION DES MEMBRES
+// Connexion Supabase
+// ======================================================
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // ----------------------------------------------------------
-    // 1. CONFIGURATION SUPABASE
-    // ----------------------------------------------------------
+    // --------------------------------------------------
+    // CONFIGURATION
+    // --------------------------------------------------
 
     const SUPABASE_URL =
         window.SUPABASE_URL ||
@@ -18,57 +18,444 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const TABLE = "membre_infos";
 
+    // --------------------------------------------------
+    // IMPORTANT :
+    // app.js ne doit pas modifier index.html.
+    // Il travaille seulement sur membres.html.
+    // --------------------------------------------------
 
-    // ----------------------------------------------------------
-    // 2. VERIFICATION
-    // ----------------------------------------------------------
+    const currentPage =
+        window.location.pathname
+            .split("/")
+            .pop()
+            .toLowerCase();
 
-    if (!SUPABASE_URL) {
-        console.error("URL Supabase manquante.");
+    if (currentPage !== "membres.html") {
+        return;
+    }
+
+    const app =
+        document.getElementById("app");
+
+    if (!app) {
         return;
     }
 
     if (!SUPABASE_ANON_KEY) {
-        console.error("Clé Supabase manquante.");
-
         afficherMessage(
-            "La clé Supabase n'est pas encore configurée.",
-            "error"
+            "La clé Supabase n'est pas configurée.",
+            true
         );
-
         return;
     }
 
-
-    // ----------------------------------------------------------
-    // 3. RECUPERER L'ID DANS L'URL
-    // ----------------------------------------------------------
+    // --------------------------------------------------
+    // PARAMÈTRES URL
+    // --------------------------------------------------
 
     const params =
         new URLSearchParams(window.location.search);
 
-    const membreId =
+    const memberId =
         params.get("id");
 
+    const rechercheURL =
+        params.get("q") || "";
 
-    // ----------------------------------------------------------
-    // 4. CHARGER LES DONNEES
-    // ----------------------------------------------------------
+    // --------------------------------------------------
+    // DEMARRAGE
+    // --------------------------------------------------
 
-    if (membreId) {
-
-        chargerMembre(membreId);
-
+    if (memberId) {
+        chargerMembre(memberId);
     } else {
-
-        chargerMembres();
-
+        chargerMembres(rechercheURL);
     }
 
+    // ==================================================
+    // CHARGER TOUS LES MEMBRES
+    // ==================================================
 
-    // ==========================================================
-    // FONCTION : CHARGER UN MEMBRE
-    // ==========================================================
+    async function chargerMembres(recherche = "") {
+
+        afficherMessage(
+            "Chargement des membres..."
+        );
+
+        try {
+
+            const url =
+                `${SUPABASE_URL}/rest/v1/${TABLE}` +
+                `?select=*&order=id.desc`;
+
+            const response =
+                await fetch(url, {
+                    method: "GET",
+
+                    headers: {
+                        "apikey": SUPABASE_ANON_KEY,
+                        "Authorization":
+                            `Bearer ${SUPABASE_ANON_KEY}`,
+                        "Content-Type":
+                            "application/json"
+                    }
+                });
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `Erreur Supabase : ${response.status}`
+                );
+            }
+
+            const membres =
+                await response.json();
+
+            console.log(
+                "MEMBRES RECUS :",
+                membres
+            );
+
+            afficherListe(
+                membres,
+                recherche
+            );
+
+        } catch (error) {
+
+            console.error(
+                "ERREUR MEMBRES :",
+                error
+            );
+
+            afficherMessage(
+                "Impossible de charger les membres.",
+                true
+            );
+        }
+    }
+
+    // ==================================================
+    // AFFICHER LA LISTE
+    // ==================================================
+
+    function afficherListe(
+        membres,
+        recherche = ""
+    ) {
+
+        let resultat =
+            filtrerMembres(
+                membres,
+                recherche
+            );
+
+        app.innerHTML = `
+
+            <div class="topbar">
+
+                <h2>👥 Liste des Membres</h2>
+
+                <div class="search-area">
+
+                    <input
+                        type="search"
+                        id="searchMember"
+                        placeholder="Rechercher par nom, prénom, assemblée, téléphone..."
+                        value="${echapper(recherche)}"
+                    >
+
+                    <button id="searchButton">
+                        🔍 Rechercher
+                    </button>
+
+                </div>
+
+                <div class="result-info">
+                    ${resultat.length}
+                    membre(s) trouvé(s)
+                </div>
+
+            </div>
+
+            <div id="tableArea"></div>
+        `;
+
+        const tableArea =
+            document.getElementById("tableArea");
+
+        if (!resultat.length) {
+
+            tableArea.innerHTML = `
+                <div class="message">
+                    Aucun membre ne correspond à votre recherche.
+                </div>
+            `;
+
+        } else {
+
+            tableArea.innerHTML = `
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Assemblée</th>
+                                <th>Téléphone</th>
+                                <th>Fonction</th>
+                                <th>Profession</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            ${resultat.map(
+                                membre => ligneMembre(membre)
+                            ).join("")}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            `;
+        }
+
+        const input =
+            document.getElementById(
+                "searchMember"
+            );
+
+        const button =
+            document.getElementById(
+                "searchButton"
+            );
+
+        function effectuerRecherche() {
+
+            const texte =
+                input.value.trim();
+
+            const nouvelleURL =
+                texte
+                    ? `membres.html?q=${encodeURIComponent(texte)}`
+                    : "membres.html";
+
+            window.history.replaceState(
+                {},
+                "",
+                nouvelleURL
+            );
+
+            afficherListe(
+                membres,
+                texte
+            );
+        }
+
+        button.addEventListener(
+            "click",
+            effectuerRecherche
+        );
+
+        input.addEventListener(
+            "keydown",
+            event => {
+
+                if (event.key === "Enter") {
+                    effectuerRecherche();
+                }
+
+            }
+        );
+
+        input.addEventListener(
+            "input",
+            () => {
+
+                const texte =
+                    input.value.trim();
+
+                const resultatLive =
+                    filtrerMembres(
+                        membres,
+                        texte
+                    );
+
+                const info =
+                    document.querySelector(
+                        ".result-info"
+                    );
+
+                if (info) {
+                    info.textContent =
+                        `${resultatLive.length} membre(s) trouvé(s)`;
+                }
+
+                const table =
+                    document.querySelector(
+                        "#tableArea"
+                    );
+
+                if (table) {
+
+                    if (!resultatLive.length) {
+
+                        table.innerHTML = `
+                            <div class="message">
+                                Aucun membre ne correspond à votre recherche.
+                            </div>
+                        `;
+
+                    } else {
+
+                        table.innerHTML = `
+                            <div class="table-wrapper">
+
+                                <table>
+
+                                    <thead>
+                                        <tr>
+                                            <th>Nom</th>
+                                            <th>Prénom</th>
+                                            <th>Assemblée</th>
+                                            <th>Téléphone</th>
+                                            <th>Fonction</th>
+                                            <th>Profession</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        ${resultatLive.map(
+                                            membre =>
+                                                ligneMembre(membre)
+                                        ).join("")}
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+                        `;
+                    }
+                }
+
+            }
+        );
+    }
+
+    // ==================================================
+    // FILTRER LES MEMBRES
+    // ==================================================
+
+    function filtrerMembres(
+        membres,
+        recherche
+    ) {
+
+        const texte =
+            String(recherche || "")
+                .toLowerCase()
+                .trim();
+
+        if (!texte) {
+            return membres;
+        }
+
+        return membres.filter(
+            membre => {
+
+                const valeurs =
+                    Object.values(membre);
+
+                return valeurs.some(
+                    valeur =>
+                        String(
+                            valeur ?? ""
+                        )
+                        .toLowerCase()
+                        .includes(texte)
+                );
+            }
+        );
+    }
+
+    // ==================================================
+    // UNE LIGNE DU TABLEAU
+    // ==================================================
+
+    function ligneMembre(membre) {
+
+        const nom =
+            getField(membre, "nom");
+
+        const prenom =
+            getField(membre, "prenom");
+
+        const assemblee =
+            getField(membre, "assemblee");
+
+        const telephone =
+            getField(membre, "telephone") ||
+            getField(membre, "telefone") ||
+            getField(membre, "phone");
+
+        const fonction =
+            getField(membre, "fonction");
+
+        const profession =
+            getField(membre, "profession");
+
+        return `
+
+            <tr>
+
+                <td>
+                    ${echapper(nom || "-")}
+                </td>
+
+                <td>
+                    ${echapper(prenom || "-")}
+                </td>
+
+                <td>
+                    ${echapper(assemblee || "-")}
+                </td>
+
+                <td>
+                    ${echapper(telephone || "-")}
+                </td>
+
+                <td>
+                    ${echapper(fonction || "-")}
+                </td>
+
+                <td>
+                    ${echapper(profession || "-")}
+                </td>
+
+                <td>
+
+                    <button
+                        class="voir-btn"
+                        onclick="window.location.href='membres.html?id=${encodeURIComponent(membre.id)}'"
+                    >
+                        Voir
+                    </button>
+
+                </td>
+
+            </tr>
+        `;
+    }
+
+    // ==================================================
+    // CHARGER UN MEMBRE
+    // ==================================================
 
     async function chargerMembre(id) {
 
@@ -79,843 +466,548 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
 
             const url =
-                `${SUPABASE_URL}/rest/v1/${TABLE}?id=eq.${encodeURIComponent(id)}&select=*`;
+                `${SUPABASE_URL}/rest/v1/${TABLE}` +
+                `?id=eq.${encodeURIComponent(id)}` +
+                `&select=*`;
 
             const response =
                 await fetch(url, {
-
                     method: "GET",
 
                     headers: {
-
                         "apikey": SUPABASE_ANON_KEY,
-
                         "Authorization":
                             `Bearer ${SUPABASE_ANON_KEY}`,
-
                         "Content-Type":
                             "application/json"
-
                     }
-
                 });
-
 
             if (!response.ok) {
 
                 throw new Error(
                     `Erreur Supabase : ${response.status}`
                 );
-
             }
-
 
             const data =
                 await response.json();
 
-
-            // --------------------------------------------------
-            // VERIFICATION DES DONNEES RECUES
-            // --------------------------------------------------
-
-            console.log(
-                "======================================"
-            );
-
-            console.log(
-                "DONNEES RECUES DE SUPABASE :",
-                data
-            );
-
-            console.log(
-                "COLONNES DU MEMBRE :",
-                data[0] ? Object.keys(data[0]) : []
-            );
-
-            console.log(
-                "PRENOM :",
-                data[0]?.prenom
-            );
-
-            console.log(
-                "TELEPHONE :",
-                data[0]?.telephone
-            );
-
-            console.log(
-                "======================================"
-            );
-
-
-            if (!data || data.length === 0) {
+            if (!data.length) {
 
                 afficherMessage(
                     "Aucun membre trouvé.",
-                    "error"
+                    true
                 );
 
                 return;
             }
 
-
-            afficherDossier(data[0]);
-
+            afficherDossier(
+                data[0]
+            );
 
         } catch (error) {
 
             console.error(
-                "ERREUR :",
+                "ERREUR DOSSIER :",
                 error
             );
 
             afficherMessage(
                 "Impossible de charger le dossier du membre.",
-                "error"
+                true
             );
-
         }
-
     }
 
-
-    // ==========================================================
-    // FONCTION : CHARGER TOUS LES MEMBRES
-    // ==========================================================
-
-    async function chargerMembres() {
-
-        afficherMessage(
-            "Chargement des membres..."
-        );
-
-        try {
-
-            const url =
-                `${SUPABASE_URL}/rest/v1/${TABLE}?select=*&order=id.desc`;
-
-
-            const response =
-                await fetch(url, {
-
-                    method: "GET",
-
-                    headers: {
-
-                        "apikey":
-                            SUPABASE_ANON_KEY,
-
-                        "Authorization":
-                            `Bearer ${SUPABASE_ANON_KEY}`,
-
-                        "Content-Type":
-                            "application/json"
-
-                    }
-
-                });
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    `Erreur Supabase : ${response.status}`
-                );
-
-            }
-
-
-            const data =
-                await response.json();
-
-
-            console.log(
-                "LISTE DES MEMBRES :",
-                data
-            );
-
-
-            afficherListe(data);
-
-
-        } catch (error) {
-
-            console.error(
-                error
-            );
-
-            afficherMessage(
-                "Impossible de charger les membres.",
-                "error"
-            );
-
-        }
-
-    }
-
-
-    // ==========================================================
-    // AFFICHER LA LISTE
-    // ==========================================================
-
-    function afficherListe(membres) {
-
-        const zone =
-            obtenirZone();
-
-
-        if (!membres.length) {
-
-            zone.innerHTML = `
-
-                <div class="message">
-
-                    Aucun membre enregistré.
-
-                </div>
-
-            `;
-
-            return;
-        }
-
-
-        let html = `
-
-            <div class="medfah-header">
-
-                <h1>MEDFAH</h1>
-
-                <h2>DOSSIER DES MEMBRES</h2>
-
-                <p>
-                    Mission Église de Dieu de la Foi Apostolique d'Haïti
-                </p>
-
-            </div>
-
-
-            <div class="membre-liste">
-
-        `;
-
-
-        membres.forEach(membre => {
-
-            html += `
-
-                <div class="membre-card">
-
-                    <h3>
-
-                        ${echapper(
-                            membre.prenom ||
-                            membre.Prenom ||
-                            membre.prénom ||
-                            ""
-                        )}
-
-                        ${echapper(
-                            membre.nom ||
-                            membre.Nom ||
-                            ""
-                        )}
-
-                    </h3>
-
-
-                    <p>
-
-                        <strong>Code :</strong>
-
-                        ${echapper(
-                            membre.code || "-"
-                        )}
-
-                    </p>
-
-
-                    <p>
-
-                        <strong>Fonction :</strong>
-
-                        ${echapper(
-                            membre.fonction || "-"
-                        )}
-
-                    </p>
-
-
-                    <p>
-
-                        <strong>Téléphone :</strong>
-
-                        ${echapper(
-                            membre.telephone ||
-                            membre.telefone ||
-                            membre.phone ||
-                            "-"
-                        )}
-
-                    </p>
-
-
-                    <p>
-
-                        <strong>Status :</strong>
-
-                        ${echapper(
-                            membre.status || "-"
-                        )}
-
-                    </p>
-
-
-                    <button
-                        onclick="window.location.href='?id=${membre.id}'">
-
-                        DOSSIER DU MEMBRE
-
-                    </button>
-
-
-                </div>
-
-            `;
-
-        });
-
-
-        html += `
-
-            </div>
-
-        `;
-
-
-        zone.innerHTML =
-            html;
-
-    }
-
-
-    // ==========================================================
-    // AFFICHER LE DOSSIER COMPLET
-    // ==========================================================
+    // ==================================================
+    // DOSSIER COMPLET
+    // ==================================================
 
     function afficherDossier(membre) {
 
-        const zone =
-            obtenirZone();
+        app.innerHTML = `
+
+            <div class="dossier">
+
+                <div class="dossier-header">
+
+                    <h2>
+                        Dossier du membre
+                    </h2>
+
+                    <p>
+                        MEDFAH
+                    </p>
+
+                </div>
+
+                <div class="dossier-body">
+
+                    <section class="section">
+
+                        <h3>
+                            Informations personnelles
+                        </h3>
+
+                        <div class="grid">
+
+                            ${champ(
+                                "Code",
+                                getField(membre, "code")
+                            )}
+
+                            ${champ(
+                                "N° carte",
+                                getField(
+                                    membre,
+                                    "numero_carte"
+                                )
+                            )}
+
+                            ${champ(
+                                "Nom",
+                                getField(membre, "nom")
+                            )}
+
+                            ${champ(
+                                "Prénom",
+                                getField(
+                                    membre,
+                                    "prenom"
+                                )
+                            )}
+
+                            ${champ(
+                                "Sexe",
+                                getField(
+                                    membre,
+                                    "sexe"
+                                )
+                            )}
+
+                            ${champ(
+                                "Date de naissance",
+                                getField(
+                                    membre,
+                                    "date_naissance"
+                                )
+                            )}
+
+                            ${champ(
+                                "Lieu de naissance",
+                                getField(
+                                    membre,
+                                    "lieu_naissance"
+                                )
+                            )}
+
+                            ${champ(
+                                "Nationalité",
+                                getField(
+                                    membre,
+                                    "nationalite"
+                                )
+                            )}
+
+                            ${champ(
+                                "Situation matrimoniale",
+                                getField(
+                                    membre,
+                                    "situation_matrimoniale"
+                                )
+                            )}
+
+                        </div>
+
+                    </section>
 
 
-        zone.innerHTML = `
+                    <section class="section">
 
-            <div class="medfah-header">
+                        <h3>
+                            Contact
+                        </h3>
 
-                <h1>MEDFAH</h1>
+                        <div class="grid">
 
-                <h2>DOSSIER DU MEMBRE</h2>
+                            ${champ(
+                                "Téléphone",
+                                getField(
+                                    membre,
+                                    "telephone"
+                                )
+                            )}
 
-                <p>
-                    Mission Église de Dieu de la Foi Apostolique d'Haïti
-                </p>
+                            ${champ(
+                                "Téléphone secondaire",
+                                getField(
+                                    membre,
+                                    "telephone_secondaire"
+                                )
+                            )}
+
+                            ${champ(
+                                "WhatsApp",
+                                getField(
+                                    membre,
+                                    "whatsapp"
+                                )
+                            )}
+
+                            ${champ(
+                                "Email",
+                                getField(
+                                    membre,
+                                    "email"
+                                )
+                            )}
+
+                            ${champ(
+                                "Adresse",
+                                getField(
+                                    membre,
+                                    "adresse"
+                                )
+                            )}
+
+                            ${champ(
+                                "Commune",
+                                getField(
+                                    membre,
+                                    "commune"
+                                )
+                            )}
+
+                            ${champ(
+                                "Département",
+                                getField(
+                                    membre,
+                                    "departement"
+                                )
+                            )}
+
+                        </div>
+
+                    </section>
+
+
+                    <section class="section">
+
+                        <h3>
+                            Ministères et responsabilités
+                        </h3>
+
+                        <div class="grid">
+
+                            ${champ(
+                                "Fonction",
+                                getField(
+                                    membre,
+                                    "fonction"
+                                )
+                            )}
+
+                            ${champ(
+                                "Profession",
+                                getField(
+                                    membre,
+                                    "profession"
+                                )
+                            )}
+
+                            ${champ(
+                                "Assemblée",
+                                getField(
+                                    membre,
+                                    "assemblee"
+                                )
+                            )}
+
+                            ${champ(
+                                "Status",
+                                getField(
+                                    membre,
+                                    "status"
+                                )
+                            )}
+
+                        </div>
+
+                    </section>
+
+
+                    <section class="section">
+
+                        <h3>
+                            Vie spirituelle
+                        </h3>
+
+                        <div class="grid">
+
+                            ${champ(
+                                "Date d'adhésion",
+                                getField(
+                                    membre,
+                                    "date_adhesion"
+                                )
+                            )}
+
+                            ${champ(
+                                "Date de conversion",
+                                getField(
+                                    membre,
+                                    "date_conversion"
+                                )
+                            )}
+
+                            ${champ(
+                                "Date de baptême",
+                                getField(
+                                    membre,
+                                    "date_bapteme"
+                                )
+                            )}
+
+                            ${champ(
+                                "Pasteur responsable",
+                                getField(
+                                    membre,
+                                    "pasteur_responsable"
+                                )
+                            )}
+
+                            ${champ(
+                                "Formation biblique",
+                                getField(
+                                    membre,
+                                    "formation_biblique"
+                                )
+                            )}
+
+                            ${champ(
+                                "Groupe d'église",
+                                getField(
+                                    membre,
+                                    "groupe_eglise"
+                                )
+                            )}
+
+                        </div>
+
+                    </section>
+
+
+                    <section class="section">
+
+                        <h3>
+                            Personne à contacter en cas d'urgence
+                        </h3>
+
+                        <div class="grid">
+
+                            ${champ(
+                                "Nom",
+                                getField(
+                                    membre,
+                                    "personne_urgence"
+                                )
+                            )}
+
+                            ${champ(
+                                "Téléphone",
+                                getField(
+                                    membre,
+                                    "telephone_urgence"
+                                )
+                            )}
+
+                            ${champ(
+                                "Relation",
+                                getField(
+                                    membre,
+                                    "relation_urgence"
+                                )
+                            )}
+
+                        </div>
+
+                    </section>
+
+
+                    <section class="section">
+
+                        <h3>
+                            Suivi / Observations
+                        </h3>
+
+                        <div class="field">
+                            <span>
+                                ${echapper(
+                                    getField(
+                                        membre,
+                                        "observations"
+                                    ) ||
+                                    "Aucune observation."
+                                )}
+                            </span>
+                        </div>
+
+                    </section>
+
+
+                    <div class="actions">
+
+                        <button
+                            class="action-btn primary"
+                            onclick="window.print()"
+                        >
+                            🖨 Imprimer
+                        </button>
+
+                        <button
+                            class="action-btn secondary"
+                            onclick="window.location.href='membres.html'"
+                        >
+                            ← Retour à la liste
+                        </button>
+
+                    </div>
+
+                </div>
 
             </div>
-
-
-            <!-- IDENTIFICATION -->
-
-            <section class="dossier-section">
-
-                <h2>
-                    Informations personnelles
-                </h2>
-
-
-                <div class="grid">
-
-
-                    ${champ(
-                        "Code",
-                        membre.code
-                    )}
-
-
-                    ${champ(
-                        "N° carte",
-                        membre.numero_carte
-                    )}
-
-
-                    ${champ(
-                        "Nom",
-                        membre.nom ||
-                        membre.Nom
-                    )}
-
-
-                    ${champ(
-                        "Prénom",
-                        membre.prenom ||
-                        membre.Prenom ||
-                        membre.prénom ||
-                        membre.first_name
-                    )}
-
-
-                    ${champ(
-                        "Sexe",
-                        membre.sexe
-                    )}
-
-
-                    ${champ(
-                        "Date de naissance",
-                        membre.date_naissance
-                    )}
-
-
-                    ${champ(
-                        "Lieu de naissance",
-                        membre.lieu_naissance
-                    )}
-
-
-                    ${champ(
-                        "Nationalité",
-                        membre.nationalite
-                    )}
-
-
-                    ${champ(
-                        "Situation matrimoniale",
-                        membre.situation_matrimoniale
-                    )}
-
-
-                </div>
-
-            </section>
-
-
-            <!-- CONTACT -->
-
-            <section class="dossier-section">
-
-                <h2>
-                    Contact
-                </h2>
-
-
-                <div class="grid">
-
-
-                    ${champ(
-                        "Téléphone",
-                        membre.telephone ||
-                        membre.telefone ||
-                        membre.phone
-                    )}
-
-
-                    ${champ(
-                        "Téléphone secondaire",
-                        membre.telephone_secondaire
-                    )}
-
-
-                    ${champ(
-                        "WhatsApp",
-                        membre.whatsapp
-                    )}
-
-
-                    ${champ(
-                        "Email",
-                        membre.email
-                    )}
-
-
-                    ${champ(
-                        "Adresse",
-                        membre.adresse
-                    )}
-
-
-                    ${champ(
-                        "Commune",
-                        membre.commune
-                    )}
-
-
-                    ${champ(
-                        "Département",
-                        membre.departement
-                    )}
-
-
-                </div>
-
-            </section>
-
-
-            <!-- FAMILLE -->
-
-            <section class="dossier-section">
-
-                <h2>
-                    Informations familiales
-                </h2>
-
-
-                <div class="grid">
-
-
-                    ${champ(
-                        "Nom du père",
-                        membre.nom_pere
-                    )}
-
-
-                    ${champ(
-                        "Nom de la mère",
-                        membre.nom_mere
-                    )}
-
-
-                    ${champ(
-                        "Nom du conjoint",
-                        membre.nom_conjoint
-                    )}
-
-
-                    ${champ(
-                        "Nombre d'enfants",
-                        membre.nombre_enfants
-                    )}
-
-
-                </div>
-
-            </section>
-
-
-            <!-- VIE SPIRITUELLE -->
-
-            <section class="dossier-section">
-
-                <h2>
-                    Vie spirituelle
-                </h2>
-
-
-                <div class="grid">
-
-
-                    ${champ(
-                        "Date d'adhésion",
-                        membre.date_adhesion
-                    )}
-
-
-                    ${champ(
-                        "Date de conversion",
-                        membre.date_conversion
-                    )}
-
-
-                    ${champ(
-                        "Date de baptême",
-                        membre.date_bapteme
-                    )}
-
-
-                    ${champ(
-                        "Pasteur responsable",
-                        membre.pasteur_responsable
-                    )}
-
-
-                    ${champ(
-                        "Formation biblique",
-                        membre.formation_biblique
-                    )}
-
-
-                    ${champ(
-                        "Groupe d'église",
-                        membre.groupe_eglise
-                    )}
-
-
-                </div>
-
-            </section>
-
-
-            <!-- MINISTERES -->
-
-            <section class="dossier-section">
-
-                <h2>
-                    Ministères et responsabilités
-                </h2>
-
-
-                <div class="grid">
-
-
-                    ${champ(
-                        "Fonction",
-                        membre.fonction
-                    )}
-
-
-                    ${champ(
-                        "Profession",
-                        membre.profession
-                    )}
-
-
-                    ${champ(
-                        "Assemblée",
-                        membre.assemblee
-                    )}
-
-
-                    ${champ(
-                        "Status",
-                        membre.status
-                    )}
-
-
-                </div>
-
-            </section>
-
-
-            <!-- URGENCE -->
-
-            <section class="dossier-section">
-
-                <h2>
-                    Personne à contacter en cas d'urgence
-                </h2>
-
-
-                <div class="grid">
-
-
-                    ${champ(
-                        "Nom",
-                        membre.personne_urgence
-                    )}
-
-
-                    ${champ(
-                        "Téléphone",
-                        membre.telephone_urgence
-                    )}
-
-
-                    ${champ(
-                        "Relation",
-                        membre.relation_urgence
-                    )}
-
-
-                </div>
-
-            </section>
-
-
-            <!-- OBSERVATIONS -->
-
-            <section class="dossier-section">
-
-                <h2>
-                    Suivi / Observations
-                </h2>
-
-
-                <div class="observation">
-
-                    ${echapper(
-                        membre.observations ||
-                        "Aucune observation."
-                    )}
-
-                </div>
-
-            </section>
-
-
-            <!-- ACTIONS -->
-
-            <div class="actions">
-
-
-                <button
-                    onclick="window.print()">
-
-                    IMPRIMER
-
-                </button>
-
-
-                <button
-                    onclick="window.history.back()">
-
-                    RETOUR
-
-                </button>
-
-
-            </div>
-
         `;
-
     }
 
+    // ==================================================
+    // CHAMP DOSSIER
+    // ==================================================
 
-    // ==========================================================
-    // CHAMP
-    // ==========================================================
-
-    function champ(label, valeur) {
+    function champ(
+        label,
+        valeur
+    ) {
 
         return `
 
-            <div class="champ">
+            <div class="field">
 
                 <strong>
-                    ${label}
+                    ${echapper(label)}
                 </strong>
 
-
                 <span>
-
                     ${echapper(
-
                         valeur === null ||
                         valeur === undefined ||
                         valeur === ""
-
                             ? "-"
-
                             : valeur
-
                     )}
-
                 </span>
 
             </div>
-
         `;
-
     }
 
-
-    // ==========================================================
-    // ZONE PRINCIPALE
-    // ==========================================================
-
-    function obtenirZone() {
-
-        let zone =
-
-            document.getElementById("app") ||
-
-            document.getElementById(
-                "membres-container"
-            ) ||
-
-            document.getElementById(
-                "app-container"
-            );
-
-
-        if (!zone) {
-
-            zone =
-                document.createElement("main");
-
-            zone.id =
-                "app";
-
-            document.body.appendChild(
-                zone
-            );
-
-        }
-
-
-        return zone;
-
-    }
-
-
-    // ==========================================================
+    // ==================================================
     // MESSAGE
-    // ==========================================================
+    // ==================================================
 
     function afficherMessage(
         message,
-        type = ""
+        erreur = false
     ) {
 
-        const zone =
-            obtenirZone();
+        app.innerHTML = `
 
-
-        zone.innerHTML = `
-
-            <div class="message ${type}">
-
+            <div class="message ${erreur ? "error" : ""}">
                 ${echapper(message)}
-
             </div>
 
         `;
-
     }
 
+    // ==================================================
+    // TROUVER UNE COLONNE
+    // ==================================================
 
-    // ==========================================================
-    // SECURITE HTML
-    // ==========================================================
+    function getField(
+        data,
+        fieldName
+    ) {
+
+        if (!data) {
+            return "";
+        }
+
+        if (
+            data[fieldName] !== undefined &&
+            data[fieldName] !== null
+        ) {
+            return data[fieldName];
+        }
+
+        const normalize =
+            text => String(text)
+                .normalize("NFD")
+                .replace(
+                    /[\u0300-\u036f]/g,
+                    ""
+                )
+                .toLowerCase()
+                .replace(
+                    /[_\s-]/g,
+                    ""
+                );
+
+        const wanted =
+            normalize(fieldName);
+
+        const key =
+            Object.keys(data).find(
+                k =>
+                    normalize(k) === wanted
+            );
+
+        if (key) {
+            return data[key];
+        }
+
+        return "";
+    }
+
+    // ==================================================
+    // PROTECTION CONTRE HTML INJECTÉ
+    // ==================================================
 
     function echapper(texte) {
 
         return String(
             texte ?? ""
         )
-
         .replace(
             /&/g,
             "&amp;"
         )
-
         .replace(
             /</g,
             "&lt;"
         )
-
         .replace(
             />/g,
             "&gt;"
         )
-
         .replace(
             /"/g,
             "&quot;"
         )
-
         .replace(
             /'/g,
             "&#039;"
         );
-
     }
 
 });
