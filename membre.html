@@ -1,279 +1,293 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Espas Manm - MEDFAH</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(
-                rgba(255, 255, 255, 0.88),
-                rgba(255, 255, 255, 0.88)
-            ),
-            url('image.png') no-repeat center center fixed;
+  <title>MEDFAH - Membres</title>
 
-            background-size: contain;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-            min-height: 100vh;
-        }
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
 
-        .container {
-            max-width: 600px;
-            margin: 40px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+    body {
+      margin: 0;
+      min-height: 100vh;
 
-        h1 {
-            color: #007bff;
-            text-align: center;
-        }
+      background:
+        linear-gradient(
+          rgba(255,255,255,.93),
+          rgba(255,255,255,.93)
+        ),
+        url("image.png") center center / cover fixed no-repeat;
 
-        .member-info {
-            margin-top: 20px;
-        }
+      color: #1f2937;
+    }
 
-        .member-info p {
-            font-size: 16px;
-            margin: 10px 0;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
-        }
+    header {
+      background: #0d47a1;
+      color: white;
+      padding: 22px;
+      text-align: center;
+    }
 
-        .member-info strong {
-            color: #555;
-        }
+    header h1 {
+      margin: 0 0 6px;
+    }
 
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            margin-top: 20px;
-            box-sizing: border-box;
-        }
+    header p {
+      margin: 0;
+      opacity: .9;
+    }
 
-        .btn:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    .container {
+      width: 95%;
+      max-width: 1200px;
+      margin: 25px auto;
+    }
+
+    .topbar {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.07);
+      margin-bottom: 20px;
+    }
+
+    .topbar h2 {
+      margin: 0 0 15px;
+      color: #0d47a1;
+    }
+
+    .search-area {
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-area input {
+      flex: 1;
+      padding: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .search-area input:focus {
+      border-color: #0d47a1;
+    }
+
+    .search-area button {
+      border: none;
+      background: #0d47a1;
+      color: white;
+      padding: 0 22px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .search-area button:hover {
+      background: #083578;
+    }
+
+    .result-info {
+      margin-top: 12px;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .table-wrapper {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.07);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 850px;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #334155;
+      text-align: left;
+      padding: 15px;
+      font-size: 14px;
+    }
+
+    td {
+      padding: 14px 15px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 14px;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    .voir-btn {
+      background: #0d47a1;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .voir-btn:hover {
+      background: #083578;
+    }
+
+    .message {
+      background: white;
+      padding: 30px;
+      text-align: center;
+      border-radius: 15px;
+      color: #64748b;
+      box-shadow: 0 4px 15px rgba(0,0,0,.07);
+    }
+
+    .error {
+      color: #b91c1c;
+    }
+
+    .back {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 11px 18px;
+      background: white;
+      color: #0d47a1;
+      text-decoration: none;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0,0,0,.08);
+    }
+
+    /* DOSSIER */
+
+    .dossier {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 18px rgba(0,0,0,.08);
+      overflow: hidden;
+    }
+
+    .dossier-header {
+      background: #0d47a1;
+      color: white;
+      padding: 25px;
+    }
+
+    .dossier-header h2 {
+      margin: 0 0 5px;
+    }
+
+    .dossier-body {
+      padding: 22px;
+    }
+
+    .section {
+      margin-bottom: 25px;
+    }
+
+    .section h3 {
+      color: #0d47a1;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 9px;
+      margin-bottom: 15px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(
+        auto-fit,
+        minmax(230px, 1fr)
+      );
+      gap: 12px;
+    }
+
+    .field {
+      background: #f8fafc;
+      padding: 13px;
+      border-radius: 8px;
+    }
+
+    .field strong {
+      display: block;
+      color: #64748b;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .field span {
+      color: #1e293b;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .action-btn {
+      border: none;
+      padding: 11px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .primary {
+      background: #0d47a1;
+      color: white;
+    }
+
+    .secondary {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    @media(max-width:650px) {
+      .search-area {
+        flex-direction: column;
+      }
+
+      .search-area button {
+        padding: 13px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
+<header>
+  <h1>MEDFAH</h1>
+  <p>Gestion des membres</p>
+</header>
+
 <div class="container">
 
-    <h1>Enfòmasyon Manm</h1>
-
-    <div id="loading" style="text-align:center;">
-        Chajman enfòmasyon yo...
+  <div id="app">
+    <div class="message">
+      Chargement des membres...
     </div>
+  </div>
 
-    <div class="member-info" id="memberDetails" style="display:none;">
-
-        <p>
-            <strong>Non :</strong>
-            <span id="nomMember"></span>
-        </p>
-
-        <p>
-            <strong>Prenon :</strong>
-            <span id="prenomMember"></span>
-        </p>
-
-        <p>
-            <strong>Imèl :</strong>
-            <span id="emailMember"></span>
-        </p>
-
-        <p>
-            <strong>Telefòn :</strong>
-            <span id="telMember"></span>
-        </p>
-
-        <p>
-            <strong>Estati :</strong>
-            <span id="statusMember"></span>
-        </p>
-
-    </div>
-
-    <a href="index.html" class="btn">
-        Retounen nan Akèy la
-    </a>
+  <a href="index.html" class="back">
+    ← Retour à l'accueil
+  </a>
 
 </div>
 
-
-<script type="module">
-
-    import { createClient }
-    from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-    import {
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-    } from './config.js';
-
-
-    const supabase = createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-    );
-
-
-    // Fonksyon pou jwenn yon kolòn
-    // menm si non an gen aksan oswa majiskil
-    function getField(data, fieldName) {
-
-        if (!data) return '';
-
-        // Premye esè: non nòmal la
-        if (data[fieldName] !== undefined &&
-            data[fieldName] !== null) {
-
-            return data[fieldName];
-        }
-
-        // Chèche lòt fòm non kolòn nan
-        const normalize = (text) => {
-
-            return String(text)
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-                .toLowerCase()
-                .replace(/[_\s-]/g, "");
-
-        };
-
-        const wanted = normalize(fieldName);
-
-        const key = Object.keys(data).find(
-            k => normalize(k) === wanted
-        );
-
-        if (key) {
-            return data[key];
-        }
-
-        return '';
-    }
-
-
-    async function loadMemberData() {
-
-        try {
-
-            const urlParams =
-                new URLSearchParams(window.location.search);
-
-            const memberId =
-                urlParams.get('id');
-
-
-            if (!memberId) {
-
-                document.getElementById('loading').innerText =
-                    "Okenn manm pa idantifye.";
-
-                return;
-            }
-
-
-            const { data, error } = await supabase
-
-                .from('Membre_infos')
-
-                .select('*')
-
-                .eq('id', memberId)
-
-                .single();
-
-
-            if (error) {
-
-                console.error("Supabase:", error);
-
-                throw error;
-            }
-
-
-            if (data) {
-
-                console.log("DONE MANM NAN:", data);
-                console.log(
-                    "KOLÒN YO:",
-                    Object.keys(data)
-                );
-
-
-                // NON
-                document.getElementById('nomMember').innerText =
-                    getField(data, 'nom') || 'Pa afiche';
-
-
-                // PRENON
-                document.getElementById('prenomMember').innerText =
-                    getField(data, 'prenom') || 'Pa afiche';
-
-
-                // EMAIL
-                document.getElementById('emailMember').innerText =
-                    getField(data, 'email') || 'Pa afiche';
-
-
-                // TELEFÒN
-                document.getElementById('telMember').innerText =
-                    getField(data, 'telephone') || 'Pa afiche';
-
-
-                // ESTATI
-                document.getElementById('statusMember').innerText =
-                    getField(data, 'status') || 'Aktif';
-
-
-                document.getElementById('loading').style.display =
-                    'none';
-
-                document.getElementById('memberDetails').style.display =
-                    'block';
-
-            } else {
-
-                document.getElementById('loading').innerText =
-                    "Nou pa jwenn enfòmasyon manm sa a.";
-
-            }
-
-        } catch (err) {
-
-            console.error("Erè:", err);
-
-            document.getElementById('loading').innerText =
-                "Gen yon erè pandan y ap chaje done yo.";
-
-        }
-
-    }
-
-
-    loadMemberData();
-
-</script>
+<script src="config.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
