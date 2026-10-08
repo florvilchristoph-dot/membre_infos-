@@ -4,2250 +4,948 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>MEDFAH — Gestion des membres</title>
+<title>MEDFAH — Plateforme de gestion</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
 
 <style>
 *{
-  box-sizing:border-box;
+    box-sizing:border-box;
 }
 
 body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#f4f6fb;
-  color:#182235;
-  position:relative;
-  min-height:100vh;
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f4f6f9;
+    color:#172033;
 }
 
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  background-image:url("logo-medfah.jpg");
-  background-repeat:no-repeat;
-  background-position:center;
-  background-size:420px auto;
-  opacity:.08;
-  pointer-events:none;
-  z-index:0;
+/* HEADER */
+.header{
+    background:#ffffff;
+    border-bottom:1px solid #e5e7eb;
+    padding:16px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    z-index:100;
 }
 
-header,nav,main,footer{
-  position:relative;
-  z-index:1;
-}
-
-header{
-  background:rgba(255,255,255,.97);
-  padding:18px;
-  border-bottom:5px solid #2145c7;
-}
-
-.top{
-  display:flex;
-  gap:18px;
-  align-items:center;
-  max-width:1150px;
-  margin:auto;
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
 }
 
 .logo{
-  width:120px;
-  height:85px;
-  object-fit:contain;
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    object-fit:contain;
 }
 
 .brand h1{
-  margin:0;
-  color:#2145c7;
-  font-size:28px;
-  line-height:1.15;
+    margin:0;
+    font-size:20px;
 }
 
 .brand p{
-  margin:9px 0 0;
-  color:#667085;
-  font-size:18px;
+    margin:3px 0 0;
+    font-size:12px;
+    color:#6b7280;
 }
 
-nav{
-  background:rgba(255,255,255,.97);
-  padding:15px 18px;
-  box-shadow:0 3px 12px rgba(0,0,0,.05);
+/* MENU */
+.menu-btn{
+    border:0;
+    background:#172033;
+    color:white;
+    border-radius:10px;
+    padding:10px 13px;
+    font-size:20px;
+    cursor:pointer;
+}
+
+.sidebar{
+    position:fixed;
+    top:0;
+    left:-280px;
+    width:270px;
+    height:100vh;
+    background:#172033;
+    color:white;
+    z-index:200;
+    transition:.3s;
+    padding:20px;
+}
+
+.sidebar.open{
+    left:0;
+}
+
+.sidebar-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.sidebar-header h2{
+    font-size:18px;
+    margin:0;
+}
+
+.close-btn{
+    background:none;
+    color:white;
+    border:0;
+    font-size:25px;
 }
 
 .nav{
-  max-width:1150px;
-  margin:auto;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
 }
 
-button,
-.btn{
-  border:0;
-  border-radius:12px;
-  background:#2145c7;
-  color:#fff;
-  padding:13px 18px;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
-  text-decoration:none;
+.nav button{
+    border:0;
+    background:transparent;
+    color:white;
+    padding:13px;
+    border-radius:9px;
+    text-align:left;
+    font-size:15px;
+    cursor:pointer;
 }
 
-button:hover,
-.btn:hover{
-  background:#17379f;
+.nav button:hover{
+    background:#27334b;
 }
 
-button.secondary{
-  background:#667085;
+/* MAIN */
+.main{
+    max-width:1200px;
+    margin:auto;
+    padding:25px 18px 50px;
 }
 
-button.danger{
-  background:#c62828;
+/* HERO */
+.hero{
+    background:white;
+    border-radius:18px;
+    padding:25px;
+    margin-bottom:20px;
+    box-shadow:0 4px 18px rgba(0,0,0,.05);
 }
 
-main{
-  max-width:1150px;
-  margin:28px auto;
-  padding:0 18px;
+.hero h2{
+    margin:0 0 8px;
+    font-size:26px;
 }
 
-.page.hidden{
-  display:none!important;
+.hero p{
+    color:#667085;
+    margin:0;
 }
 
-.panel{
-  background:rgba(255,255,255,.96);
-  border-radius:22px;
-  padding:26px;
-  box-shadow:0 5px 25px rgba(0,0,0,.07);
-  margin-bottom:22px;
+/* SEARCH */
+.search-box{
+    margin-top:20px;
+    display:flex;
+    gap:10px;
 }
 
-h2{
-  font-size:30px;
-  margin:0 0 20px;
-  color:#182235;
+.search-box input{
+    flex:1;
+    border:1px solid #d8dde6;
+    border-radius:12px;
+    padding:14px;
+    font-size:16px;
+    outline:none;
 }
 
-.cards{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:18px;
+.search-box button{
+    border:0;
+    border-radius:12px;
+    background:#172033;
+    color:white;
+    padding:0 20px;
+    cursor:pointer;
 }
 
-.card{
-  background:rgba(255,255,255,.98);
-  border-radius:18px;
-  padding:24px;
-  box-shadow:0 4px 18px rgba(0,0,0,.06);
-  border-left:5px solid #2145c7;
+/* STATS */
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:22px;
 }
 
-.card .label{
-  font-size:17px;
-  color:#667085;
+.stat{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 4px 15px rgba(0,0,0,.05);
 }
 
-.number{
-  font-size:48px;
-  color:#2145c7;
-  font-weight:bold;
-  margin-top:8px;
+.stat-icon{
+    font-size:25px;
 }
 
-.note{
-  font-size:16px;
-  color:#667085;
-  line-height:1.5;
+.stat-number{
+    font-size:28px;
+    font-weight:bold;
+    margin-top:8px;
 }
 
-.status{
-  margin:15px 0;
-  padding:12px;
-  border-radius:10px;
-  background:#eef4ff;
-  color:#2145c7;
+.stat-label{
+    color:#667085;
+    font-size:13px;
+    margin-top:3px;
 }
 
-.status.ok{
-  background:#ecfdf3;
-  color:#087443;
+/* SECTION */
+.section{
+    background:white;
+    border-radius:17px;
+    padding:20px;
+    box-shadow:0 4px 18px rgba(0,0,0,.05);
 }
 
-.status.error{
-  background:#fff1f2;
-  color:#b42318;
+.section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:15px;
 }
 
-.actions{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:18px;
+.section-head h3{
+    margin:0;
 }
 
-.form-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:15px;
+.refresh{
+    border:1px solid #d8dde6;
+    background:white;
+    padding:9px 13px;
+    border-radius:9px;
+    cursor:pointer;
 }
 
-input,
-select,
-textarea{
-  width:100%;
-  padding:13px;
-  border:1px solid #d0d5dd;
-  border-radius:10px;
-  font-size:16px;
-  background:#fff;
-}
-
-textarea{
-  min-height:100px;
-}
-
-label{
-  font-weight:bold;
-  display:block;
-  margin-bottom:6px;
-}
-
+/* TABLE */
 .table-wrap{
-  overflow-x:auto;
+    overflow-x:auto;
 }
 
 table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:18px;
-  min-width:900px;
-}
-
-th,
-td{
-  padding:12px;
-  border-bottom:1px solid #e5e7eb;
-  text-align:left;
+    width:100%;
+    border-collapse:collapse;
 }
 
 th{
-  background:#f0f3fa;
-  color:#182235;
+    text-align:left;
+    background:#f6f7f9;
+    padding:13px;
+    font-size:13px;
+    color:#475467;
 }
 
-tr:hover td{
-  background:#f8faff;
+td{
+    padding:13px;
+    border-bottom:1px solid #edf0f3;
+    font-size:14px;
 }
 
 .badge{
-  display:inline-block;
-  padding:5px 9px;
-  border-radius:20px;
-  background:#ecfdf3;
-  color:#087443;
-  font-weight:bold;
+    display:inline-block;
+    background:#eef2f7;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:12px;
 }
 
-.member-card{
-  border:1px solid #e4e7ec;
-  border-radius:16px;
-  padding:18px;
-  margin-top:15px;
-  background:#fff;
-}
-
-.member-card h3{
-  margin:0 0 8px;
-  color:#2145c7;
-}
-
-.member-card p{
-  margin:5px 0;
+.view-btn{
+    border:0;
+    background:#172033;
+    color:white;
+    padding:7px 11px;
+    border-radius:7px;
+    cursor:pointer;
 }
 
 .empty{
-  text-align:center;
-  color:#667085;
-  padding:25px;
+    text-align:center;
+    padding:35px;
+    color:#667085;
 }
 
-.camera-box{
-  display:none;
-  margin-top:18px;
+.loading{
+    text-align:center;
+    padding:30px;
+    color:#667085;
 }
 
-.camera-box.active{
-  display:block;
+/* MEMBER CARD */
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    z-index:500;
+    padding:20px;
+    overflow:auto;
 }
 
-video{
-  width:100%;
-  max-width:520px;
-  border-radius:16px;
-  background:#111;
+.modal.show{
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
-#qrResult{
-  font-weight:bold;
-  margin-top:12px;
-}
-
-footer{
-  text-align:center;
-  color:#667085;
-  padding:15px 18px 35px;
-}
-
-.small{
-  font-size:13px;
-  color:#667085;
-}
-
-/* Bouton dossier */
-.dossier-btn{
-  background:#2145c7;
-  padding:9px 13px;
-  border-radius:9px;
-  font-size:14px;
-  white-space:nowrap;
-}
-
-.dossier-btn:hover{
-  background:#17379f;
-}
-
-@media(max-width:750px){
-
-  .top{
-    align-items:flex-start;
-  }
-
-  .logo{
-    width:95px;
-    height:75px;
-  }
-
-  .brand h1{
-    font-size:23px;
-  }
-
-  .brand p{
-    font-size:15px;
-  }
-
-  .cards{
-    grid-template-columns:1fr;
-  }
-
-  .form-grid{
-    grid-template-columns:1fr;
-  }
-
-  .panel{
-    padding:20px 15px;
-  }
-
-  h2{
-    font-size:26px;
-  }
-
-  .nav button{
+.modal-card{
+    background:white;
     width:100%;
-  }
+    max-width:550px;
+    border-radius:18px;
+    padding:25px;
+}
 
-  body::before{
-    background-size:300px auto;
-  }
+.modal-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.modal-head h2{
+    margin:0;
+}
+
+.close-modal{
+    border:0;
+    background:#f1f3f5;
+    border-radius:50%;
+    width:35px;
+    height:35px;
+    font-size:20px;
+}
+
+.details{
+    margin-top:20px;
+}
+
+.detail{
+    padding:12px 0;
+    border-bottom:1px solid #edf0f3;
+}
+
+.detail strong{
+    display:block;
+    font-size:12px;
+    color:#667085;
+    margin-bottom:4px;
+}
+
+/* MOBILE */
+@media(max-width:800px){
+    .stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .brand h1{
+        font-size:17px;
+    }
+
+    .brand p{
+        display:none;
+    }
+}
+
+@media(max-width:500px){
+    .stats{
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+    }
+
+    .stat{
+        padding:15px;
+    }
+
+    .stat-number{
+        font-size:23px;
+    }
+
+    .search-box{
+        flex-direction:column;
+    }
+
+    .search-box button{
+        padding:12px;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<header>
+<!-- MENU LATERAL -->
+<aside class="sidebar" id="sidebar">
 
-  <div class="top">
+    <div class="sidebar-header">
+        <h2>MEDFAH</h2>
+        <button class="close-btn" onclick="closeMenu()">×</button>
+    </div>
 
-    <img
-      class="logo"
-      src="logo-medfah.jpg"
-      alt="Logo MEDFAH"
-      onerror="this.style.display='none'"
-    >
+    <div class="nav">
+
+        <button onclick="goHome()">🏠 Tableau de bord</button>
+
+        <button onclick="showMembers()">👥 Membres</button>
+
+        <button onclick="alert('Module Cartes de persévérance')">
+            💳 Cartes de persévérance
+        </button>
+
+        <button onclick="alert('Scanner QR Code')">
+            📷 Scanner QR Code
+        </button>
+
+        <button onclick="alert('Vérification des cartes')">
+            🔎 Vérifier une carte
+        </button>
+
+        <button onclick="alert('Module Assemblées')">
+            ⛪ Assemblées
+        </button>
+
+        <button onclick="alert('Module Statistiques')">
+            📊 Statistiques
+        </button>
+
+        <button onclick="alert('Administration')">
+            ⚙️ Administration
+        </button>
+
+    </div>
+</aside>
+
+
+<!-- HEADER -->
+<header class="header">
 
     <div class="brand">
 
-      <h1>
-        Mission Église de Dieu de la Foi Apostolique d’Haïti — MEDFAH
-      </h1>
+        <!-- Si ton logo s'appelle logo.png -->
+        <img src="logo.png"
+             class="logo"
+             onerror="this.style.display='none'">
 
-      <p>
-        Plateforme de gestion, vérification des membres et cartes de persévérance
-      </p>
+        <div>
+            <h1>Mission Église de Dieu de la Foi Apostolique d’Haïti</h1>
+            <p>Plateforme de gestion des membres — MEDFAH</p>
+        </div>
 
     </div>
 
-  </div>
+    <button class="menu-btn" onclick="openMenu()">☰</button>
 
 </header>
 
 
-<nav>
+<!-- CONTENU -->
+<main class="main">
 
-  <div class="nav">
+    <section class="hero">
 
-    <button onclick="showPage('dashboard')">
-      🏠 Tableau de bord
-    </button>
+        <h2>Bienvenue sur MEDFAH</h2>
 
-    <button onclick="showPage('membres')">
-      📋 Liste des Membres
-    </button>
+        <p>
+            Plateforme officielle de gestion, de vérification
+            et de suivi des membres de l’Église.
+        </p>
 
-    <button onclick="showPage('scanner')">
-      📷 Scanner QR Code
-    </button>
+        <div class="search-box">
 
-    <button onclick="showPage('verifier')">
-      🔎 Vérifier Carte
-    </button>
+            <input
+                type="search"
+                id="searchInput"
+                placeholder="Rechercher un membre, un code, une assemblée..."
+                oninput="searchMembers()"
+            >
 
-    <button onclick="showPage('eglise')">
-      ⚙️ Administration
-    </button>
+            <button onclick="searchMembers()">
+                🔎 Rechercher
+            </button>
 
-  </div>
-
-</nav>
-
-
-<main>
-
-
-<!-- ===================================================== -->
-<!-- TABLEAU DE BORD -->
-<!-- ===================================================== -->
-
-<section id="dashboard" class="page">
-
-  <div class="panel">
-
-    <h2>
-      Tableau de bord MEDFAH
-    </h2>
-
-    <div class="cards">
-
-      <div class="card">
-
-        <div class="label">
-          Membres enregistrés
         </div>
 
-        <div
-          id="countMembers"
-          class="number">
-          —
+    </section>
+
+
+    <!-- STATISTIQUES -->
+    <section class="stats">
+
+        <div class="stat">
+            <div class="stat-icon">👥</div>
+            <div class="stat-number" id="totalMembers">—</div>
+            <div class="stat-label">Total des membres</div>
         </div>
 
-      </div>
-
-
-      <div class="card">
-
-        <div class="label">
-          Cartes actives
+        <div class="stat">
+            <div class="stat-icon">⛪</div>
+            <div class="stat-number" id="totalAssemblies">—</div>
+            <div class="stat-label">Assemblées</div>
         </div>
 
-        <div
-          id="countCards"
-          class="number">
-          —
+        <div class="stat">
+            <div class="stat-icon">💳</div>
+            <div class="stat-number">—</div>
+            <div class="stat-label">Cartes de persévérance</div>
         </div>
 
-      </div>
-
-
-      <div class="card">
-
-        <div class="label">
-          Église / Assemblée
+        <div class="stat">
+            <div class="stat-icon">✓</div>
+            <div class="stat-number">MEDFAH</div>
+            <div class="stat-label">Administration</div>
         </div>
 
-        <div
-          id="countChurches"
-          class="number">
-          1
+    </section>
+
+
+    <!-- LISTE DES MEMBRES -->
+    <section class="section" id="membersSection">
+
+        <div class="section-head">
+
+            <h3>👥 Liste des membres</h3>
+
+            <button class="refresh" onclick="loadMembers()">
+                ↻ Actualiser
+            </button>
+
         </div>
 
-      </div>
-
-    </div>
-
-
-    <p
-      class="note"
-      id="connectionStatus">
-
-      Connexion à Supabase en cours...
-
-    </p>
-
-  </div>
-
-</section>
-
-
-<!-- ===================================================== -->
-<!-- LISTE DES MEMBRES -->
-<!-- ===================================================== -->
-
-<section id="membres" class="page hidden">
-
-  <div class="panel">
-
-    <h2>
-      📋 Dossier des membres
-    </h2>
-
-
-    <div
-      id="memberStatus"
-      class="status">
-
-      Chargement...
-
-    </div>
-
-
-    <div class="actions">
-
-      <button onclick="loadMembers()">
-        🔄 Actualiser
-      </button>
-
-      <button onclick="showPage('ajout')">
-        ➕ Ajouter un membre
-      </button>
-
-    </div>
-
-
-    <div class="table-wrap">
-
-      <table>
-
-        <thead>
-
-          <tr>
-
-            <th>
-              Code
-            </th>
-
-            <th>
-              Nom
-            </th>
-
-            <th>
-              Prénom
-            </th>
-
-            <th>
-              Téléphone
-            </th>
-
-            <th>
-              Adresse
-            </th>
-
-            <th>
-              Fonction
-            </th>
-
-            <th>
-              Dossier
-            </th>
-
-          </tr>
-
-        </thead>
-
-
-        <tbody id="membersBody">
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- ===================================================== -->
-<!-- AJOUTER UN MEMBRE -->
-<!-- ===================================================== -->
-
-<section id="ajout" class="page hidden">
-
-  <div class="panel">
-
-    <h2>
-      ➕ Ajouter un membre
-    </h2>
-
-
-    <div
-      id="addStatus"
-      class="status">
-
-      Remplissez les informations.
-
-    </div>
-
-
-    <div class="form-grid">
-
-      <div>
-
-        <label>
-          Nom
-        </label>
-
-        <input id="nom">
-
-      </div>
-
-
-      <div>
-
-        <label>
-          Prénom
-        </label>
-
-        <input id="prenom">
-
-      </div>
-
-
-      <div>
-
-        <label>
-          Adresse
-        </label>
-
-        <input id="adresse">
-
-      </div>
-
-
-      <div>
-
-        <label>
-          Téléphone
-        </label>
-
-        <input id="telephone">
-
-      </div>
-
-
-      <div>
-
-        <label>
-          Fonction
-        </label>
-
-        <input id="fonction">
-
-      </div>
-
-
-      <div>
-
-        <label>
-          Code membre
-        </label>
-
-        <input id="code">
-
-      </div>
-
-
-      <div>
-
-        <label>
-          Numéro de carte
-        </label>
-
-        <input id="numero_carte">
-
-      </div>
-
-
-      <div>
-
-        <label>
-          Email
-        </label>
-
-        <input
-          id="email"
-          type="email">
-
-      </div>
-
-    </div>
-
-
-    <div class="actions">
-
-      <button onclick="addMember()">
-        💾 Enregistrer le membre
-      </button>
-
-      <button
-        class="secondary"
-        onclick="showPage('membres')">
-
-        Retour
-
-      </button>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- ===================================================== -->
-<!-- SCANNER -->
-<!-- ===================================================== -->
-
-<section id="scanner" class="page hidden">
-
-  <div class="panel">
-
-    <h2>
-      📷 Scanner QR Code
-    </h2>
-
-
-    <p class="note">
-
-      Le scanner utilise la caméra du téléphone lorsque le navigateur le permet.
-
-    </p>
-
-
-    <div class="actions">
-
-      <button onclick="startScanner()">
-        📷 Démarrer la caméra
-      </button>
-
-      <button
-        class="secondary"
-        onclick="stopScanner()">
-
-        Arrêter
-
-      </button>
-
-    </div>
-
-
-    <div
-      id="cameraBox"
-      class="camera-box">
-
-      <video
-        id="qrVideo"
-        playsinline>
-      </video>
-
-
-      <div
-        id="qrResult"
-        class="status">
-
-        Recherche d’un QR Code...
-
-      </div>
-
-    </div>
-
-
-    <div id="scanMember"></div>
-
-  </div>
-
-</section>
-
-
-<!-- ===================================================== -->
-<!-- VERIFIER -->
-<!-- ===================================================== -->
-
-<section id="verifier" class="page hidden">
-
-  <div class="panel">
-
-    <h2>
-      🔎 Vérifier Carte / Membre
-    </h2>
-
-
-    <p class="note">
-
-      Entrez le code du membre ou le numéro de carte pour rechercher dans Supabase.
-
-    </p>
-
-
-    <div class="form-grid">
-
-      <div>
-
-        <label>
-          Code membre
-        </label>
-
-        <input
-          id="verifyCode"
-          placeholder="ex. medfah0001">
-
-      </div>
-
-
-      <div>
-
-        <label>
-          Numéro de carte
-        </label>
-
-        <input
-          id="verifyCard"
-          placeholder="Numéro de carte">
-
-      </div>
-
-    </div>
-
-
-    <div class="actions">
-
-      <button onclick="verifyMember()">
-        🔎 Vérifier
-      </button>
-
-      <button
-        class="secondary"
-        onclick="clearVerify()">
-
-        Effacer
-
-      </button>
-
-    </div>
-
-
-    <div
-      id="verifyStatus"
-      class="status">
-
-      Aucune recherche effectuée.
-
-    </div>
-
-
-    <div id="verifyResult"></div>
-
-  </div>
-
-</section>
-
-
-<!-- ===================================================== -->
-<!-- CARTES -->
-<!-- ===================================================== -->
-
-<section id="cartes" class="page hidden">
-
-  <div class="panel">
-
-    <h2>
-      Carte de persévérance
-    </h2>
-
-
-    <p class="note">
-
-      Gestion des cartes enregistrées dans Supabase.
-
-    </p>
-
-
-    <div class="actions">
-
-      <button onclick="loadCardCount()">
-        🔄 Actualiser les cartes
-      </button>
-
-    </div>
-
-
-    <div
-      id="cardStatus"
-      class="status">
-
-      En attente...
-
-    </div>
-
-  </div>
-
-</section>
-
-
-<!-- ===================================================== -->
-<!-- ADMINISTRATION -->
-<!-- ===================================================== -->
-
-<section id="eglise" class="page hidden">
-
-  <div class="panel">
-
-    <h2>
-      ⚙️ Administration — Données de l’église
-    </h2>
-
-
-    <div class="form-grid">
-
-      <div>
-
-        <label>
-          Nom de l’église
-        </label>
-
-        <input
-          id="churchName"
-          placeholder="MEDFAH">
-
-      </div>
-
-
-      <div>
-
-        <label>
-          Pasteur
-        </label>
-
-        <input
-          id="churchPastor"
-          placeholder="Nom du pasteur">
-
-      </div>
-
-
-      <div>
-
-        <label>
-          Adresse
-        </label>
-
-        <input
-          id="churchAddress"
-          placeholder="Adresse">
-
-      </div>
-
-
-      <div>
-
-        <label>
-          Téléphone
-        </label>
-
-        <input
-          id="churchPhone"
-          placeholder="Téléphone">
-
-      </div>
-
-
-      <div>
-
-        <label>
-          Email
-        </label>
-
-        <input
-          id="churchEmail"
-          type="email"
-          placeholder="Email">
-
-      </div>
-
-
-      <div>
-
-        <label>
-          Responsable
-        </label>
-
-        <input
-          id="churchResponsible"
-          placeholder="Responsable">
-
-      </div>
-
-    </div>
-
-
-    <div class="actions">
-
-      <button onclick="saveChurch()">
-        💾 Enregistrer
-      </button>
-
-      <button
-        class="secondary"
-        onclick="loadChurch()">
-
-        📥 Charger les données
-
-      </button>
-
-    </div>
-
-
-    <div
-      id="churchStatus"
-      class="status">
-
-      Prêt.
-
-    </div>
-
-  </div>
-
-</section>
-
+        <div id="membersContent" class="loading">
+            Chargement des membres...
+        </div>
+
+    </section>
 
 </main>
 
 
-<footer>
+<!-- MODAL -->
+<div class="modal" id="memberModal">
 
-  © 2026 MEDFAH — Tous droits réservés.
+    <div class="modal-card">
 
-</footer>
+        <div class="modal-head">
 
+            <h2>Informations du membre</h2>
 
-<!-- ===================================================== -->
-<!-- CONFIGURATION -->
-<!-- ===================================================== -->
+            <button class="close-modal"
+                    onclick="closeMember()">
+                ×
+            </button>
 
-<script src="config.js"></script>
+        </div>
+
+        <div id="memberDetails" class="details"></div>
+
+    </div>
+
+</div>
 
 
 <script>
 
-const MEMBERS_TABLE = 'membre_infos';
+/* ==========================================
+   CONFIGURATION SUPABASE
+========================================== */
 
-const CARD_TABLES = [
-  'cartes_perseverance',
-  'carte_perseverance',
-  'cartes_persévérance'
-];
+let supabaseClient = null;
 
-const CHURCH_TABLE = 'donnees_eglise';
+function initSupabase(){
 
-let scannerStream = null;
-let scannerTimer = null;
+    if(
+        typeof SUPABASE_URL === "undefined" ||
+        typeof SUPABASE_ANON_KEY === "undefined"
+    ){
 
+        console.error("Configuration Supabase introuvable.");
 
-/* =====================================================
-   NAVIGATION
-===================================================== */
+        document.getElementById("membersContent").innerHTML =
+        '<div class="empty">' +
+        '⚠️ Configuration Supabase introuvable.<br>' +
+        'Vérifie le fichier config.js.' +
+        '</div>';
 
-function showPage(id){
-
-  document
-    .querySelectorAll('.page')
-    .forEach(p => p.classList.add('hidden'));
-
-  const page = document.getElementById(id);
-
-  if(page){
-    page.classList.remove('hidden');
-  }
-
-  window.scrollTo({
-    top:0,
-    behavior:'smooth'
-  });
-
-
-  if(id === 'dashboard'){
-    loadDashboard();
-  }
-
-
-  if(id === 'membres'){
-    loadMembers();
-  }
-
-
-  if(id === 'scanner'){
-    stopScanner();
-  }
-
-
-  if(id === 'eglise'){
-    loadChurch();
-  }
-
-}
-
-
-/* =====================================================
-   CONFIG SUPABASE
-===================================================== */
-
-function getConfig(){
-
-  const url = window.SUPABASE_URL;
-  const key = window.SUPABASE_ANON_KEY;
-
-
-  if(!url || !key){
-
-    throw new Error(
-      'SUPABASE_URL ou SUPABASE_ANON_KEY manque dans config.js'
-    );
-
-  }
-
-
-  return {
-    url:url.replace(/\/$/,''),
-    key:key
-  };
-
-}
-
-
-/* =====================================================
-   API SUPABASE
-===================================================== */
-
-async function api(path, options = {}){
-
-  const {
-    url,
-    key
-  } = getConfig();
-
-
-  const headers = Object.assign({
-
-    apikey:key,
-
-    Authorization:'Bearer ' + key,
-
-    'Content-Type':'application/json'
-
-  }, options.headers || {});
-
-
-  const res = await fetch(
-    url + '/rest/v1/' + path,
-    {
-      ...options,
-      headers
+        return false;
     }
-  );
 
-
-  if(!res.ok){
-
-    const txt = await res.text();
-
-    throw new Error(
-      txt || ('Erreur HTTP ' + res.status)
+    supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
     );
 
-  }
-
-
-  return res.status === 204
-    ? null
-    : res.json();
-
+    return true;
 }
 
 
-/* =====================================================
-   TABLEAU DE BORD
-===================================================== */
+/* ==========================================
+   MENU
+========================================== */
 
-async function loadDashboard(){
+function openMenu(){
+    document.getElementById("sidebar").classList.add("open");
+}
 
-  try{
+function closeMenu(){
+    document.getElementById("sidebar").classList.remove("open");
+}
 
-    const members =
-      await api(
-        MEMBERS_TABLE + '?select=id'
-      );
+function goHome(){
+    closeMenu();
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+}
 
+function showMembers(){
+    closeMenu();
 
-    document.getElementById(
-      'countMembers'
-    ).textContent = members.length;
-
-
-    await loadCardCount(true);
-
-
-    document.getElementById(
-      'connectionStatus'
-    ).textContent =
-      '✅ Connexion Supabase réussie.';
-
-
-    document.getElementById(
-      'connectionStatus'
-    ).className = 'note';
-
-
-  }catch(e){
-
-    document.getElementById(
-      'connectionStatus'
-    ).textContent =
-      '❌ Erreur de connexion : ' + e.message;
-
-  }
-
+    document.getElementById("membersSection")
+        .scrollIntoView({
+            behavior:"smooth"
+        });
 }
 
 
-/* =====================================================
-   NOMBRE CARTES
-===================================================== */
+/* ==========================================
+   CHARGER LES MEMBRES
+========================================== */
 
-async function loadCardCount(silent = false){
-
-  const status =
-    document.getElementById('cardStatus');
-
-
-  for(const table of CARD_TABLES){
-
-    try{
-
-      const rows =
-        await api(
-          table + '?select=id'
-        );
-
-
-      document.getElementById(
-        'countCards'
-      ).textContent = rows.length;
-
-
-      if(!silent && status){
-
-        status.textContent =
-          'Table trouvée : ' +
-          table +
-          ' — ' +
-          rows.length +
-          ' carte(s).';
-
-      }
-
-
-      return;
-
-    }catch(e){}
-
-  }
-
-
-  document.getElementById(
-    'countCards'
-  ).textContent = '0';
-
-
-  if(!silent && status){
-
-    status.textContent =
-      'Aucune table de cartes trouvée.';
-
-  }
-
-}
-
-
-/* =====================================================
-   LISTE DES MEMBRES
-===================================================== */
+let allMembers = [];
 
 async function loadMembers(){
 
-  const body =
-    document.getElementById('membersBody');
+    const container =
+        document.getElementById("membersContent");
 
-  const status =
-    document.getElementById('memberStatus');
+    container.innerHTML =
+        '<div class="loading">Chargement des membres...</div>';
 
-
-  body.innerHTML = '';
-
-  status.textContent =
-    'Chargement des membres...';
-
-
-  try{
-
-    const rows =
-      await api(
-        MEMBERS_TABLE +
-        '?select=id,code,nom,prenom,telephone,adresse,fonction' +
-        '&order=nom.asc'
-      );
-
-
-    if(!rows.length){
-
-      body.innerHTML =
-        '<tr>' +
-        '<td colspan="7" class="empty">' +
-        'Aucun membre enregistré.' +
-        '</td>' +
-        '</tr>';
-
+    if(!supabaseClient){
+        container.innerHTML =
+            '<div class="empty">Supabase n’est pas configuré.</div>';
+        return;
     }
 
+    try{
 
-    else{
+        const { data, error } =
+            await supabaseClient
+            .from("membre_infos")
+            .select("*")
+            .order("nom", {ascending:true});
 
-      rows.forEach(m => {
+        if(error){
+            console.error(error);
 
-        const tr =
-          document.createElement('tr');
+            container.innerHTML =
+            '<div class="empty">' +
+            '❌ Impossible de charger les membres.<br><br>' +
+            '<small>' +
+            error.message +
+            '</small>' +
+            '</div>';
 
+            return;
+        }
 
-        /*
-          IMPORTANT :
+        allMembers = data || [];
 
-          Chaque membre reçoit automatiquement
-          son propre bouton.
+        updateStats(allMembers);
 
-          Nous utilisons l'ID Supabase du membre.
-        */
+        displayMembers(allMembers);
 
-        tr.innerHTML =
+    }catch(error){
 
-          '<td>' +
-          esc(m.code) +
-          '</td>' +
+        console.error(error);
 
-          '<td>' +
-          esc(m.nom) +
-          '</td>' +
-
-          '<td>' +
-          esc(m.prenom) +
-          '</td>' +
-
-          '<td>' +
-          esc(m.telephone) +
-          '</td>' +
-
-          '<td>' +
-          esc(m.adresse) +
-          '</td>' +
-
-          '<td>' +
-          esc(m.fonction) +
-          '</td>' +
-
-          '<td>' +
-
-          '<button ' +
-
-          'class="dossier-btn" ' +
-
-          'onclick="openMember(\'' +
-          jsesc(m.id) +
-          '\')">' +
-
-          '📂 Dossier' +
-
-          '</button>' +
-
-          '</td>';
-
-
-        body.appendChild(tr);
-
-      });
-
+        container.innerHTML =
+        '<div class="empty">' +
+        '❌ Une erreur est survenue.' +
+        '</div>';
     }
-
-
-    status.textContent =
-      '✅ ' +
-      rows.length +
-      ' membre(s) chargé(s).';
-
-
-    status.className =
-      'status ok';
-
-
-  }catch(e){
-
-    status.textContent =
-      '❌ Erreur : ' +
-      e.message;
-
-
-    status.className =
-      'status error';
-
-  }
-
 }
 
 
-/* =====================================================
-   OUVRIR LE DOSSIER DU MEMBRE
-===================================================== */
+/* ==========================================
+   STATISTIQUES
+========================================== */
 
-function openMember(id){
+function updateStats(members){
 
-  if(!id){
+    document.getElementById("totalMembers")
+        .textContent = members.length;
 
-    alert(
-      'ID du membre manquant.'
-    );
+    const assemblies = new Set();
 
-    return;
+    members.forEach(member => {
 
-  }
+        const value =
+            member.assemblee ||
+            member.assemblée ||
+            "";
 
-
-  /*
-    Exemple :
-
-    membre.html?id=123
-
-    Le même système fonctionne
-    avec 10, 300 ou 1000 membres.
-  */
-
-  window.location.href =
-    'membre.html?id=' +
-    encodeURIComponent(id);
-
-}
-
-
-/* =====================================================
-   VERIFICATION PAR CODE
-===================================================== */
-
-function verifyByCode(code){
-
-  showPage('verifier');
-
-  document.getElementById(
-    'verifyCode'
-  ).value = code || '';
-
-
-  verifyMember();
-
-}
-
-
-/* =====================================================
-   VERIFIER MEMBRE
-===================================================== */
-
-async function verifyMember(){
-
-  const code =
-    v('verifyCode');
-
-  const card =
-    v('verifyCard');
-
-
-  const status =
-    document.getElementById(
-      'verifyStatus'
-    );
-
-
-  const result =
-    document.getElementById(
-      'verifyResult'
-    );
-
-
-  result.innerHTML = '';
-
-
-  if(!code && !card){
-
-    status.textContent =
-      'Entrez un code membre ou un numéro de carte.';
-
-    return;
-
-  }
-
-
-  status.textContent =
-    'Recherche...';
-
-
-  try{
-
-    let query =
-      'select=*';
-
-
-    if(code){
-
-      query +=
-        '&code=eq.' +
-        encodeURIComponent(code);
-
-    }
-
-    else{
-
-      query +=
-        '&numero_carte=eq.' +
-        encodeURIComponent(card);
-
-    }
-
-
-    const rows =
-      await api(
-        MEMBERS_TABLE +
-        '?' +
-        query +
-        '&limit=1'
-      );
-
-
-    if(!rows.length){
-
-      status.textContent =
-        '❌ Aucun membre trouvé.';
-
-      status.className =
-        'status error';
-
-      return;
-
-    }
-
-
-    const m = rows[0];
-
-
-    status.textContent =
-      '✅ Carte / membre vérifié.';
-
-    status.className =
-      'status ok';
-
-
-    result.innerHTML =
-
-      '<div class="member-card">' +
-
-      '<h3>' +
-
-      esc(
-        (m.prenom || '') +
-        ' ' +
-        (m.nom || '')
-      ) +
-
-      '</h3>' +
-
-      '<p><b>Code :</b> ' +
-      esc(m.code) +
-      '</p>' +
-
-      '<p><b>Carte :</b> ' +
-      esc(m.numero_carte) +
-      '</p>' +
-
-      '<p><b>Téléphone :</b> ' +
-      esc(m.telephone) +
-      '</p>' +
-
-      '<p><b>Adresse :</b> ' +
-      esc(m.adresse) +
-      '</p>' +
-
-      '<p><b>Fonction :</b> ' +
-      esc(m.fonction) +
-      '</p>' +
-
-      '<p><b>Statut :</b> ' +
-
-      '<span class="badge">' +
-
-      esc(
-        m.status || 'actif'
-      ) +
-
-      '</span>' +
-
-      '</p>' +
-
-      '<div class="actions">' +
-
-      '<button onclick="openMember(\'' +
-      jsesc(m.id) +
-      '\')">' +
-
-      '📂 Ouvrir le dossier complet' +
-
-      '</button>' +
-
-      '</div>' +
-
-      '</div>';
-
-  }
-
-
-  catch(e){
-
-    status.textContent =
-      '❌ Erreur : ' +
-      e.message;
-
-    status.className =
-      'status error';
-
-  }
-
-}
-
-
-/* =====================================================
-   EFFACER VERIFICATION
-===================================================== */
-
-function clearVerify(){
-
-  document.getElementById(
-    'verifyCode'
-  ).value = '';
-
-
-  document.getElementById(
-    'verifyCard'
-  ).value = '';
-
-
-  document.getElementById(
-    'verifyResult'
-  ).innerHTML = '';
-
-
-  document.getElementById(
-    'verifyStatus'
-  ).textContent =
-    'Aucune recherche effectuée.';
-
-}
-
-
-/* =====================================================
-   AJOUTER MEMBRE
-===================================================== */
-
-async function addMember(){
-
-  const status =
-    document.getElementById(
-      'addStatus'
-    );
-
-
-  const data = {
-
-    nom:v('nom'),
-
-    prenom:v('prenom'),
-
-    adresse:v('adresse'),
-
-    telephone:v('telephone'),
-
-    fonction:v('fonction'),
-
-    code:v('code'),
-
-    numero_carte:v('numero_carte'),
-
-    email:v('email')
-
-  };
-
-
-  if(!data.nom || !data.prenom){
-
-    status.textContent =
-      'Le nom et le prénom sont obligatoires.';
-
-    return;
-
-  }
-
-
-  status.textContent =
-    'Enregistrement...';
-
-
-  try{
-
-    await api(
-      MEMBERS_TABLE,
-      {
-        method:'POST',
-
-        headers:{
-          Prefer:'return=minimal'
-        },
-
-        body:JSON.stringify(data)
-      }
-    );
-
-
-    status.textContent =
-      '✅ Membre enregistré avec succès.';
-
-    status.className =
-      'status ok';
-
-
-    [
-      'nom',
-      'prenom',
-      'adresse',
-      'telephone',
-      'fonction',
-      'code',
-      'numero_carte',
-      'email'
-    ].forEach(id => {
-
-      document.getElementById(
-        id
-      ).value = '';
+        if(value.trim()){
+            assemblies.add(value.trim().toLowerCase());
+        }
 
     });
 
-
-    loadDashboard();
-
-
-    setTimeout(
-      () => showPage('membres'),
-      1000
-    );
-
-
-  }catch(e){
-
-    status.textContent =
-      '❌ Erreur : ' +
-      e.message;
-
-    status.className =
-      'status error';
-
-  }
-
+    document.getElementById("totalAssemblies")
+        .textContent = assemblies.size;
 }
 
 
-/* =====================================================
-   DONNEES EGLISE
-===================================================== */
+/* ==========================================
+   AFFICHER MEMBRES
+========================================== */
 
-async function loadChurch(){
+function displayMembers(members){
 
-  const status =
-    document.getElementById(
-      'churchStatus'
-    );
+    const container =
+        document.getElementById("membersContent");
+
+    if(!members.length){
+
+        container.innerHTML =
+        '<div class="empty">' +
+        'Aucun membre trouvé.' +
+        '</div>';
+
+        return;
+    }
+
+    let html = `
+    <div class="table-wrap">
+    <table>
+
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Assemblée</th>
+                <th>Téléphone</th>
+                <th>Profession</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+    `;
+
+    members.forEach((member,index) => {
+
+        const nom =
+            member.nom || "—";
+
+        const prenom =
+            member.prenom ||
+            member.prénom ||
+            "—";
+
+        const assemblee =
+            member.assemblee ||
+            member.assemblée ||
+            "—";
+
+        const telephone =
+            member.telephone ||
+            member.téléphone ||
+            "—";
+
+        const profession =
+            member.profession ||
+            "—";
+
+        html += `
+        <tr>
+
+            <td><strong>${escapeHTML(nom)}</strong></td>
+
+            <td>${escapeHTML(prenom)}</td>
+
+            <td>
+                <span class="badge">
+                    ${escapeHTML(assemblee)}
+                </span>
+            </td>
+
+            <td>${escapeHTML(telephone)}</td>
+
+            <td>${escapeHTML(profession)}</td>
+
+            <td>
+                <button
+                    class="view-btn"
+                    onclick="viewMember(${index})">
+                    Voir
+                </button>
+            </td>
+
+        </tr>
+        `;
+    });
+
+    html += `
+        </tbody>
+    </table>
+    </div>
+    `;
+
+    container.innerHTML = html;
+}
 
 
-  try{
+/* ==========================================
+   RECHERCHE
+========================================== */
 
-    const rows =
-      await api(
-        CHURCH_TABLE +
-        '?select=*&limit=1'
-      );
+function searchMembers(){
 
+    const query =
+        document.getElementById("searchInput")
+        .value
+        .toLowerCase()
+        .trim();
 
-    if(rows.length){
+    if(!query){
 
-      const d = rows[0];
+        displayMembers(allMembers);
+        return;
+    }
 
+    const results =
+        allMembers.filter(member => {
 
-      setv(
-        'churchName',
-        d.nom || d.nom_eglise || ''
-      );
+            return [
 
+                member.nom,
+                member.prenom,
+                member.prénom,
+                member.code,
+                member.telephone,
+                member.téléphone,
+                member.adresse,
+                member.address,
+                member.profession,
+                member.fonction,
+                member.assemblee,
+                member.assemblée
 
-      setv(
-        'churchPastor',
-        d.pasteur || ''
-      );
+            ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase()
+            .includes(query);
 
+        });
 
-      setv(
-        'churchAddress',
-        d.adresse || ''
-      );
-
-
-      setv(
-        'churchPhone',
-        d.telephone || ''
-      );
-
-
-      setv(
-        'churchEmail',
-        d.email || ''
-      );
-
-
-      setv(
-        'churchResponsible',
-        d.responsable || ''
-      );
+    displayMembers(results);
+}
 
 
-      status.textContent =
-        '✅ Données chargées.';
+/* ==========================================
+   VOIR UN MEMBRE
+========================================== */
 
-      status.className =
-        'status ok';
+function viewMember(index){
+
+    const member = allMembers[index];
+
+    if(!member) return;
+
+    const fields = [
+
+        ["Nom", member.nom],
+        ["Prénom", member.prenom || member.prénom],
+        ["Adresse", member.adresse || member.address],
+        ["Téléphone", member.telephone || member.téléphone],
+        ["Code", member.code],
+        ["Profession", member.profession],
+        ["Fonction", member.fonction],
+        ["Assemblée", member.assemblee || member.assemblée]
+
+    ];
+
+    let html = "";
+
+    fields.forEach(item => {
+
+        html += `
+        <div class="detail">
+
+            <strong>${escapeHTML(item[0])}</strong>
+
+            <span>
+                ${escapeHTML(item[1] || "Non renseigné")}
+            </span>
+
+        </div>
+        `;
+
+    });
+
+    document.getElementById("memberDetails")
+        .innerHTML = html;
+
+    document.getElementById("memberModal")
+        .classList.add("show");
+}
+
+
+function closeMember(){
+
+    document.getElementById("memberModal")
+        .classList.remove("show");
+}
+
+
+/* ==========================================
+   SÉCURITÉ AFFICHAGE
+========================================== */
+
+function escapeHTML(value){
+
+    return String(value)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+
+/* ==========================================
+   DÉMARRAGE
+========================================== */
+
+document.addEventListener("DOMContentLoaded", async function(){
+
+    if(initSupabase()){
+
+        await loadMembers();
 
     }
 
-    else{
-
-      status.textContent =
-        'Aucune donnée trouvée.';
-
-    }
-
-
-  }catch(e){
-
-    status.textContent =
-      '❌ Impossible de charger : ' +
-      e.message;
-
-    status.className =
-      'status error';
-
-  }
-
-}
-
-
-/* =====================================================
-   ENREGISTRER EGLISE
-===================================================== */
-
-async function saveChurch(){
-
-  const status =
-    document.getElementById(
-      'churchStatus'
-    );
-
-
-  const data = {
-
-    nom:v('churchName'),
-
-    pasteur:v('churchPastor'),
-
-    adresse:v('churchAddress'),
-
-    telephone:v('churchPhone'),
-
-    email:v('churchEmail'),
-
-    responsable:v('churchResponsible')
-
-  };
-
-
-  try{
-
-    const old =
-      await api(
-        CHURCH_TABLE +
-        '?select=id&limit=1'
-      );
-
-
-    if(old.length){
-
-      await api(
-
-        CHURCH_TABLE +
-        '?id=eq.' +
-        encodeURIComponent(
-          old[0].id
-        ),
-
-        {
-          method:'PATCH',
-
-          headers:{
-            Prefer:'return=minimal'
-          },
-
-          body:JSON.stringify(data)
-        }
-
-      );
-
-    }
-
-    else{
-
-      await api(
-
-        CHURCH_TABLE,
-
-        {
-          method:'POST',
-
-          headers:{
-            Prefer:'return=minimal'
-          },
-
-          body:JSON.stringify(data)
-        }
-
-      );
-
-    }
-
-
-    status.textContent =
-      '✅ Données de l’église enregistrées.';
-
-    status.className =
-      'status ok';
-
-
-  }catch(e){
-
-    status.textContent =
-      '❌ Erreur : ' +
-      e.message;
-
-    status.className =
-      'status error';
-
-  }
-
-}
-
-
-/* =====================================================
-   SCANNER QR CODE
-===================================================== */
-
-async function startScanner(){
-
-  const box =
-    document.getElementById(
-      'cameraBox'
-    );
-
-
-  const video =
-    document.getElementById(
-      'qrVideo'
-    );
-
-
-  const result =
-    document.getElementById(
-      'qrResult'
-    );
-
-
-  if(!('BarcodeDetector' in window)){
-
-    result.textContent =
-      '⚠️ Ce navigateur ne prend pas en charge le scanner QR automatique. Utilisez « Vérifier Carte » pour entrer le code manuellement.';
-
-    box.classList.add('active');
-
-    return;
-
-  }
-
-
-  try{
-
-    scannerStream =
-      await navigator.mediaDevices.getUserMedia({
-
-        video:{
-          facingMode:{
-            ideal:'environment'
-          }
-        }
-
-      });
-
-
-    video.srcObject =
-      scannerStream;
-
-
-    await video.play();
-
-
-    box.classList.add('active');
-
-
-    const detector =
-      new BarcodeDetector({
-        formats:['qr_code']
-      });
-
-
-    scannerTimer =
-      setInterval(
-        async () => {
-
-          if(video.readyState < 2){
-            return;
-          }
-
-
-          try{
-
-            const codes =
-              await detector.detect(video);
-
-
-            if(
-              codes.length &&
-              codes[0].rawValue
-            ){
-
-              const value =
-                codes[0].rawValue;
-
-
-              result.textContent =
-                '✅ QR Code détecté : ' +
-                value;
-
-
-              stopScanner();
-
-
-              document.getElementById(
-                'verifyCode'
-              ).value = value;
-
-
-              showPage(
-                'verifier'
-              );
-
-
-              verifyMember();
-
-            }
-
-          }catch(e){}
-
-        },
-        500
-      );
-
-
-  }catch(e){
-
-    box.classList.add('active');
-
-
-    result.textContent =
-      '❌ Impossible d’accéder à la caméra : ' +
-      e.message;
-
-  }
-
-}
-
-
-/* =====================================================
-   ARRETER SCANNER
-===================================================== */
-
-function stopScanner(){
-
-  if(scannerTimer){
-
-    clearInterval(
-      scannerTimer
-    );
-
-    scannerTimer = null;
-
-  }
-
-
-  if(scannerStream){
-
-    scannerStream
-      .getTracks()
-      .forEach(
-        t => t.stop()
-      );
-
-    scannerStream = null;
-
-  }
-
-
-  const video =
-    document.getElementById(
-      'qrVideo'
-    );
-
-
-  if(video){
-
-    video.srcObject = null;
-
-  }
-
-}
-
-
-/* =====================================================
-   PETITES FONCTIONS
-===================================================== */
-
-function v(id){
-
-  return (
-    document
-      .getElementById(id)
-      ?.value || ''
-  ).trim();
-
-}
-
-
-function setv(id,value){
-
-  if(
-    document.getElementById(id)
-  ){
-
-    document.getElementById(id)
-      .value = value || '';
-
-  }
-
-}
-
-
-function esc(x){
-
-  return String(
-    x ?? ''
-  ).replace(
-    /[&<>"']/g,
-    c => ({
-
-      '&':'&amp;',
-      '<':'&lt;',
-      '>':'&gt;',
-      '"':'&quot;',
-      "'":'&#039;'
-
-    }[c])
-  );
-
-}
-
-
-function jsesc(x){
-
-  return String(
-    x ?? ''
-  )
-  .replace(
-    /\\/g,
-    '\\\\'
-  )
-  .replace(
-    /'/g,
-    "\\'"
-  );
-
-}
-
-
-/* =====================================================
-   DEMARRAGE
-===================================================== */
-
-loadDashboard();
+});
 
 </script>
 
