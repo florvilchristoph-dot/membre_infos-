@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ht">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>MEDFAH - Akèy</title>
-  
-  <!-- SCRIPT POU HTML5 QRCODE -->
+
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
@@ -13,98 +13,234 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: "Segoe UI", Arial, sans-serif;
     }
 
     body {
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      /* Background ki gen imaj ou an ak yon kouch blanch transparan anlè l */
-      background: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)),
-                  url('image.png') no-repeat center center fixed;
-      background-size: cover;
-      color: #333;
-      padding: 20px;
+      background:
+        linear-gradient(
+          rgba(255,255,255,.91),
+          rgba(255,255,255,.91)
+        ),
+        url("image.png") center center / cover fixed no-repeat;
+      color: #1f2937;
     }
 
     header {
+      background: #0d47a1;
+      color: white;
+      padding: 22px 20px;
       text-align: center;
-      margin-top: 30px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.15);
     }
 
     header h1 {
-      color: #0d47a1;
-      font-size: 2.2rem;
-      margin-bottom: 10px;
+      font-size: 2rem;
+      margin-bottom: 6px;
     }
 
     header p {
-      font-size: 1.1rem;
-      color: #555;
+      font-size: .98rem;
+      opacity: .92;
+    }
+
+    .container {
+      width: 94%;
+      max-width: 1100px;
+      margin: 30px auto;
+    }
+
+    .welcome {
+      background: white;
+      border-radius: 18px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 5px 20px rgba(0,0,0,.08);
+      margin-bottom: 25px;
+    }
+
+    .welcome h2 {
+      color: #0d47a1;
+      margin-bottom: 8px;
+    }
+
+    .welcome p {
+      color: #64748b;
+    }
+
+    .search-box {
+      display: flex;
+      max-width: 700px;
+      margin: 22px auto 0;
+      gap: 10px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .search-box input:focus {
+      border-color: #0d47a1;
+    }
+
+    .search-box button {
+      border: none;
+      border-radius: 10px;
+      padding: 0 22px;
+      background: #0d47a1;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .search-box button:hover {
+      background: #083578;
+    }
+
+    .menu-title {
+      margin: 25px 0 15px;
+      color: #334155;
     }
 
     .main-actions {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-      width: 100%;
-      max-width: 800px;
-      margin: 40px 0;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 18px;
     }
 
     .btn-card {
-      background: #ffffff;
-      border: 2px solid #0d47a1;
-      border-radius: 12px;
-      padding: 20px;
+      background: white;
+      border-radius: 15px;
+      padding: 25px 18px;
       text-align: center;
       text-decoration: none;
       color: #0d47a1;
-      font-weight: bold;
-      font-size: 1.1rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      transition: transform 0.2s, background-color 0.2s;
+      font-weight: 600;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 5px 15px rgba(0,0,0,.07);
+      transition: .2s;
     }
 
     .btn-card:hover {
-      background-color: #0d47a1;
-      color: #ffffff;
       transform: translateY(-3px);
+      box-shadow: 0 8px 22px rgba(0,0,0,.12);
+      border-color: #0d47a1;
+    }
+
+    .icon {
+      display: block;
+      font-size: 30px;
+      margin-bottom: 10px;
     }
 
     footer {
       text-align: center;
-      font-size: 0.9rem;
-      color: #777;
-      margin-bottom: 10px;
+      color: #64748b;
+      padding: 25px 10px;
+      font-size: 14px;
+    }
+
+    @media(max-width:600px) {
+      .search-box {
+        flex-direction: column;
+      }
+
+      .search-box button {
+        padding: 14px;
+      }
     }
   </style>
 </head>
+
 <body>
 
-  <header>
-    <h1>Bienvenue sur MEDFAH</h1>
-    <p>Platfòm jesyon ak verifikasyon manm yo</p>
-  </header>
+<header>
+  <h1>MEDFAH</h1>
+  <p>Mission Église de Dieu de la Foi Apostolique d'Haïti</p>
+</header>
+
+<div class="container">
+
+  <section class="welcome">
+    <h2>Bienvenue sur MEDFAH</h2>
+
+    <p>
+      Plateforme de gestion, de vérification des membres
+      et des cartes de persévérance.
+    </p>
+
+    <div class="search-box">
+      <input
+        type="search"
+        id="homeSearch"
+        placeholder="Rechercher un membre..."
+      >
+
+      <button onclick="rechercherMembre()">
+        🔍 Rechercher
+      </button>
+    </div>
+  </section>
+
+  <h3 class="menu-title">Services MEDFAH</h3>
 
   <main class="main-actions">
-    <a href="scan.html" class="btn-card">📷 Scanner QR Code</a>
-    <a href="verify.html" class="btn-card">🔍 Vérifier Carte</a>
-    <a href="membres.html" class="btn-card">📋 Liste des Membres</a>
-    <a href="admin.html" class="btn-card">⚙ Administration</a>
+
+    <a href="membres.html" class="btn-card">
+      <span class="icon">👥</span>
+      Liste des Membres
+    </a>
+
+    <a href="scan.html" class="btn-card">
+      <span class="icon">📷</span>
+      Scanner QR Code
+    </a>
+
+    <a href="verify.html" class="btn-card">
+      <span class="icon">🔍</span>
+      Vérifier une Carte
+    </a>
+
+    <a href="admin.html" class="btn-card">
+      <span class="icon">⚙️</span>
+      Administration
+    </a>
+
   </main>
 
-  <footer>
-    &copy; 2026 MEDFAH - Tout dwa rezeve.
-  </footer>
+</div>
 
-  <!-- SCRIPT SUPABASE AK CONFIG -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
-  <script src="app.js"></script>
+<footer>
+  © 2026 MEDFAH — Tous droits réservés.
+</footer>
+
+<script>
+  function rechercherMembre() {
+    const recherche =
+      document.getElementById("homeSearch").value.trim();
+
+    if (recherche) {
+      window.location.href =
+        "membres.html?q=" + encodeURIComponent(recherche);
+    } else {
+      window.location.href = "membres.html";
+    }
+  }
+
+  document
+    .getElementById("homeSearch")
+    .addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        rechercherMembre();
+      }
+    });
+</script>
 
 </body>
 </html>
