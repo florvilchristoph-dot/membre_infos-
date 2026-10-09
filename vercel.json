@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/scanner",
-      "destination": "/scan.html"
+      "destination": "/scanner.html"
     },
     {
       "source": "/membre",
@@ -12,6 +12,10 @@
     {
       "source": "/medfah",
       "destination": "/medfah.html"
+    },
+    {
+      "source": "/verify",
+      "destination": "/verify.html"
     }
   ]
 }
