@@ -684,6 +684,97 @@ function initSupabase(){
 
 
 /* ==========================================
+   NAVIGATION DES 6 SECTIONS MEDFAH
+========================================== */
+
+const sectionsMEDFAH = {
+    dossier: {
+        titre: "01. Dossier de l’Église",
+        details: [
+            "Identité et historique de l’Église",
+            "Pastorat et comité central",
+            "Informations générales",
+            "Assemblées locales et responsables"
+        ]
+    },
+    programmation: {
+        titre: "02. Programmation de l’Église",
+        details: [
+            "Calendrier annuel",
+            "Réunions et cultes",
+            "Conférences et campagnes spirituelles",
+            "Planification des événements"
+        ]
+    },
+    activites: {
+        titre: "03. Activités de l’Église",
+        details: [
+            "Planification des activités",
+            "Responsables et participants",
+            "Budgets et rapports d’activités"
+        ]
+    },
+    entites: {
+        titre: "04. Entités de l’Église",
+        details: [
+            "Comité central",
+            "Pastorat et assemblées locales",
+            "Jeunesse et chorales",
+            "Groupe des dames et autres ministères"
+        ]
+    },
+    archives: {
+        titre: "05. Archives de l’Église",
+        details: [
+            "Procès-verbaux",
+            "Rapports anciens",
+            "Décisions et archives classées par année"
+        ]
+    },
+    documents: {
+        titre: "06. Documents de l’Église",
+        details: [
+            "Lettres officielles",
+            "Invitations et attestations",
+            "Formulaires et règlements",
+            "Documents PDF"
+        ]
+    }
+};
+
+function ouvrirSectionMEDFAH(cle) {
+    const section = sectionsMEDFAH[cle];
+    if (!section) return;
+
+    document.getElementById("titreSectionMEDFAH").textContent =
+        section.titre;
+
+    const liste = section.details.map(item =>
+        "<li>" + escapeHTML(item) + "</li>"
+    ).join("");
+
+    document.getElementById("detailsSectionMEDFAH").innerHTML =
+        "<ul style='line-height:2; padding-left:22px;'>" +
+        liste +
+        "</ul><p>Les fonctions de gestion de cette section seront " +
+        "connectées progressivement.</p>";
+
+    document.getElementById("contenuSectionMEDFAH").style.display =
+        "block";
+
+    document.getElementById("contenuSectionMEDFAH")
+        .scrollIntoView({ behavior: "smooth" });
+}
+
+function retourAccueilMEDFAH() {
+    document.getElementById("contenuSectionMEDFAH").style.display =
+        "none";
+
+    document.getElementById("accueilAdmin")
+        .scrollIntoView({ behavior: "smooth" });
+}
+
+/* ==========================================
    MENU
 ========================================== */
 
