@@ -761,13 +761,213 @@ async function ouvrirSectionMEDFAH(cle) {
         return;
     }
 
-    zone.innerHTML =
-        "<ul style='line-height:2;padding-left:22px;'>" +
-        (section.details || []).map(item =>
-            "<li>" + escapeHTML(item) + "</li>"
-        ).join("") +
-        "</ul><p>Ce module sera développé dans une prochaine étape.</p>";
+/* ============================================================
+   PROGRAMMATION DE L'ÉGLISE - MEDFAH
+============================================================ */
+
+async function chargerProgrammationMEDFAH() {
+    const form = document.getElementById("formProgrammationMEDFAH");
+
+    if (!supabaseClient) {
+        document.getElementById("listeProgrammationMEDFAH").textContent =
+            "Connexion Supabase indisponible.";
+        return;
+    }
+
+    // Branche le formulaire une seule fois
+    if (form && form.dataset.connecte !== "oui") {
+        form.dataset.connecte = "oui";
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const bouton = form.querySelector('button[type="submit"]');
+            const ancienTexte = bouton.textContent;
+
+            bouton.disabled = true;
+            bouton.textContent = "Enregistrement...";
+
+            const debut = document.getElementById("progDateDebut").value;
+            const fin = document.getElementById("progDateFin").value;
+
+            if (fin && new Date(fin) < new Date(debut)) {
+                alert("La date de fin doit être égale ou postérieure à la date de début.");
+                bouton.disabled = false;
+                bouton.textContent = ancienTexte;
+                return;
+            }
+
+            const donnees = {
+                titre: document.getElementById("progTitre").value.trim(),
+                categorie: document.getElementById("progCategorie").value,
+                date_debut: new Date(debut).toISOString(),
+                date_fin: fin ? new Date(fin).toISOString() : null,
+                lieu: document.getElementById("progLieu").value.trim(),
+                responsable: document.getElementById("progResponsable").value.trim(),
+                description: document.getElementById("progDescription").value.trim(),
+                statut: document.getElementById("progStatut").value
+            };
+
+            try {
+                const { error } = await supabaseClient
+                    .from("programmation_eglise")
+                    .insert([donnees]);
+
+                if (error) throw error;
+
+                alert("Programme enregistré avec succès !");
+                form.reset();
+
+                await afficherListeProgrammationMEDFAH();
+
+            } catch (erreur) {
+                console.error("Erreur programmation MEDFAH :", erreur);
+                alert(
+                    "Impossible d'enregistrer le programme. " +
+                    "Vérifiez les autorisations Supabase et les données saisies."
+                );
+            } finally {
+                bouton.disabled = false;
+                bouton.textContent = ancienTexte;
+            }
+        });
+    }
+
+    await afficherListeProgrammationMEDFAH();
 }
+
+
+async function afficherListeProgrammationMEDFAH() {
+    const liste = document.getElementById("listeProgrammationMEDFAH");
+
+    if (!liste) return;
+
+    if (!supabaseClient) {
+        liste.textContent = "Connexion Supabase indisponible.";
+        return;
+    }
+
+    liste.textContent = "Chargement des programmes...";
+
+    try {
+        const { data, error } = await supabaseClient
+            .from("programmation_eglise")
+            .select("*")
+            .order("date_debut", { ascending: true });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            liste.textContent = "Aucun programme enregistré pour le moment.";
+            return;
+        }
+
+        liste.innerHTML = data.map(function(prog) {
+            const debut = new Date(prog.date_debut).toLocaleString("fr-FR");
+            const fin = prog.date_fin
+                ? new Date(prog.date_fin).toLocaleString("fr-FR")
+                : "";
+
+            return `
+                <article style="border:1px solid #ccc;border-radius:8px;padding:12px;margin:12px 0">
+                    <h4>${escapeHTML(prog.titre || "")}</h4>
+                    <p><strong>Catégorie :</strong> ${escapeHTML(prog.categorie || "")}</p>
+                    <p><strong>Début :</strong> ${escapeHTML(debut)}</p>
+                    ${fin ? `<p><strong>Fin :</strong> ${escapeHTML(fin)}</p>` : ""}
+                    <p><strong>Lieu :</strong> ${escapeHTML(prog.lieu || "Non précisé")}</p>
+                    <p><strong>Responsable :</strong> ${escapeHTML(prog.responsable || "Non précisé")}</p>
+                    <p><strong>Statut :</strong> ${escapeHTML(prog.statut || "")}</p>
+                    <p><strong>Description :</strong> ${escapeHTML(prog.description || "Aucune")}</p>
+                </article>
+            `;
+        }).join("");
+
+    } catch (erreur) {
+        console.error("Erreur chargement programmation :", erreur);
+        liste.textContent =
+            "La liste ne peut pas être chargée. Vérifiez les autorisations Supabase.";
+    }
+}
+
+
+if (cle === "programmation") {
+    zone.innerHTML = `
+        <div style="padding:15px">
+            <h3>Programmation de l’Église</h3>
+            <p>Enregistrez et consultez les programmes de la MEDFAH.</p>
+
+            <form id="formProgrammationMEDFAH">
+                <label for="progTitre">Titre du programme *</label>
+                <input id="progTitre" type="text" required
+                    placeholder="Ex. : Culte de dimanche"
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+
+                <label for="progCategorie">Catégorie</label>
+                <select id="progCategorie"
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+                    <option value="Culte">Culte</option>
+                    <option value="Réunion">Réunion</option>
+                    <option value="Conférence">Conférence</option>
+                    <option value="Campagne spirituelle">Campagne spirituelle</option>
+                    <option value="Autre">Autre</option>
+                </select>
+
+                <label for="progDateDebut">Date et heure *</label>
+                <input id="progDateDebut" type="datetime-local" required
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+
+                <label for="progDateFin">Date et heure de fin</label>
+                <input id="progDateFin" type="datetime-local"
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+
+                <label for="progLieu">Lieu</label>
+                <input id="progLieu" type="text"
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+
+                <label for="progResponsable">Responsable</label>
+                <input id="progResponsable" type="text"
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+
+                <label for="progDescription">Description</label>
+                <textarea id="progDescription"
+                    style="width:100%;padding:10px;margin:6px 0 12px"></textarea>
+
+                <label for="progStatut">Statut</label>
+                <select id="progStatut"
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+                    <option value="Planifié">Planifié</option>
+                    <option value="Réalisé">Réalisé</option>
+                    <option value="Reporté">Reporté</option>
+                    <option value="Annulé">Annulé</option>
+                </select>
+
+                <button type="submit" style="padding:12px 18px">
+                    Enregistrer le programme
+                </button>
+            </form>
+
+            <hr style="margin:20px 0">
+            <h3>Liste des programmes</h3>
+            <div id="listeProgrammationMEDFAH">
+                Chargement des programmes...
+            </div>
+        </div>
+    `;
+
+    if (typeof chargerProgrammationMEDFAH === "function") {
+        await chargerProgrammationMEDFAH();
+    }
+
+    return;
+}
+
+zone.innerHTML =
+    "<ul style='line-height:2;padding-left:22px'>" +
+    (section.details || []).map(item =>
+        "<li>" + escapeHTML(item) + "</li>"
+    ).join("") +
+    "</ul><p>Ce module sera développé dans une prochaine étape.</p>";
+
 
 /* ==========================================
    CHARGER LE DOSSIER DE L'ÉGLISE
