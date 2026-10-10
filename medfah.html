@@ -825,6 +825,122 @@ async function ouvrirSectionMEDFAH(cle) {
         return;
     }
 
+    if (cle === "activites") {
+        zone.innerHTML = `
+            <div style="padding:15px">
+                <h3>Activités de l’Église — MEDFAH</h3>
+                <p>Enregistrer les activités organisées par les entités de l’Église.</p>
+
+                <form id="formActivitesMEDFAH">
+                    <label>Titre de l’activité *</label>
+                    <input id="actTitre" required
+                        style="width:100%;padding:10px;margin:6px 0 12px">
+
+                    <label>Entité organisatrice *</label>
+                    <select id="actEntite" required
+                        style="width:100%;padding:10px;margin:6px 0 12px">
+                        <option value="">-- Choisir une entité --</option>
+                        <option value="Département des Dames — MARANATHA">Département des Dames — MARANATHA</option>
+                        <option value="Département des Hommes — COMBATTANT">Département des Hommes — COMBATTANT</option>
+                        <option value="Département des Jeunes — AJEDFAH">Département des Jeunes — AJEDFAH</option>
+                        <option value="Département d’Évaluation — Cellule de prière">Département d’Évaluation — Cellule de prière</option>
+                        <option value="Département Accueil et Entretien">Département Accueil et Entretien</option>
+                        <option value="Département de la Musique">Département de la Musique</option>
+                        <option value="Le Grand Chœur de la MEDFAH">Le Grand Chœur de la MEDFAH</option>
+                    </select>
+
+                    <label>Catégorie</label>
+                    <select id="actCategorie"
+                        style="width:100%;padding:10px;margin:6px 0 12px">
+                        <option value="Réunion">Réunion</option>
+                        <option value="Conférence">Conférence</option>
+                        <option value="Culte">Culte</option>
+                        <option value="Prière">Prière</option>
+                        <option value="Évangélisation">Évangélisation</option>
+                        <option value="Répétition">Répétition</option>
+                        <option value="Activité communautaire">Activité communautaire</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+
+                    <label>Date et heure *</label>
+                    <input id="actDate" type="datetime-local" required
+                        style="width:100%;padding:10px;margin:6px 0 12px">
+
+                    <label>Lieu</label>
+                    <input id="actLieu"
+                        style="width:100%;padding:10px;margin:6px 0 12px">
+
+                    <label>Responsable</label>
+                    <input id="actResponsable"
+                        style="width:100%;padding:10px;margin:6px 0 12px">
+
+                    <label>Nombre de participants</label>
+                    <input id="actParticipants" type="number" min="0" value="0"
+                        style="width:100%;padding:10px;margin:6px 0 12px">
+
+                    <label>Budget prévu</label>
+                    <input id="actBudget" type="number" min="0" step="0.01" value="0"
+                        style="width:100%;padding:10px;margin:6px 0 12px">
+
+                    <label>Dépenses réelles</label>
+                    <input id="actDepenses" type="number" min="0" step="0.01" value="0"
+                        style="width:100%;padding:10px;margin:6px 0 12px">
+
+                    <label>Description</label>
+                    <textarea id="actDescription"
+                        style="width:100%;padding:10px;margin:6px 0 12px"></textarea>
+
+                    <label>Rapport d’activité</label>
+                    <textarea id="actRapport"
+                        style="width:100%;padding:10px;margin:6px 0 12px"></textarea>
+
+                    <label>Statut</label>
+                    <select id="actStatut"
+                        style="width:100%;padding:10px;margin:6px 0 12px">
+                        <option value="Planifiée">Planifiée</option>
+                        <option value="En cours">En cours</option>
+                        <option value="Réalisée">Réalisée</option>
+                        <option value="Reportée">Reportée</option>
+                        <option value="Annulée">Annulée</option>
+                    </select>
+
+                    <button type="submit" class="view-btn">
+                        Enregistrer l’activité
+                    </button>
+                    <p id="messageActivitesMEDFAH" role="status"></p>
+                </form>
+
+                <hr>
+                <h3>Historique des activités</h3>
+
+                <label>Filtrer par entité</label>
+                <select id="filtreEntiteActivites"
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+                    <option value="">Toutes les entités</option>
+                    <option value="Département des Dames — MARANATHA">MARANATHA</option>
+                    <option value="Département des Hommes — COMBATTANT">COMBATTANT</option>
+                    <option value="Département des Jeunes — AJEDFAH">AJEDFAH</option>
+                    <option value="Département d’Évaluation — Cellule de prière">Cellule de prière</option>
+                    <option value="Département Accueil et Entretien">Accueil et Entretien</option>
+                    <option value="Département de la Musique">Département de la Musique</option>
+                    <option value="Le Grand Chœur de la MEDFAH">Grand Chœur de la MEDFAH</option>
+                </select>
+
+                <button type="button" class="refresh"
+                    onclick="afficherActivitesMEDFAH()">
+                    Filtrer les activités
+                </button>
+
+                <div id="listeActivitesMEDFAH" style="margin-top:15px">
+                    Chargement...
+                </div>
+            </div>
+        `;
+
+        await chargerActivitesMEDFAH();
+        return;
+    }
+
     zone.innerHTML =
         "<ul style='line-height:2;padding-left:22px'>" +
         (section.details || []).map(item =>
@@ -851,7 +967,6 @@ async function chargerProgrammationMEDFAH() {
 
     if (form.dataset.connecte !== "oui") {
         form.dataset.connecte = "oui";
-
         form.addEventListener("submit", async function(event) {
             event.preventDefault();
 
@@ -946,6 +1061,147 @@ async function afficherListeProgrammationMEDFAH() {
     }
 }
 
+
+/* ==========================================
+   ACTIVITÉS DE L'ÉGLISE — MEDFAH
+========================================== */
+
+async function chargerActivitesMEDFAH() {
+    const form = document.getElementById("formActivitesMEDFAH");
+    if (!form) return;
+
+    if (!supabaseClient) {
+        document.getElementById("listeActivitesMEDFAH").textContent =
+            "Connexion Supabase indisponible.";
+        return;
+    }
+
+    if (form.dataset.connecte !== "oui") {
+        form.dataset.connecte = "oui";
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const bouton = form.querySelector('button[type="submit"]');
+            const message = document.getElementById("messageActivitesMEDFAH");
+
+            bouton.disabled = true;
+            message.textContent = "Enregistrement en cours...";
+
+            try {
+                const date = document.getElementById("actDate").value;
+
+                if (!date || Number.isNaN(new Date(date).getTime())) {
+                    throw new Error("Veuillez saisir une date valide.");
+                }
+
+                const donnees = {
+                    titre: document.getElementById("actTitre").value.trim(),
+                    entite: document.getElementById("actEntite").value,
+                    categorie: document.getElementById("actCategorie").value,
+                    date_activite: new Date(date).toISOString(),
+                    lieu: document.getElementById("actLieu").value.trim(),
+                    responsable: document.getElementById("actResponsable").value.trim(),
+                    nombre_participants: Number(document.getElementById("actParticipants").value || 0),
+                    budget: Number(document.getElementById("actBudget").value || 0),
+                    depenses: Number(document.getElementById("actDepenses").value || 0),
+                    description: document.getElementById("actDescription").value.trim(),
+                    rapport: document.getElementById("actRapport").value.trim(),
+                    statut: document.getElementById("actStatut").value
+                };
+
+                if (
+                    donnees.nombre_participants < 0 ||
+                    donnees.budget < 0 ||
+                    donnees.depenses < 0
+                ) {
+                    throw new Error("Les nombres et les montants ne peuvent pas être négatifs.");
+                }
+
+                const { error } = await supabaseClient
+                    .from("activites_eglise")
+                    .insert([donnees]);
+
+                if (error) throw error;
+
+                message.textContent = "Activité enregistrée avec succès.";
+                form.reset();
+
+                document.getElementById("actParticipants").value = "0";
+                document.getElementById("actBudget").value = "0";
+                document.getElementById("actDepenses").value = "0";
+
+                await afficherActivitesMEDFAH();
+
+            } catch (erreur) {
+                console.error("Erreur activité MEDFAH :", erreur);
+                message.textContent =
+                    "Enregistrement impossible : " + erreur.message;
+            } finally {
+                bouton.disabled = false;
+            }
+        });
+    }
+
+    await afficherActivitesMEDFAH();
+}
+
+
+async function afficherActivitesMEDFAH() {
+    const liste = document.getElementById("listeActivitesMEDFAH");
+    if (!liste || !supabaseClient) return;
+
+    liste.textContent = "Chargement des activités...";
+
+    try {
+        let requete = supabaseClient
+            .from("activites_eglise")
+            .select("*")
+            .order("date_activite", { ascending: false });
+
+        const filtre = document.getElementById("filtreEntiteActivites");
+
+        if (filtre && filtre.value) {
+            requete = requete.eq("entite", filtre.value);
+        }
+
+        const { data, error } = await requete;
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            liste.textContent = "Aucune activité enregistrée pour le moment.";
+            return;
+        }
+
+        liste.innerHTML = data.map(activite => {
+            const date = new Date(activite.date_activite).toLocaleString("fr-FR");
+
+            return `
+                <article style="border:1px solid #d8dde6;border-radius:10px;padding:14px;margin:12px 0">
+                    <h4>${escapeHTML(activite.titre || "")}</h4>
+                    <p><strong>Entité :</strong> ${escapeHTML(activite.entite || "")}</p>
+                    <p><strong>Catégorie :</strong> ${escapeHTML(activite.categorie || "")}</p>
+                    <p><strong>Date :</strong> ${escapeHTML(date)}</p>
+                    <p><strong>Lieu :</strong> ${escapeHTML(activite.lieu || "Non précisé")}</p>
+                    <p><strong>Responsable :</strong> ${escapeHTML(activite.responsable || "Non précisé")}</p>
+                    <p><strong>Participants :</strong> ${Number(activite.nombre_participants || 0)}</p>
+                    <p><strong>Budget :</strong> ${Number(activite.budget || 0).toLocaleString("fr-FR")}</p>
+                    <p><strong>Dépenses :</strong> ${Number(activite.depenses || 0).toLocaleString("fr-FR")}</p>
+                    <p><strong>Statut :</strong> ${escapeHTML(activite.statut || "")}</p>
+                    <p><strong>Description :</strong> ${escapeHTML(activite.description || "Aucune")}</p>
+                    <p><strong>Rapport :</strong> ${escapeHTML(activite.rapport || "Aucun")}</p>
+                </article>
+            `;
+        }).join("");
+
+    } catch (erreur) {
+        console.error("Erreur chargement activités :", erreur);
+        liste.textContent =
+            "Chargement impossible : " + erreur.message +
+            ". Vérifiez les autorisations Supabase.";
+    }
+}
 
 
 /* ==========================================
