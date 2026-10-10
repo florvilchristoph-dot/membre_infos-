@@ -457,6 +457,94 @@ td{
 
 <!-- CONTENU -->
 <main class="main">
+    
+<!-- ACCUEIL ADMINISTRATION MEDFAH -->
+<section class="hero" id="accueilAdmin">
+    <h2>Administration générale MEDFAH</h2>
+    <p>
+        Espace central de gestion de l’Église,
+        de ses assemblées, de ses membres et de ses documents.
+    </p>
+</section>
+
+<section class="stats" id="sixSections">
+
+    <div class="stat">
+        <div class="stat-icon">⛪</div>
+        <h3>01. Dossier de l’Église</h3>
+        <p>Idantite, istwa, pastè ak komite santral.</p>
+        <button class="view-btn"
+            onclick="ouvrirSectionMEDFAH('dossier')">
+            Ouvrir la section
+        </button>
+    </div>
+
+    <div class="stat">
+        <div class="stat-icon">📅</div>
+        <h3>02. Programmation</h3>
+        <p>Kalandriye, reyinyon ak sèvis yo.</p>
+        <button class="view-btn"
+            onclick="ouvrirSectionMEDFAH('programmation')">
+            Ouvrir la section
+        </button>
+    </div>
+
+    <div class="stat">
+        <div class="stat-icon">🎯</div>
+        <h3>03. Activités de l’Église</h3>
+        <p>Evènman, aktivite ak rapò yo.</p>
+        <button class="view-btn"
+            onclick="ouvrirSectionMEDFAH('activites')">
+            Ouvrir la section
+        </button>
+    </div>
+
+    <div class="stat">
+        <div class="stat-icon">👥</div>
+        <h3>04. Entités de l’Église</h3>
+        <p>Asanble, ministè, koral ak gwoup yo.</p>
+        <button class="view-btn"
+            onclick="ouvrirSectionMEDFAH('entites')">
+            Ouvrir la section
+        </button>
+    </div>
+
+    <div class="stat">
+        <div class="stat-icon">🗂️</div>
+        <h3>05. Archives de l’Église</h3>
+        <p>Achiv, pwosè-vèbal ak rapò yo.</p>
+        <button class="view-btn"
+            onclick="ouvrirSectionMEDFAH('archives')">
+            Ouvrir la section
+        </button>
+    </div>
+
+    <div class="stat">
+        <div class="stat-icon">📄</div>
+        <h3>06. Documents de l’Église</h3>
+        <p>Lèt, envitasyon, atestasyon ak fòmilè.</p>
+        <button class="view-btn"
+            onclick="ouvrirSectionMEDFAH('documents')">
+            Ouvrir la section
+        </button>
+    </div>
+
+</section>
+
+<section class="section" id="contenuSectionMEDFAH"
+    style="display:none; margin-bottom:22px;">
+    <div class="section-head">
+        <h3 id="titreSectionMEDFAH">Section MEDFAH</h3>
+        <button class="refresh"
+            onclick="retourAccueilMEDFAH()">
+            ← Retour à l’accueil
+        </button>
+    </div>
+    <div id="detailsSectionMEDFAH">
+        Sélectionnez une section.
+    </div>
+</section>
+
 
     <section class="hero">
 
