@@ -740,31 +740,291 @@ const sectionsMEDFAH = {
             "Documents PDF"
         ]
     }
+
+        
+
+/* ==========================================
+   MEDFAH — NAVIGATION DES 6 SECTIONS
+========================================== */
+
+const sectionsMEDFAH = {
+    dossier: { titre: "01. Dossier de l’Église" },
+    programmation: {
+        titre: "02. Programmation de l’Église",
+        details: [
+            "Calendrier annuel",
+            "Réunions et cultes",
+            "Conférences et campagnes spirituelles",
+            "Planification des événements"
+        ]
+    },
+    activites: {
+        titre: "03. Activités de l’Église",
+        details: [
+            "Planification des activités",
+            "Responsables et participants",
+            "Budgets et rapports d’activités"
+        ]
+    },
+    entites: {
+        titre: "04. Entités de l’Église",
+        details: [
+            "Comité central",
+            "Pastorat et assemblées locales",
+            "Jeunesse et chorales",
+            "Groupe des dames et autres ministères"
+        ]
+    },
+    archives: {
+        titre: "05. Archives de l’Église",
+        details: [
+            "Procès-verbaux",
+            "Rapports anciens",
+            "Décisions classées par année"
+        ]
+    },
+    documents: {
+        titre: "06. Documents de l’Église",
+        details: [
+            "Lettres officielles",
+            "Invitations et attestations",
+            "Formulaires et règlements",
+            "Documents PDF"
+        ]
+    }
 };
 
-function ouvrirSectionMEDFAH(cle) {
+/* ==========================================
+   OUVRIR UNE SECTION
+========================================== */
+
+async function ouvrirSectionMEDFAH(cle) {
     const section = sectionsMEDFAH[cle];
     if (!section) return;
 
     document.getElementById("titreSectionMEDFAH").textContent =
         section.titre;
 
-    const liste = section.details.map(item =>
-        "<li>" + escapeHTML(item) + "</li>"
-    ).join("");
-
-    document.getElementById("detailsSectionMEDFAH").innerHTML =
-        "<ul style='line-height:2; padding-left:22px;'>" +
-        liste +
-        "</ul><p>Les fonctions de gestion de cette section seront " +
-        "connectées progressivement.</p>";
+    const zone = document.getElementById("detailsSectionMEDFAH");
 
     document.getElementById("contenuSectionMEDFAH").style.display =
         "block";
 
     document.getElementById("contenuSectionMEDFAH")
         .scrollIntoView({ behavior: "smooth" });
+
+    if (cle === "dossier") {
+        zone.innerHTML =
+            '<div class="loading">Chargement du dossier de l’Église...</div>';
+
+        await chargerDossierMEDFAH();
+        return;
+    }
+
+    zone.innerHTML =
+        "<ul style='line-height:2;padding-left:22px;'>" +
+        (section.details || []).map(item =>
+            "<li>" + escapeHTML(item) + "</li>"
+        ).join("") +
+        "</ul><p>Ce module sera développé dans une prochaine étape.</p>";
 }
+
+/* ==========================================
+   CHARGER LE DOSSIER DE L'ÉGLISE
+========================================== */
+
+async function chargerDossierMEDFAH() {
+    const zone = document.getElementById("detailsSectionMEDFAH");
+
+    if (!supabaseClient) {
+        zone.innerHTML =
+            "<p>Connexion Supabase indisponible. Vérifie config.js.</p>";
+        return;
+    }
+
+    try {
+        const { data, error } = await supabaseClient
+            .from("dossier_eglise")
+            .select("*")
+            .eq("id", 1)
+            .maybeSingle();
+
+        if (error) throw error;
+
+        afficherFormulaireDossierMEDFAH(data || {});
+
+    } catch (error) {
+        console.error("Erreur dossier MEDFAH :", error);
+
+        zone.innerHTML =
+            "<p><strong>Le dossier n’a pas pu être chargé.</strong></p>" +
+            "<p>La table dossier_eglise doit être créée dans Supabase, " +
+            "avec ses colonnes et les autorisations appropriées.</p>";
+    }
+}
+
+/* ==========================================
+   AFFICHER LE FORMULAIRE
+========================================== */
+
+function afficherFormulaireDossierMEDFAH(d = {}) {
+    const zone = document.getElementById("detailsSectionMEDFAH");
+
+    const groupes = [
+        {
+            titre: "A. Identité de l’Église",
+            champs: [
+                ["nom_eglise", "Nom officiel de l’Église", "text"],
+                ["sigle", "Sigle", "text"],
+                ["adresse", "Adresse du siège", "text"],
+                ["commune", "Commune", "text"],
+                ["departement", "Département", "text"],
+                ["pays", "Pays", "text"],
+                ["telephone", "Téléphone officiel", "tel"],
+                ["email", "E-mail officiel", "email"],
+                ["date_fondation", "Date de fondation", "date"]
+            ]
+        },
+        {
+            titre: "B. Corps pastoral",
+            champs: [
+                ["pasteur_1", "1er pasteur", "text"],
+                ["pasteur_2", "2e pasteur", "text"],
+                ["pasteur_3", "3e pasteur", "text"]
+            ]
+        },
+        {
+            titre: "C. Comité central",
+            champs: [
+                ["president", "Président", "text"],
+                ["secretaire", "Secrétaire", "text"],
+                ["secretaire_adjoint", "Secrétaire adjoint", "text"],
+                ["tresorier", "Trésorier / Trésorière", "text"],
+                ["conseiller_1", "1er conseiller", "text"],
+                ["conseiller_2", "2e conseiller", "text"],
+                ["conseiller_3", "3e conseiller", "text"],
+                ["porte_parole", "Porte-parole", "text"],
+                ["delegue", "Délégué", "text"]
+            ]
+        }
+    ];
+
+    let html = `
+        <form id="formDossierMEDFAH"
+              onsubmit="sauvegarderDossierMEDFAH(event)">
+
+            <p>Complète les informations officielles de la MEDFAH.</p>
+    `;
+
+    groupes.forEach(groupe => {
+        html += `
+            <div style="margin-top:24px;">
+                <h3>${escapeHTML(groupe.titre)}</h3>
+                <div style="display:grid;
+                    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+                    gap:14px;">
+        `;
+
+        groupe.champs.forEach(([nom, titre, type]) => {
+            html += `
+                <label style="display:flex;flex-direction:column;gap:6px;">
+                    <strong>${escapeHTML(titre)}</strong>
+                    <input
+                        name="${nom}"
+                        type="${type}"
+                        value="${escapeHTML(d[nom] || "")}"
+                        style="padding:12px;border:1px solid #d8dde6;
+                        border-radius:9px;width:100%;"
+                    >
+                </label>
+            `;
+        });
+
+        html += "</div></div>";
+    });
+
+    const zonesTexte = [
+        ["historique", "Historique de l’Église"],
+        ["vision", "Vision"],
+        ["mission", "Mission"],
+        ["autres_informations", "Autres informations"]
+    ];
+
+    zonesTexte.forEach(([nom, titre]) => {
+        html += `
+            <label style="display:flex;flex-direction:column;
+                gap:6px;margin-top:18px;">
+                <strong>${escapeHTML(titre)}</strong>
+                <textarea name="${nom}" rows="4"
+                    style="padding:12px;border:1px solid #d8dde6;
+                    border-radius:9px;width:100%;">${escapeHTML(d[nom] || "")}</textarea>
+            </label>
+        `;
+    });
+
+    html += `
+            <div style="margin-top:22px;">
+                <button type="submit" class="view-btn"
+                    style="padding:12px 18px;">
+                    💾 Enregistrer le dossier
+                </button>
+                <p id="messageDossierMEDFAH" role="status"></p>
+            </div>
+        </form>
+    `;
+
+    zone.innerHTML = html;
+}
+
+/* ==========================================
+   ENREGISTRER LE DOSSIER
+========================================== */
+
+async function sauvegarderDossierMEDFAH(event) {
+    event.preventDefault();
+
+    const form = document.getElementById("formDossierMEDFAH");
+    const message = document.getElementById("messageDossierMEDFAH");
+    const bouton = form.querySelector('button[type="submit"]');
+
+    if (!supabaseClient) {
+        message.textContent = "Supabase n’est pas connecté.";
+        return;
+    }
+
+    const donnees = Object.fromEntries(new FormData(form).entries());
+
+    donnees.id = 1;
+    donnees.updated_at = new Date().toISOString();
+
+    bouton.disabled = true;
+    message.textContent = "Enregistrement en cours...";
+
+    try {
+        const { error } = await supabaseClient
+            .from("dossier_eglise")
+            .upsert(donnees, { onConflict: "id" });
+
+        if (error) throw error;
+
+        message.textContent =
+            "Dossier de l’Église enregistré avec succès.";
+
+    } catch (error) {
+        console.error("Erreur enregistrement dossier :", error);
+
+        message.textContent =
+            "Échec de l’enregistrement. Vérifie la table et les " +
+            "autorisations de sécurité Supabase.";
+
+    } finally {
+        bouton.disabled = false;
+    }
+}
+
+/* ==========================================
+   RETOUR À L'ACCUEIL
+========================================== */
 
 function retourAccueilMEDFAH() {
     document.getElementById("contenuSectionMEDFAH").style.display =
@@ -773,6 +1033,7 @@ function retourAccueilMEDFAH() {
     document.getElementById("accueilAdmin")
         .scrollIntoView({ behavior: "smooth" });
 }
+
 
 /* ==========================================
    MENU
