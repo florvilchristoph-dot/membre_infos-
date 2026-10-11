@@ -1083,6 +1083,99 @@ async function ouvrirSectionMEDFAH(cle) {
             return;
         }
 
+if (cle === "documents") {
+    zone.innerHTML = `
+        <h2>Documents de l’Église</h2>
+        <p>Gestion et suivi des documents officiels et administratifs de la MEDFAH.</p>
+
+        <form id="formDocumentsMEDFAH">
+            <label for="docTitre">Titre du document *</label>
+            <input id="docTitre" type="text" required
+                placeholder="Ex. : Reconnaissance du Ministère des Cultes">
+
+            <label for="docCategorie">Catégorie *</label>
+            <select id="docCategorie" required>
+                <option value="Documents administratifs">Documents administratifs</option>
+                <option value="Documents officiels">Documents officiels</option>
+                <option value="Documents juridiques">Documents juridiques</option>
+                <option value="Documents financiers">Documents financiers</option>
+                <option value="Documents ecclésiastiques">Documents ecclésiastiques</option>
+                <option value="Correspondances">Correspondances</option>
+                <option value="Autres documents">Autres documents</option>
+            </select>
+
+            <label for="docSousCategorie">Sous-catégorie</label>
+            <input id="docSousCategorie" type="text"
+                placeholder="Ex. : Reconnaissance, renouvellement">
+
+            <label for="docReference">Référence du document</label>
+            <input id="docReference" type="text"
+                placeholder="Numéro ou référence officielle">
+
+            <label for="docDate">Date du document</label>
+            <input id="docDate" type="date">
+
+            <label for="docExpiration">Date d’expiration</label>
+            <input id="docExpiration" type="date">
+
+            <label for="docOrganisme">Organisme émetteur</label>
+            <input id="docOrganisme" type="text"
+                placeholder="Ex. : Ministère des Cultes">
+
+            <label for="docResponsable">Responsable du document</label>
+            <input id="docResponsable" type="text">
+
+            <label for="docStatut">Statut *</label>
+            <select id="docStatut" required>
+                <option value="En attente">En attente</option>
+                <option value="Brouillon">Brouillon</option>
+                <option value="Déposé">Déposé</option>
+                <option value="Valide">Valide</option>
+                <option value="Expiré">Expiré</option>
+                <option value="À renouveler">À renouveler</option>
+                <option value="Archivé">Archivé</option>
+            </select>
+
+            <label for="docDescription">Description et observations</label>
+            <textarea id="docDescription" rows="4"
+                placeholder="Informations complémentaires sur le document"></textarea>
+
+            <label for="docFichierNom">Nom du fichier (si disponible)</label>
+            <input id="docFichierNom" type="text"
+                placeholder="Ex. : reconnaissance_medfah.pdf">
+
+            <button type="submit">Enregistrer le document</button>
+            <p id="messageDocumentsMEDFAH" role="status"></p>
+        </form>
+
+        <hr>
+
+        <h3>Documents enregistrés</h3>
+
+        <label for="filtreStatutDocuments">Filtrer par statut</label>
+        <select id="filtreStatutDocuments">
+            <option value="">Tous les statuts</option>
+            <option value="Brouillon">Brouillon</option>
+            <option value="En attente">En attente</option>
+            <option value="Déposé">Déposé</option>
+            <option value="Valide">Valide</option>
+            <option value="Expiré">Expiré</option>
+            <option value="À renouveler">À renouveler</option>
+            <option value="Archivé">Archivé</option>
+        </select>
+
+        <div id="listeDocumentsMEDFAH">
+            Chargement des documents...
+        </div>
+    `;
+
+    document.getElementById("filtreStatutDocuments")
+        .addEventListener("change", afficherDocumentsMEDFAH);
+
+    await chargerDocumentsMEDFAH();
+    return;
+}
+
     zone.innerHTML =
         "<ul style='line-height:2;padding-left:22px'>" +
         (section.details || []).map(item =>
@@ -1594,6 +1687,172 @@ async function afficherArchivesMEDFAH() {
 
     } catch (erreur) {
         console.error("Erreur chargement archives MEDFAH :", erreur);
+        liste.textContent =
+            "Chargement impossible : " + erreur.message +
+            ". Vérifiez les autorisations Supabase.";
+    }
+}
+
+/* =====================================================
+   SECTION 6 — DOCUMENTS DE L'ÉGLISE MEDFAH
+   ===================================================== */
+
+async function chargerDocumentsMEDFAH() {
+    const form = document.getElementById("formDocumentsMEDFAH");
+    if (!form) return;
+
+    if (!supabaseClient) {
+        document.getElementById("listeDocumentsMEDFAH").textContent =
+            "Connexion Supabase indisponible.";
+        return;
+    }
+
+    if (form.dataset.connecte !== "oui") {
+        form.dataset.connecte = "oui";
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const bouton = form.querySelector('button[type="submit"]');
+            const message = document.getElementById("messageDocumentsMEDFAH");
+
+            bouton.disabled = true;
+            message.textContent = "Enregistrement en cours...";
+
+            try {
+                const dateDocument =
+                    document.getElementById("docDate").value || null;
+
+                const dateExpiration =
+                    document.getElementById("docExpiration").value || null;
+
+                if (
+                    dateDocument &&
+                    dateExpiration &&
+                    dateExpiration < dateDocument
+                ) {
+                    throw new Error(
+                        "La date d’expiration ne peut pas précéder la date du document."
+                    );
+                }
+
+                const donnees = {
+                    titre: document.getElementById("docTitre").value.trim(),
+                    categorie: document.getElementById("docCategorie").value,
+                    sous_categorie:
+                        document.getElementById("docSousCategorie").value.trim() || null,
+                    reference_document:
+                        document.getElementById("docReference").value.trim() || null,
+                    date_document: dateDocument,
+                    date_expiration: dateExpiration,
+                    organisme_emetteur:
+                        document.getElementById("docOrganisme").value.trim() || null,
+                    responsable:
+                        document.getElementById("docResponsable").value.trim() || null,
+                    statut: document.getElementById("docStatut").value,
+                    description:
+                        document.getElementById("docDescription").value.trim() || null,
+                    fichier_nom:
+                        document.getElementById("docFichierNom").value.trim() || null
+                };
+
+                const { error } = await supabaseClient
+                    .from("documents_eglise")
+                    .insert([donnees]);
+
+                if (error) throw error;
+
+                message.textContent =
+                    "Document enregistré avec succès.";
+
+                form.reset();
+                await afficherDocumentsMEDFAH();
+
+            } catch (erreur) {
+                console.error("Erreur documents MEDFAH :", erreur);
+                message.textContent =
+                    "Enregistrement impossible : " + erreur.message;
+            } finally {
+                bouton.disabled = false;
+            }
+        });
+    }
+
+    await afficherDocumentsMEDFAH();
+}
+
+
+async function afficherDocumentsMEDFAH() {
+    const liste = document.getElementById("listeDocumentsMEDFAH");
+    if (!liste || !supabaseClient) return;
+
+    liste.textContent = "Chargement des documents...";
+
+    try {
+        let requete = supabaseClient
+            .from("documents_eglise")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+        const filtre = document.getElementById("filtreStatutDocuments");
+
+        if (filtre && filtre.value) {
+            requete = requete.eq("statut", filtre.value);
+        }
+
+        const { data, error } = await requete;
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            liste.textContent =
+                "Aucun document enregistré pour le moment.";
+            return;
+        }
+
+        liste.innerHTML = data.map(function(doc) {
+            return `
+                <article style="border:1px solid #d8dde6;
+                    border-radius:10px;padding:14px;margin:12px 0;">
+
+                    <h3>${escapeHTML(doc.titre || "")}</h3>
+
+                    <p><strong>Catégorie :</strong>
+                        ${escapeHTML(doc.categorie || "")}</p>
+
+                    <p><strong>Sous-catégorie :</strong>
+                        ${escapeHTML(doc.sous_categorie || "Non précisée")}</p>
+
+                    <p><strong>Référence :</strong>
+                        ${escapeHTML(doc.reference_document || "Non précisée")}</p>
+
+                    <p><strong>Date du document :</strong>
+                        ${escapeHTML(doc.date_document || "Non précisée")}</p>
+
+                    <p><strong>Date d’expiration :</strong>
+                        ${escapeHTML(doc.date_expiration || "Non précisée")}</p>
+
+                    <p><strong>Organisme émetteur :</strong>
+                        ${escapeHTML(doc.organisme_emetteur || "Non précisé")}</p>
+
+                    <p><strong>Responsable :</strong>
+                        ${escapeHTML(doc.responsable || "Non précisé")}</p>
+
+                    <p><strong>Statut :</strong>
+                        ${escapeHTML(doc.statut || "")}</p>
+
+                    <p><strong>Description :</strong>
+                        ${escapeHTML(doc.description || "Aucune")}</p>
+
+                    <p><strong>Nom du fichier :</strong>
+                        ${escapeHTML(doc.fichier_nom || "Aucun fichier indiqué")}</p>
+
+                </article>
+            `;
+        }).join("");
+
+    } catch (erreur) {
+        console.error("Erreur affichage documents :", erreur);
         liste.textContent =
             "Chargement impossible : " + erreur.message +
             ". Vérifiez les autorisations Supabase.";
