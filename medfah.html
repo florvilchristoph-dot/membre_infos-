@@ -1025,6 +1025,64 @@ async function ouvrirSectionMEDFAH(cle) {
             return;
         }
 
+        if (cle === "archives") {
+            zone.innerHTML = `
+                <h2>Archives et Mémoire de l’Église</h2>
+                <p>Conservation de l’histoire et des documents officiels de la MEDFAH.</p>
+
+                <form id="formArchivesMEDFAH">
+                    <label for="arcTitre">Titre du document *</label>
+                    <input id="arcTitre" type="text" required
+                        placeholder="Titre du rapport ou du document">
+
+                    <label for="arcCategorie">Catégorie *</label>
+                    <select id="arcCategorie" required>
+                        <option value="Autre">Autre</option>
+                        <option value="Procès-verbal">Procès-verbal</option>
+                        <option value="Rapport">Rapport</option>
+                        <option value="Historique">Historique</option>
+                        <option value="Décision">Décision</option>
+                        <option value="Programme">Programme</option>
+                        <option value="Document administratif">Document administratif</option>
+                        <option value="Document spirituel">Document spirituel</option>
+                    </select>
+
+                    <label for="arcDate">Date du document</label>
+                    <input id="arcDate" type="date">
+
+                    <label for="arcResponsable">Auteur ou responsable</label>
+                    <input id="arcResponsable" type="text">
+
+                    <label for="arcReference">Référence du document</label>
+                    <input id="arcReference" type="text"
+                        placeholder="Numéro de référence ou emplacement">
+
+                    <label for="arcStatut">Statut</label>
+                    <select id="arcStatut">
+                        <option value="Classé">Classé</option>
+                        <option value="À compléter">À compléter</option>
+                        <option value="En attente">En attente</option>
+                    </select>
+
+                    <label for="arcDescription">Description du document</label>
+                    <textarea id="arcDescription" rows="4"
+                        placeholder="Résumé ou informations importantes"></textarea>
+
+                    <button type="submit">Enregistrer l’archive</button>
+                    <p id="messageArchivesMEDFAH" role="status"></p>
+                </form>
+
+                <hr>
+                <h3>Documents archivés</h3>
+                <div id="listeArchivesMEDFAH">
+                    Chargement des archives...
+                </div>
+            `;
+
+            await chargerArchivesMEDFAH();
+            return;
+        }
+
     zone.innerHTML =
         "<ul style='line-height:2;padding-left:22px'>" +
         (section.details || []).map(item =>
@@ -1436,6 +1494,111 @@ async function afficherEntitesMEDFAH() {
     }
 }
 
+
+/* ARCHIVES ET MÉMOIRE DE L'ÉGLISE — MEDFAH */
+
+async function chargerArchivesMEDFAH() {
+    const form = document.getElementById("formArchivesMEDFAH");
+    if (!form) return;
+
+    if (!supabaseClient) {
+        document.getElementById("listeArchivesMEDFAH").textContent =
+            "Connexion Supabase indisponible.";
+        return;
+    }
+
+    if (form.dataset.connecte !== "oui") {
+        form.dataset.connecte = "oui";
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const bouton = form.querySelector('button[type="submit"]');
+            const message = document.getElementById("messageArchivesMEDFAH");
+
+            bouton.disabled = true;
+            message.textContent = "Enregistrement en cours...";
+
+            try {
+                const titre = document.getElementById("arcTitre").value.trim();
+
+                if (!titre) {
+                    throw new Error("Veuillez saisir le titre du document.");
+                }
+
+                const donnees = {
+                    titre: titre,
+                    categorie: document.getElementById("arcCategorie").value,
+                    date_document: document.getElementById("arcDate").value || null,
+                    responsable: document.getElementById("arcResponsable").value.trim(),
+                    reference_document: document.getElementById("arcReference").value.trim(),
+                    statut: document.getElementById("arcStatut").value,
+                    description: document.getElementById("arcDescription").value.trim()
+                };
+
+                const { error } = await supabaseClient
+                    .from("archives_eglise")
+                    .insert([donnees]);
+
+                if (error) throw error;
+
+                message.textContent = "Archive enregistrée avec succès.";
+                form.reset();
+
+                await afficherArchivesMEDFAH();
+
+            } catch (erreur) {
+                console.error("Erreur archives MEDFAH :", erreur);
+                message.textContent =
+                    "Enregistrement impossible : " + erreur.message;
+            } finally {
+                bouton.disabled = false;
+            }
+        });
+    }
+
+    await afficherArchivesMEDFAH();
+}
+
+async function afficherArchivesMEDFAH() {
+    const liste = document.getElementById("listeArchivesMEDFAH");
+
+    if (!liste || !supabaseClient) return;
+
+    liste.textContent = "Chargement des archives...";
+
+    try {
+        const { data, error } = await supabaseClient
+            .from("archives_eglise")
+            .select("*")
+            .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            liste.textContent = "Aucune archive enregistrée pour le moment.";
+            return;
+        }
+
+        liste.innerHTML = data.map(archive => `
+            <article style="border:1px solid #d8dde6;border-radius:10px;padding:14px;margin:12px 0">
+                <h3>${escapeHTML(archive.titre || "")}</h3>
+                <p><strong>Catégorie :</strong> ${escapeHTML(archive.categorie || "")}</p>
+                <p><strong>Date du document :</strong> ${escapeHTML(archive.date_document || "Non précisée")}</p>
+                <p><strong>Auteur ou responsable :</strong> ${escapeHTML(archive.responsable || "Non précisé")}</p>
+                <p><strong>Référence :</strong> ${escapeHTML(archive.reference_document || "Non précisée")}</p>
+                <p><strong>Statut :</strong> ${escapeHTML(archive.statut || "")}</p>
+                <p><strong>Description :</strong> ${escapeHTML(archive.description || "Aucune description")}</p>
+            </article>
+        `).join("");
+
+    } catch (erreur) {
+        console.error("Erreur chargement archives MEDFAH :", erreur);
+        liste.textContent =
+            "Chargement impossible : " + erreur.message +
+            ". Vérifiez les autorisations Supabase.";
+    }
+}
 
 /* ==========================================
    CHARGER LE DOSSIER DE L'ÉGLISE
