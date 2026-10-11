@@ -941,6 +941,90 @@ async function ouvrirSectionMEDFAH(cle) {
         return;
     }
 
+        if (cle === "entites") {
+            zone.innerHTML = `
+                <h2>Entités de l’Église</h2>
+                <p>Gestion des départements et groupes de la MEDFAH.</p>
+
+                <form id="formEntitesMEDFAH">
+                    <label for="entNom">Nom de l’entité *</label>
+                    <select id="entNom" required>
+                        <option value="">Choisir une entité</option>
+                        <option value="Département des Dames">Département des Dames</option>
+                        <option value="Département des Hommes">Département des Hommes</option>
+                        <option value="Département des Jeunes">Département des Jeunes</option>
+                        <option value="Département d’Évaluation">Département d’Évaluation</option>
+                        <option value="Département Accueil et Entretien">Département Accueil et Entretien</option>
+                        <option value="Département de la Musique">Département de la Musique</option>
+                        <option value="Le Grand Chœur de la MEDFAH">Le Grand Chœur de la MEDFAH</option>
+                    </select>
+
+                    <label for="entSigle">Sigle ou nom du groupe</label>
+                    <input id="entSigle" type="text" placeholder="Ex. : MARANATHA, COMBATTANT, AJEDFAH">
+
+                    <label for="entResponsable">Responsable principal</label>
+                    <input id="entResponsable" type="text">
+
+                    <label for="entDate">Date de création</label>
+                    <input id="entDate" type="date">
+
+                    <label for="entMembres">Nombre de membres</label>
+                    <input id="entMembres" type="number" min="0" value="0" required>
+
+                    <label for="entStatut">Statut</label>
+                    <select id="entStatut">
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+
+                    <h3>Comité de l’entité</h3>
+                    <p>Remplissez les postes nécessaires : 5 ou 7 membres.</p>
+
+                    <div id="entComiteChamps">
+                        ${Array.from({length: 7}, (_, i) => `
+                            <fieldset style="margin:12px 0;padding:12px;border:1px solid #ccc;border-radius:8px">
+                                <legend>Membre ${i + 1}</legend>
+                                <label for="entComiteNom${i + 1}">Nom et prénom</label>
+                                <input id="entComiteNom${i + 1}" type="text">
+                                <label for="entComiteFonction${i + 1}">Fonction</label>
+                                <input id="entComiteFonction${i + 1}" type="text"
+                                    placeholder="Ex. : Président, secrétaire, trésorier">
+                            </fieldset>
+                        `).join("")}
+                    </div>
+
+                    <label for="entDescription">Description et informations complémentaires</label>
+                    <textarea id="entDescription" rows="4"></textarea>
+
+                    <button type="submit">Enregistrer l’entité</button>
+                    <p id="messageEntitesMEDFAH" role="status"></p>
+                </form>
+
+                <hr>
+                <h3>Liste des entités enregistrées</h3>
+
+                <label for="filtreEntitesMEDFAH">Filtrer par entité</label>
+                <select id="filtreEntitesMEDFAH">
+                    <option value="">Toutes les entités</option>
+                    <option value="Département des Dames">Département des Dames</option>
+                    <option value="Département des Hommes">Département des Hommes</option>
+                    <option value="Département des Jeunes">Département des Jeunes</option>
+                    <option value="Département d’Évaluation">Département d’Évaluation</option>
+                    <option value="Département Accueil et Entretien">Département Accueil et Entretien</option>
+                    <option value="Département de la Musique">Département de la Musique</option>
+                    <option value="Le Grand Chœur de la MEDFAH">Le Grand Chœur de la MEDFAH</option>
+                </select>
+
+                <div id="listeEntitesMEDFAH">Chargement des entités...</div>
+            `;
+
+            document.getElementById("filtreEntitesMEDFAH")
+                .addEventListener("change", afficherEntitesMEDFAH);
+
+            await chargerEntitesMEDFAH();
+            return;
+        }
+
     zone.innerHTML =
         "<ul style='line-height:2;padding-left:22px'>" +
         (section.details || []).map(item =>
@@ -1197,6 +1281,155 @@ async function afficherActivitesMEDFAH() {
 
     } catch (erreur) {
         console.error("Erreur chargement activités :", erreur);
+        liste.textContent =
+            "Chargement impossible : " + erreur.message +
+            ". Vérifiez les autorisations Supabase.";
+    }
+}
+
+/* ENTITÉS DE L'ÉGLISE — MEDFAH */
+
+async function chargerEntitesMEDFAH() {
+    const form = document.getElementById("formEntitesMEDFAH");
+    if (!form) return;
+
+    if (!supabaseClient) {
+        document.getElementById("listeEntitesMEDFAH").textContent =
+            "Connexion Supabase indisponible.";
+        return;
+    }
+
+    if (form.dataset.connecte !== "oui") {
+        form.dataset.connecte = "oui";
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const bouton = form.querySelector('button[type="submit"]');
+            const message = document.getElementById("messageEntitesMEDFAH");
+
+            bouton.disabled = true;
+            message.textContent = "Enregistrement en cours...";
+
+            try {
+                const nom = document.getElementById("entNom").value;
+                if (!nom) throw new Error("Veuillez choisir une entité.");
+
+                const nombre = Number(
+                    document.getElementById("entMembres").value || 0
+                );
+
+                if (!Number.isInteger(nombre) || nombre < 0) {
+                    throw new Error("Le nombre de membres doit être un entier positif ou égal à zéro.");
+                }
+
+                const donnees = {
+                    nom: nom,
+                    sigle: document.getElementById("entSigle").value.trim(),
+                    responsable: document.getElementById("entResponsable").value.trim(),
+                    date_creation: document.getElementById("entDate").value || null,
+                    nombre_membres: nombre,
+                    statut: document.getElementById("entStatut").value,
+                    description: document.getElementById("entDescription").value.trim()
+                };
+
+                for (let i = 1; i <= 7; i++) {
+                    donnees["membre_comite_" + i] =
+                        document.getElementById("entComiteNom" + i).value.trim();
+
+                    donnees["fonction_comite_" + i] =
+                        document.getElementById("entComiteFonction" + i).value.trim();
+                }
+
+                const { error } = await supabaseClient
+                    .from("entites_eglise")
+                    .insert([donnees]);
+
+                if (error) throw error;
+
+                message.textContent = "Entité enregistrée avec succès.";
+                form.reset();
+                document.getElementById("entMembres").value = "0";
+
+                await afficherEntitesMEDFAH();
+
+            } catch (erreur) {
+                console.error("Erreur entités MEDFAH :", erreur);
+
+                if (erreur.code === "23505") {
+                    message.textContent =
+                        "Cette entité existe déjà. Son nom ne peut pas être enregistré une deuxième fois.";
+                } else {
+                    message.textContent =
+                        "Enregistrement impossible : " + erreur.message;
+                }
+            } finally {
+                bouton.disabled = false;
+            }
+        });
+    }
+
+    await afficherEntitesMEDFAH();
+}
+
+async function afficherEntitesMEDFAH() {
+    const liste = document.getElementById("listeEntitesMEDFAH");
+    if (!liste || !supabaseClient) return;
+
+    liste.textContent = "Chargement des entités...";
+
+    try {
+        let requete = supabaseClient
+            .from("entites_eglise")
+            .select("*")
+            .order("nom", { ascending: true });
+
+        const filtre = document.getElementById("filtreEntitesMEDFAH");
+
+        if (filtre && filtre.value) {
+            requete = requete.eq("nom", filtre.value);
+        }
+
+        const { data, error } = await requete;
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            liste.textContent = "Aucune entité enregistrée pour le moment.";
+            return;
+        }
+
+        liste.innerHTML = data.map(entite => {
+            let comite = "";
+
+            for (let i = 1; i <= 7; i++) {
+                const membre = entite["membre_comite_" + i];
+                const fonction = entite["fonction_comite_" + i];
+
+                if (membre || fonction) {
+                    comite += `
+                        <li>
+                            ${escapeHTML(membre || "Nom non précisé")}
+                            — ${escapeHTML(fonction || "Fonction non précisée")}
+                        </li>`;
+                }
+            }
+
+            return `
+                <article style="border:1px solid #d8dde6;border-radius:10px;padding:14px;margin:12px 0">
+                    <h3>${escapeHTML(entite.nom || "")}</h3>
+                    <p><strong>Sigle :</strong> ${escapeHTML(entite.sigle || "Non précisé")}</p>
+                    <p><strong>Responsable :</strong> ${escapeHTML(entite.responsable || "Non précisé")}</p>
+                    <p><strong>Date de création :</strong> ${escapeHTML(entite.date_creation || "Non précisée")}</p>
+                    <p><strong>Nombre de membres :</strong> ${Number(entite.nombre_membres || 0)}</p>
+                    <p><strong>Statut :</strong> ${escapeHTML(entite.statut || "")}</p>
+                    <h4>Comité de l'entité</h4>
+                    ${comite ? `<ul>${comite}</ul>` : "<p>Aucun membre du comité renseigné.</p>"}
+                    <p><strong>Informations complémentaires :</strong> ${escapeHTML(entite.description || "Aucune")}</p>
+                </article>`;
+        }).join("");
+
+    } catch (erreur) {
+        console.error("Erreur chargement entités :", erreur);
         liste.textContent =
             "Chargement impossible : " + erreur.message +
             ". Vérifiez les autorisations Supabase.";
