@@ -646,15 +646,25 @@ td{
     <!-- LISTE DES MEMBRES -->
     <section class="section" id="membersSection">
 
-        <div class="section-head">
+        
+<div class="section-head">
 
-            <h3>👥 Liste des membres</h3>
+    <h3>👥 Liste des membres</h3>
 
-            <button class="refresh" onclick="loadMembers()">
-                ↻ Actualiser
-            </button>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
 
-        </div>
+        <button class="refresh" onclick="loadMembers()">
+            ↻ Actualiser
+        </button>
+
+        <button class="refresh" onclick="ouvrirFormulaireMembre()">
+            ➕ Ajouter un membre
+        </button>
+
+    </div>
+
+</div>
+
 
         <div id="membersContent" class="loading">
             Chargement des membres...
@@ -664,6 +674,146 @@ td{
 
 </main>
 
+
+<!-- FORMULAIRE AJOUT D'UN MEMBRE MEDFAH -->
+<div id="ajoutMembreModal"
+     style="display:none; position:fixed; inset:0; z-index:9999;
+     background:rgba(0,0,0,.65); overflow-y:auto; padding:15px;">
+
+  <div style="max-width:850px; margin:20px auto; background:white;
+       color:#222; padding:20px; border-radius:12px;">
+
+    <h2>➕ Ajouter un membre</h2>
+    <p>Ajoute yon nouvo manm nan MEDFAH.</p>
+
+    <form id="formAjoutMembre">
+
+      <h3>Informations personnelles — Enfòmasyon pèsonèl</h3>
+
+      <label>Nom — Siyati *</label>
+      <input name="nom" required>
+
+      <label>Prénom — Non *</label>
+      <input name="prenom" required>
+
+      <label>Sexe — Sèks</label>
+      <select name="sexe">
+        <option value="">Sélectionner</option>
+        <option value="Masculin">Masculin</option>
+        <option value="Féminin">Féminin</option>
+      </select>
+
+      <label>Date de naissance — Dat nesans</label>
+      <input name="date_naissance" type="date">
+
+      <label>Lieu de naissance — Kote nesans</label>
+      <input name="lieu_naissance">
+
+      <label>Nationalité — Nasyonalite</label>
+      <input name="nationalité">
+
+      <label>Situation matrimoniale — Sitiyasyon matrimonyal</label>
+      <select name="situation_matrimoniale">
+        <option value="">Sélectionner</option>
+        <option value="Célibataire">Célibataire</option>
+        <option value="Marié(e)">Marié(e)</option>
+        <option value="Veuf/Veuve">Veuf/Veuve</option>
+        <option value="Divorcé(e)">Divorcé(e)</option>
+      </select>
+
+      <h3>Contact — Kontak</h3>
+
+      <label>Téléphone — Telefòn</label>
+      <input name="telephone" type="tel">
+
+      <label>Téléphone secondaire — Dezyèm telefòn</label>
+      <input name="telephone_secondaire" type="tel">
+
+      <label>WhatsApp</label>
+      <input name="whatsapp" type="tel">
+
+      <label>Email — Imèl</label>
+      <input name="email" type="email">
+
+      <label>Adresse — Adrès</label>
+      <input name="adresse">
+
+      <label>Commune — Komin</label>
+      <input name="commune">
+
+      <label>Département — Depatman</label>
+      <input name="departement">
+
+      <h3>Ministères et responsabilités — Ministè ak responsablite</h3>
+
+      <label>Fonction — Fonksyon</label>
+      <input name="fonction">
+
+      <label>Profession — Pwofesyon</label>
+      <input name="profession">
+
+      <label>Assemblée — Asanble</label>
+      <input name="assemblée">
+
+      <label>Statut — Estati</label>
+      <select name="statut">
+        <option value="actif">Actif — Aktif</option>
+        <option value="inactif">Inactif — Inaktif</option>
+      </select>
+
+      <h3>Vie spirituelle — Lavi espirityèl</h3>
+
+      <label>Date d'adhésion — Dat li antre nan legliz la</label>
+      <input name="date_adhesion" type="date">
+
+      <label>Date de conversion — Dat konvèsyon</label>
+      <input name="date_conversion" type="date">
+
+      <label>Date de baptême — Dat batèm</label>
+      <input name="date_bapteme" type="date">
+
+      <label>Pasteur responsable — Pastè responsab</label>
+      <input name="pasteur_responsable">
+
+      <label>Formation biblique — Fòmasyon biblik</label>
+      <input name="formation_biblique">
+
+      <label>Groupe d'église — Gwoup legliz</label>
+      <input name="groupe_eglise">
+
+      <h3>Urgence — Kontak ijans</h3>
+
+      <label>Nom du contact — Non moun pou kontakte</label>
+      <input name="personne_urgence">
+
+      <label>Téléphone d'urgence — Telefòn ijans</label>
+      <input name="telephone_urgence" type="tel">
+
+      <label>Relation — Relasyon ak manm nan</label>
+      <input name="relation_urgence">
+
+      <h3>Suivi / Observations — Swivi / Remak</h3>
+
+      <label>Observations — Remak</label>
+      <textarea name="observation" rows="3"></textarea>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;">
+        <button type="submit" id="btnEnregistrerMembre">
+          💾 Enregistrer le membre
+        </button>
+
+        <button type="button"
+                onclick="fermerFormulaireMembre()">
+          Annuler — Anile
+        </button>
+      </div>
+
+      <p id="messageAjoutMembre" role="status"></p>
+
+    </form>
+  </div>
+</div>
+<!-- FIN FORMULAIRE AJOUT MEMBRE -->
 
 <!-- MODAL -->
 <div class="modal" id="memberModal">
@@ -2588,6 +2738,91 @@ document.addEventListener("DOMContentLoaded", async function() {
     await verifierRoleAdminMEDFAH();
 
     await loadMembers();
+});
+
+/* OUVRIR LE FORMULAIRE D'AJOUT D'UN MEMBRE */
+function ouvrirFormulaireMembre() {
+    const modal = document.getElementById("ajoutMembreModal");
+    const form = document.getElementById("formAjoutMembre");
+    const message = document.getElementById("messageAjoutMembre");
+
+    if (!modal || !form) {
+        alert("Le formulaire d'ajout est introuvable.");
+        return;
+    }
+
+    form.reset();
+    message.textContent = "";
+    modal.style.display = "block";
+}
+
+/* FERMER LE FORMULAIRE */
+function fermerFormulaireMembre() {
+    document.getElementById("ajoutMembreModal").style.display = "none";
+}
+
+/* ENREGISTRER LE NOUVEAU MEMBRE */
+document.getElementById("formAjoutMembre").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const form = e.currentTarget;
+    const bouton = document.getElementById("btnEnregistrerMembre");
+    const message = document.getElementById("messageAjoutMembre");
+
+    if (!supabaseClient) {
+        message.textContent = "❌ Supabase n'est pas configuré.";
+        return;
+    }
+
+    const donneesFormulaire = new FormData(form);
+    const donnees = Object.fromEntries(donneesFormulaire.entries());
+
+    /* Nettoyer les champs vides pour les dates et les textes */
+    Object.keys(donnees).forEach(function(cle) {
+        if (typeof donnees[cle] === "string") {
+            donnees[cle] = donnees[cle].trim();
+        }
+
+        if (donnees[cle] === "") {
+            donnees[cle] = null;
+        }
+    });
+
+    /* Générer un code de membre unique */
+    donnees.code = "MEDFAH-" + Date.now().toString(36).toUpperCase();
+    donnees.date_inscription = new Date().toISOString();
+    donnees.observation = donnees.observation || "Aucune observation.";
+
+    bouton.disabled = true;
+    message.textContent = "⏳ Enregistrement en cours...";
+
+    try {
+        const { data, error } = await supabaseClient
+            .from("membre_infos")
+            .insert([donnees])
+            .select();
+
+        if (error) {
+            console.error("Erreur Supabase :", error);
+            message.textContent = "❌ Erreur : " + error.message;
+            return;
+        }
+
+        message.textContent = "✅ Membre enregistré avec succès !";
+        form.reset();
+
+        await loadMembers();
+
+        setTimeout(function() {
+            fermerFormulaireMembre();
+        }, 1200);
+
+    } catch (erreur) {
+        console.error(erreur);
+        message.textContent = "❌ Une erreur est survenue pendant l'enregistrement.";
+    } finally {
+        bouton.disabled = false;
+    }
 });
 
 </script>
