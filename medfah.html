@@ -2735,9 +2735,11 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     afficherZoneAdminMEDFAH(false);
 
-    await verifierRoleAdminMEDFAH();
+    const autorise = await verifierRoleAdminMEDFAH();
 
-    await loadMembers();
+    if (autorise) {
+        await loadMembers();
+    }
 });
 
 /* OUVRIR LE FORMULAIRE D'AJOUT D'UN MEMBRE */
