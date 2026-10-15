@@ -277,58 +277,45 @@ async function chargerStatistiques(){
 // CHARGER MEMBRES
 // ======================================================
 
-async function chargerMembres(
-    recherche,
-    app
-){
 
+
+async function chargerMembres(recherche, app) {
     app.innerHTML = `
         <div class="message">
             Chargement des membres...
         </div>
     `;
 
-
-    try{
+    try {
+        // Récupérer le véritable jeton de la session administrateur
+        const entetes = await obtenirEntetesAuthentifiees();
 
         const url =
             `${window.SUPABASE_URL}/rest/v1/membre_infos` +
             `?select=*&order=id.desc`;
 
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                ...entetes,
+                "Content-Type": "application/json"
+            }
+        });
 
-        const response =
-            await fetch(
-                url,
-                {
-                    method:"GET",
-
-                    headers:{
-                        "apikey":
-                            window.SUPABASE_ANON_KEY,
-
-                        "Authorization":
-                            `Bearer ${window.SUPABASE_ANON_KEY}`,
-
-                        "Content-Type":
-                            "application/json"
-                    }
-                }
+        if (!response.ok) {
+            const details = await response.text();
+            console.error(
+                "Erreur Supabase :",
+                response.status,
+                details
             );
-
-
-        if(!response.ok){
 
             throw new Error(
-                "Erreur Supabase : " +
-                response.status
+                "Erreur Supabase : " + response.status
             );
-
         }
 
-
-        const membres =
-            await response.json();
-
+        const membres = await response.json();
 
         afficherListe(
             membres,
@@ -336,22 +323,23 @@ async function chargerMembres(
             app
         );
 
-
-    }catch(error){
-
-        console.error(error);
-
+    } catch (error) {
+        console.error(
+            "Chargement des membres impossible :",
+            error
+        );
 
         app.innerHTML = `
             <div class="message error">
                 Impossible de charger les membres.
                 <br><br>
-                Vérifiez la configuration Supabase.
+                ${error.message ===
+                "Session absente. Connectez-vous d'abord dans Administration."
+                    ? "Connectez-vous d'abord dans Administration."
+                    : "Vérifiez la session et les autorisations Supabase."}
             </div>
         `;
-
     }
-
 }
 
 
