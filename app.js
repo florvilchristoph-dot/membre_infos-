@@ -25,7 +25,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return;
     }
+const clientMembresMEDFAH = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
 
+async function obtenirEntetesAuthentifiees() {
+    const { data, error } =
+        await clientMembresMEDFAH.auth.getSession();
+
+    if (error) throw error;
+
+    if (!data.session) {
+        throw new Error(
+            "Session absente. Connectez-vous d'abord dans Administration."
+        );
+    }
+
+    return {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${data.session.access_token}`
+    };
+}
 
     // --------------------------------------------------
     // Page actuelle
