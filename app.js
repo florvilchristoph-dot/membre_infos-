@@ -734,229 +734,132 @@ const response = await fetch(url, {headers: {
 // DOSSIER
 // ======================================================
 
-function afficherDossier(
-    membre,
-    app
-){
+
+function afficherDossier(membre, app) {
+    // Li yon chan ak plizyè non posib san li pa pèdi done yo.
+    function valè(...noms) {
+        for (const nom of noms) {
+            const resultat = getField(membre, nom);
+            if (resultat !== null &&
+                resultat !== undefined &&
+                String(resultat).trim() !== "") {
+                return resultat;
+            }
+        }
+        return "-";
+    }
 
     app.innerHTML = `
-
         <div class="dossier">
-
             <div class="dossier-header">
-
-                <h2>
-                    Dossier du membre
-                </h2>
-
-                <p>
-                    MEDFAH
-                </p>
-
+                <h2>Dossier du membre</h2>
+                <p>MEDFAH</p>
             </div>
-
 
             <div class="dossier-body">
 
                 <section class="section">
-
-                    <h3>
-                        Informations personnelles
-                    </h3>
-
+                    <h3>Informations personnelles</h3>
                     <div class="grid">
-
-                        ${champ("Code",
-                            getField(membre,"code"))}
-
-                        ${champ("N° carte",
-                            getField(membre,"numero_carte"))}
-
-                        ${champ("Nom",
-                            getField(membre,"nom"))}
-
-                        ${champ("Prénom",
-                            getField(membre,"prenom"))}
-
-                        ${champ("Sexe",
-                            getField(membre,"sexe"))}
-
-                        ${champ("Date de naissance",
-                            getField(membre,"date_naissance"))}
-
-                        ${champ("Lieu de naissance",
-                            getField(membre,"lieu_naissance"))}
-
-                        ${champ("Nationalité",
-                            getField(membre,"nationalite"))}
-
-                        ${champ("Situation matrimoniale",
-                            getField(membre,"situation_matrimoniale"))}
-
+                        ${champ("Code", valè("code"))}
+                        ${champ("N° carte", valè("numero_carte", "carte_numerique"))}
+                        ${champ("Nom", valè("nom"))}
+                        ${champ("Prénom", valè("prenom"))}
+                        ${champ("Sexe", valè("sexe"))}
+                        ${champ("Date de naissance", valè("date_naissance"))}
+                        ${champ("Lieu de naissance", valè("lieu_naissance"))}
+                        ${champ("Nationalité", valè("nationaliste"))}
+                        ${champ("Situation matrimoniale", valè("situation_matrimoniale"))}
                     </div>
-
                 </section>
 
-
                 <section class="section">
-
-                    <h3>
-                        Contact
-                    </h3>
-
+                    <h3>Informations familiales</h3>
                     <div class="grid">
-
-                        ${champ("Téléphone",
-                            getField(membre,"telephone"))}
-
-                        ${champ("Téléphone secondaire",
-                            getField(membre,"telephone_secondaire"))}
-
-                        ${champ("WhatsApp",
-                            getField(membre,"whatsapp"))}
-
-                        ${champ("Email",
-                            getField(membre,"email"))}
-
-                        ${champ("Adresse",
-                            getField(membre,"adresse"))}
-
-                        ${champ("Commune",
-                            getField(membre,"commune"))}
-
-                        ${champ("Département",
-                            getField(membre,"departement"))}
-
+                        ${champ("Nom du père", valè("nom_pere", "nom père"))}
+                        ${champ("Nom de la mère", valè("nom_mere", "nom mere", "nom mère"))}
+                        ${champ("Nom du conjoint", valè("nom_conjoint"))}
+                        ${champ("Nombre d'enfants", valè("nombre_enfants"))}
                     </div>
-
                 </section>
 
-
                 <section class="section">
-
-                    <h3>
-                        Ministères et responsabilités
-                    </h3>
-
+                    <h3>Contact</h3>
                     <div class="grid">
-
-                        ${champ("Fonction",
-                            getField(membre,"fonction"))}
-
-                        ${champ("Profession",
-                            getField(membre,"profession"))}
-
-                        ${champ("Assemblée",
-                            getField(membre,"assemblee"))}
-
-                        ${champ("Status",
-                            getField(membre,"status"))}
-
+                        ${champ("Téléphone", valè("telephone", "telefone"))}
+                        ${champ("Téléphone secondaire", valè("telephone_secondaire"))}
+                        ${champ("WhatsApp", valè("whatsapp", "watsapp"))}
+                        ${champ("Email", valè("email"))}
+                        ${champ("Adresse", valè("adresse"))}
+                        ${champ("Commune", valè("commune"))}
+                        ${champ("Département", valè("departement"))}
                     </div>
-
                 </section>
 
-
                 <section class="section">
-
-                    <h3>
-                        Vie spirituelle
-                    </h3>
-
+                    <h3>Ministères et responsabilités</h3>
                     <div class="grid">
-
-                        ${champ("Date d'adhésion",
-                            getField(membre,"date_adhesion"))}
-
-                        ${champ("Date de conversion",
-                            getField(membre,"date_conversion"))}
-
-                        ${champ("Date de baptême",
-                            getField(membre,"date_bapteme"))}
-
-                        ${champ("Pasteur responsable",
-                            getField(membre,"pasteur_responsable"))}
-
-                        ${champ("Formation biblique",
-                            getField(membre,"formation_biblique"))}
-
-                        ${champ("Groupe d'église",
-                            getField(membre,"groupe_eglise"))}
-
+                        ${champ("Fonction", valè("fonction"))}
+                        ${champ("Profession", valè("profession"))}
+                        ${champ("Assemblée", valè("assemblee", "assemblée"))}
+                        ${champ("Statut", valè("statut", "status"))}
+                        ${champ("Responsable de l'enregistrement", valè("responsable_enregistrement"))}
                     </div>
-
                 </section>
 
-
                 <section class="section">
-
-                    <h3>
-                        Personne à contacter en cas d'urgence
-                    </h3>
-
+                    <h3>Vie spirituelle</h3>
                     <div class="grid">
-
-                        ${champ("Nom",
-                            getField(membre,"personne_urgence"))}
-
-                        ${champ("Téléphone",
-                            getField(membre,"telephone_urgence"))}
-
-                        ${champ("Relation",
-                            getField(membre,"relation_urgence"))}
-
+                        ${champ("Date d'adhésion", valè("date_adhesion"))}
+                        ${champ("Date de conversion", valè("conversion_date", "date_conversion"))}
+                        ${champ("Date de baptême", valè("date_bapteme", "date_bapteme"))}
+                        ${champ("Pasteur responsable", valè("pasteur_responsable"))}
+                        ${champ("Formation biblique", valè("formation_biblique"))}
+                        ${champ("Groupe d'église", valè("groupe_eglise"))}
                     </div>
-
                 </section>
 
+                <section class="section">
+                    <h3>Personne à contacter en cas d'urgence</h3>
+                    <div class="grid">
+                        ${champ("Nom", valè("personne_urgence"))}
+                        ${champ("Téléphone", valè("urgence_telephonique", "telephone_urgence"))}
+                        ${champ("Relation", valè("relation_urgence"))}
+                    </div>
+                </section>
 
                 <section class="section">
-
-                    <h3>
-                        Suivi / Observations
-                    </h3>
-
+                    <h3>Suivi / Observations</h3>
                     <div class="field">
-
-                        <span>
-                            ${echapper(
-                                getField(
-                                    membre,
-                                    "observations"
-                                ) ||
-                                "Aucune observation."
-                            )}
-                        </span>
-
+                        <span>${echapper(
+                            valè("observation", "observations") === "-"
+                                ? "Aucune observation."
+                                : valè("observation", "observations")
+                        )}</span>
                     </div>
-
                 </section>
-
 
                 <div class="actions">
-
-                    <button
-                        class="action-btn primary"
-                        onclick="window.print()"
-                    >
+                    <button class="action-btn primary"
+                            onclick="window.print()">
                         🖨 Imprimer
                     </button>
 
-                    <button
-                        class="action-btn secondary"
-                        onclick="window.location.href='membre.html'"
-                    >
+                    <button class="action-btn secondary"
+                            onclick="window.location.href='membre.html'">
                         ← Retour à la liste
                     </button>
 
+                    <button class="action-btn secondary"
+                            onclick="window.location.href='index.html'">
+                        Retour à l'accueil
+                    </button>
                 </div>
-
             </div>
-
         </div>
     `;
-
 }
+
 
 
 // ======================================================
