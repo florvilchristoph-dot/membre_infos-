@@ -1,36 +1,30 @@
-// ======================================================
-// MEDFAH - APPLICATION
-// ======================================================
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    const SUPABASE_URL =
-        window.SUPABASE_URL || "";
-
-    const SUPABASE_ANON_KEY =
-        window.SUPABASE_ANON_KEY || "";
-
-    const TABLE = "membre_infos";
 
 
-    // --------------------------------------------------
-    // Vérification configuration
-    // --------------------------------------------------
+ // ======================================================
+ // MEDFAH - APPLICATION
+ // ======================================================
 
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+const SUPABASE_URL = window.SUPABASE_URL || "";
+const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "";
 
-        console.error(
-            "Configuration Supabase manquante."
-        );
+let clientMembresMEDFAH = null;
 
-        return;
-    }
-const clientMembresMEDFAH = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-);
+if (
+    SUPABASE_URL &&
+    SUPABASE_ANON_KEY &&
+    window.supabase
+) {
+    clientMembresMEDFAH = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+    );
+}
 
 async function obtenirEntetesAuthentifiees() {
+    if (!clientMembresMEDFAH) {
+        throw new Error("Configuration Supabase indisponible.");
+    }
+
     const { data, error } =
         await clientMembresMEDFAH.auth.getSession();
 
@@ -48,78 +42,36 @@ async function obtenirEntetesAuthentifiees() {
     };
 }
 
-    // --------------------------------------------------
-    // Page actuelle
-    // --------------------------------------------------
-
-    const currentPage =
-        window.location.pathname
-            .split("/")
-            .pop()
-            .toLowerCase();
-
-
-    // ==================================================
-    // ACCUEIL
-    // ==================================================
-
-    if (
-        currentPage === "" ||
-        currentPage === "index.html"
-    ) {
-
-        chargerStatistiques();
-
+document.addEventListener("DOMContentLoaded", () => {
+    if (!clientMembresMEDFAH) {
+        console.error("Configuration Supabase manquante.");
         return;
     }
 
+    const currentPage = window.location.pathname
+        .split("/")
+        .pop()
+        .toLowerCase();
 
-    // ==================================================
-    // PAGE MEMBRES
-    // ==================================================
-
-    if (
-        currentPage === "membre.html"
-    ) {
-
-        const app =
-            document.getElementById("app");
-
-        if (!app) return;
-
-
-        const params =
-            new URLSearchParams(
-                window.location.search
-            );
-
-
-        const memberId =
-            params.get("id");
-
-
-        const recherche =
-            params.get("q") || "";
-
-
-        if(memberId){
-
-            chargerMembre(
-                memberId,
-                app
-            );
-
-        }else{
-
-            chargerMembres(
-                recherche,
-                app
-            );
-
-        }
-
+    if (currentPage === "" || currentPage === "index.html") {
+        chargerStatistiques();
+        return;
     }
 
+    if (currentPage === "membre.html") {
+        const app = document.getElementById("app");
+        if (!app) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const memberId = params.get("id");
+        const recherche = params.get("q") || "";
+
+        if (memberId) {
+            chargerMembre(memberId, app);
+        } else {
+            chargerMembres(recherche, app);
+        }
+    }
 });
 
 
@@ -706,7 +658,7 @@ async function chargerMembre(
     `;
 
 
-    try{
+    try{const entetes = await obtenirEntetesAuthentifiees();
 
         const url =
             `${window.SUPABASE_URL}/rest/v1/membre_infos` +
@@ -714,24 +666,20 @@ async function chargerMembre(
             `&select=*`;
 
 
-        const response =
-            await fetch(
-                url,
-                {
-                    method:"GET",
+    
+const entetes = await obtenirEntetesAuthentifiees();
 
-                    headers:{
-                        "apikey":
-                            window.SUPABASE_ANON_KEY,
+const response = await fetch(url, {headers: {
+    ...entetes,
+    "Content-Type": "application/json"
+}
+    method: "GET",
+    : {
+        ...entetes,
+        "Content-Type": "application/json"
+    }
+});
 
-                        "Authorization":
-                            `Bearer ${window.SUPABASE_ANON_KEY}`,
-
-                        "Content-Type":
-                            "application/json"
-                    }
-                }
-            );
 
 
         if(!response.ok){
