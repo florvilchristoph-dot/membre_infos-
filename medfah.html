@@ -2536,93 +2536,111 @@ function searchMembers(){
 ========================================== */
 
 
-
 function viewMember(index) {
     const member = allMembers[index];
-
     if (!member) return;
 
     function valeur(...cles) {
         for (const cle of cles) {
             const v = member[cle];
-
-            if (
-                v !== null &&
-                v !== undefined &&
-                String(v).trim() !== ""
-            ) {
+            if (v !== null && v !== undefined &&
+                String(v).trim() !== "") {
                 return v;
             }
         }
-
         return "Non renseigné";
     }
 
-    const fields = [
-        ["Date de création", valeur("cree_a", "created_at", "crée_a")],
-        ["Code", valeur("code")],
-        ["N° carte", valeur("carte_numerique", "numero_carte")],
-        ["Photo", valeur("photo")],
-        ["Code QR", valeur("code_qr")],
+    function champ(label, ...cles) {
+        return `
+            <div class="detail">
+                <strong>${escapeHTML(label)}</strong>
+                <span>${escapeHTML(String(valeur(...cles)))}</span>
+            </div>`;
+    }
 
-        ["Nom", valeur("nom")],
-        ["Prénom", valeur("prénom", "prenom")],
-        ["Sexe", valeur("sexe")],
-        ["Nom du père", valeur("nom père", "nom_pere", "nom_du_pere")],
-        ["Nom de la mère", valeur("nom mere", "nom_mere", "nom de la mère")],
-        ["Nom du conjoint", valeur("nom_conjoint")],
-        ["Nombre d'enfants", valeur("nombre_enfants")],
-
-        ["Date de naissance", valeur("date_naissance")],
-        ["Lieu de naissance", valeur("lieu_naissance")],
-        ["Nationalité", valeur("nationaliste")],
-        ["Situation matrimoniale", valeur("situation_matrimoniale")],
-
-        ["Adresse", valeur("adresse")],
-        ["Téléphone", valeur("telephone", "telefone")],
-        ["Téléphone secondaire", valeur("telephone_secondaire")],
-        ["WhatsApp", valeur("whatsapp", "watsapp")],
-        ["Email", valeur("email")],
-        ["Commune", valeur("commune")],
-        ["Département", valeur("departement")],
-
-        ["Fonction", valeur("fonction")],
-        ["Profession", valeur("profession")],
-        ["Assemblée", valeur("assemblee", "assemblée")],
-        ["Statut", valeur("statut")],
-
-        ["Date d'adhésion", valeur("date_adhesion")],
-        ["Date de conversion", valeur("conversion_date")],
-        ["Date de baptême", valeur("date_baptêteme", "date_bapteme")],
-
-        ["Pasteur responsable", valeur("pasteur_responsable")],
-        ["Formation biblique", valeur("formation_biblique")],
-        ["Groupe d'église", valeur("groupe_eglise")],
-
-        ["Personne à contacter en urgence", valeur("personne_urgence")],
-        ["Téléphone d'urgence", valeur("urgence_ téléphonique", "urgence_telephonique", "telephone_urgence")],
-        ["Relation d'urgence", valeur("relation_urgence")],
-
-        ["Date d'inscription", valeur("inscription de la date", "date_inscription")],
-        ["Responsable de l'enregistrement", valeur("responsable_anregistrement", "responsable_enregistrement")],
-        ["Observations", valeur("observation")],
-        ["Mis à jour le", valeur("mis à jour à", "updated_at")]
-    ];
+    function section(titre, champs) {
+        return `
+            <section class="section dossier-section">
+                <h3>${escapeHTML(titre)}</h3>
+                <div class="details">
+                    ${champs.join("")}
+                </div>
+            </section>`;
+    }
 
     let html = "";
 
-    fields.forEach(([label, value]) => {
-        html += `
-            <div class="detail">
-                <strong>${escapeHTML(label)}</strong>
-                <span>${escapeHTML(String(value))}</span>
-            </div>
-        `;
-    });
+    html += section("1. Informations personnelles", [
+        champ("Code membre", "code"),
+        champ("N° carte", "numero_carte", "carte_numerique"),
+        champ("Photo", "photo"),
+        champ("Code QR", "code_qr", "qr_code"),
+        champ("Nom", "nom"),
+        champ("Prénom", "prénom", "prenom"),
+        champ("Nom du père", "nom père", "nom_pere", "nom_du_pere"),
+        champ("Nom de la mère", "nom mere", "nom_mere", "nom de la mère"),
+        champ("Nom du conjoint", "nom_conjoint"),
+        champ("Nombre d'enfants", "nombre_enfants"),
+        champ("NIF", "nif"),
+        champ("CIN", "cin"),
+        champ("Sexe", "sexe"),
+        champ("Date de naissance", "date_naissance"),
+        champ("Lieu de naissance", "lieu_naissance"),
+        champ("Nationalité", "nationaliste"),
+        champ("Situation matrimoniale", "situation_matrimoniale")
+    ]);
+
+    html += section("2. Contact", [
+        champ("Adresse", "adresse"),
+        champ("Téléphone", "telephone", "telefone"),
+        champ("Téléphone secondaire", "telephone_secondaire"),
+        champ("WhatsApp", "whatsapp", "watsapp"),
+        champ("Email", "email"),
+        champ("Commune", "commune"),
+        champ("Département", "departement")
+    ]);
+
+    html += section("3. Ministères et responsabilités", [
+        champ("Fonction", "fonction"),
+        champ("Profession", "profession"),
+        champ("Assemblée", "assemblee", "assemblée"),
+        champ("Statut", "statut", "status")
+    ]);
+
+    html += section("4. Vie spirituelle", [
+        champ("Date d'adhésion", "date_adhesion"),
+        champ("Date de conversion", "conversion_date", "date_conversion"),
+        champ("Date de baptême", "date_baptêteme", "date_bapteme"),
+        champ("Pasteur responsable", "pasteur_responsable"),
+        champ("Formation biblique", "formation_biblique"),
+        champ("Groupe d'église", "groupe_eglise")
+    ]);
+
+    html += section("5. Personne à contacter en cas d'urgence", [
+        champ("Personne à contacter", "personne_urgence"),
+        champ("Téléphone d'urgence",
+            "urgence_ téléphonique",
+            "urgence_téléphonique",
+            "urgence_telephonique",
+            "telephone_urgence"),
+        champ("Relation", "relation_urgence")
+    ]);
+
+    html += section("6. Suivi / Observations", [
+        champ("Date d'inscription",
+            "inscription de la date", "date_inscription", "created_at"),
+        champ("Responsable de l'enregistrement",
+            "responsable_anregistrement",
+            "responsable_enregistrement"),
+        champ("Observations", "observation", "observations"),
+        champ("Mis à jour le", "mis à jour à", "updated_at")
+    ]);
 
     document.getElementById("memberDetails").innerHTML = html;
     document.getElementById("memberModal").classList.add("show");
 }
+
 
 
 
