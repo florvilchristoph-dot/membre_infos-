@@ -2542,10 +2542,12 @@ function viewMember(index) {
 
     function valeur(...cles) {
         for (const cle of cles) {
-            const v = member[cle];
-            if (v !== null && v !== undefined &&
-                String(v).trim() !== "") {
-                return v;
+            if (Object.prototype.hasOwnProperty.call(member, cle)) {
+                const v = member[cle];
+                if (v !== null && v !== undefined &&
+                    String(v).trim() !== "") {
+                    return v;
+                }
             }
         }
         return "Non renseigné";
@@ -2561,38 +2563,35 @@ function viewMember(index) {
 
     function section(titre, champs) {
         return `
-            <section class="section dossier-section">
-                <h3>${escapeHTML(titre)}</h3>
-                <div class="details">
+            <div class="dossier-groupe"
+                 style="display:block;width:100%;margin:0 0 20px;padding:20px;border-radius:18px;background:#fff;box-sizing:border-box;">
+                <h3 style="display:block;margin:0 0 18px;font-size:22px;">
+                    ${escapeHTML(titre)}
+                </h3>
+                <div class="details"
+                     style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;">
                     ${champs.join("")}
                 </div>
-            </section>`;
+            </div>`;
     }
 
     let html = "";
 
-    
-html += section("1. Informations personnelles", [
-    champ("Nom", "nom"),
-    champ("Prénom", "prénom", "prenom"),
-    champ("Date de naissance", "date_naissance"),
-    champ("Lieu de naissance", "lieu_naissance"),
-    champ("CIN", "cin"),
-    champ("NIF", "nif"),
-    champ("Nom du père", "nom père", "nom_pere", "nom_du_pere"),
-    champ("Nom de la mère", "nom mere", "nom_mere", "nom de la mère"),
-    champ("Nom du conjoint / de la conjointe", "nom_conjoint"),
-    champ("Sexe", "sexe"),
-    champ("Nationalité", "nationaliste", "nationalité", "nationalite"),
-    champ("Situation matrimoniale", "situation_matrimoniale"),
-    champ("Nombre d'enfants", "nombre_enfants"),
-
-    champ("Code membre", "code"),
-    champ("N° carte", "numero_carte", "carte_numerique"),
-    champ("Photo", "photo"),
-    champ("Code QR", "code_qr", "qr_code")
-]);
-
+    html += section("1. Informations personnelles", [
+        champ("Nom", "nom"),
+        champ("Prénom", "prenom", "prénom"),
+        champ("Date de naissance", "date_naissance"),
+        champ("Lieu de naissance", "lieu_naissance"),
+        champ("CIN", "cin"),
+        champ("NIF", "nif"),
+        champ("Nom du père", "nom père", "nom_pere", "nom_du_pere"),
+        champ("Nom de la mère", "nom mere", "nom_mere", "nom de la mère"),
+        champ("Nom du conjoint / de la conjointe", "nom_conjoint"),
+        champ("Sexe", "sexe"),
+        champ("Nationalité", "nationaliste", "nationalité", "nationalite"),
+        champ("Situation matrimoniale", "situation_matrimoniale"),
+        champ("Nombre d'enfants", "nombre_enfants")
+    ]);
 
     html += section("2. Contact", [
         champ("Adresse", "adresse"),
@@ -2622,30 +2621,32 @@ html += section("1. Informations personnelles", [
 
     html += section("5. Personne à contacter en cas d'urgence", [
         champ("Personne à contacter", "personne_urgence"),
-        champ("Téléphone d'urgence",
-            "urgence_ téléphonique",
-            "urgence_téléphonique",
-            "urgence_telephonique",
-            "telephone_urgence"),
+        champ("Téléphone d'urgence", "urgence_ téléphonique",
+              "urgence_téléphonique", "urgence_telephonique",
+              "telephone_urgence"),
         champ("Relation", "relation_urgence")
     ]);
 
     html += section("6. Suivi / Observations", [
-        champ("Date d'inscription",
-            "inscription de la date", "date_inscription", "created_at"),
+        champ("Date d'inscription", "inscription de la date",
+              "date_inscription", "created_at", "cree_a"),
         champ("Responsable de l'enregistrement",
-            "responsable_anregistrement",
-            "responsable_enregistrement"),
+              "responsable_anregistrement", "responsable_enregistrement"),
         champ("Observations", "observation", "observations"),
         champ("Mis à jour le", "mis à jour à", "updated_at")
     ]);
 
-    document.getElementById("memberDetails").innerHTML = html;
-    document.getElementById("memberModal").classList.add("show");
+    const conteneur = document.getElementById("memberDetails");
+    const modal = document.getElementById("memberModal");
+
+    if (!conteneur || !modal) {
+        alert("Erreur : la fenêtre des informations du membre est introuvable.");
+        return;
+    }
+
+    conteneur.innerHTML = html;
+    modal.classList.add("show");
 }
-
-
-
 
 
 function closeMember(){
