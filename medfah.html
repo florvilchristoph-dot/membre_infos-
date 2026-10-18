@@ -2621,25 +2621,27 @@ function viewMember(index) {
 
     let html = "";
 
-    html += section("1. Informations personnelles", [
-        champ("Nom", "nom"),
-        champ("Prénom", "prenom", "prénom"),
-        champ("Date de naissance", "date_naissance"),
-        champ("Lieu de naissance", "lieu_naissance"),
-        champ("CIN", "cin"),
-        champ("NIF", "nif"),
-        champ("Nom du père", "nom père", "nom_pere", "nom_du_pere"),
-        champ("Nom de la mère", "nom mere", "nom_mere", "nom de la mère"),
-        champ("Nom du conjoint / de la conjointe", "nom_conjoint"),
-        champ("Sexe", "sexe"),
-        champ("Nationalité", "nationaliste", "nationalité", "nationalite"),
-        champ("Situation matrimoniale", "situation_matrimoniale"),
-        champ("Nombre d'enfants", "nombre_enfants")
-        champ("Code du membre", "code"),
-champ("Numéro de carte", "numero_carte"),
-champ("Code QR", "qr_code"),
-champ("Photo", "photo"),
-    ]);
+    
+html += section("1. Informations personnelles", [
+    champ("Nom", "nom"),
+    champ("Prénom", "prenom", "prénom"),
+    champ("Date de naissance", "date_naissance"),
+    champ("Lieu de naissance", "lieu_naissance"),
+    champ("CIN", "cin"),
+    champ("NIF", "nif"),
+    champ("Nom du père", "nom père", "nom_pere", "nom_du_pere"),
+    champ("Nom de la mère", "nom mere", "nom_mere", "nom de la mère"),
+    champ("Nom du conjoint / de la conjointe", "nom_conjoint"),
+    champ("Sexe", "sexe"),
+    champ("Nationalité", "nationaliste", "nationalité", "nationalite"),
+    champ("Situation matrimoniale", "situation_matrimoniale"),
+    champ("Nombre d'enfants", "nombre_enfants"),
+    champ("Code du membre", "code"),
+    champ("Numéro de carte", "numero_carte"),
+    champ("Code QR", "qr_code"),
+    champ("Photo", "photo")
+]);
+
 
     html += section("2. Contact", [
         champ("Adresse", "adresse"),
