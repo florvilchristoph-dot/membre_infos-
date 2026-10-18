@@ -2536,37 +2536,47 @@ function searchMembers(){
 ========================================== */
 
 
+
 function viewMember(index) {
     const member = allMembers[index];
 
     if (!member) return;
 
-    // Chèche premye valè ki egziste pou yon chan.
     function valeur(...cles) {
         for (const cle of cles) {
             const v = member[cle];
-            if (v !== null && v !== undefined && String(v).trim() !== "") {
+
+            if (
+                v !== null &&
+                v !== undefined &&
+                String(v).trim() !== ""
+            ) {
                 return v;
             }
         }
+
         return "Non renseigné";
     }
 
     const fields = [
+        ["Date de création", valeur("cree_a", "created_at", "crée_a")],
         ["Code", valeur("code")],
-        ["N° carte", valeur("numero_carte", "carte_numerique")],
+        ["N° carte", valeur("carte_numerique", "numero_carte")],
+        ["Photo", valeur("photo")],
+        ["Code QR", valeur("code_qr")],
+
         ["Nom", valeur("nom")],
-        ["Prénom", valeur("prenom", "prénom")],
+        ["Prénom", valeur("prénom", "prenom")],
         ["Sexe", valeur("sexe")],
+        ["Nom du père", valeur("nom père", "nom_pere", "nom_du_pere")],
+        ["Nom de la mère", valeur("nom mere", "nom_mere", "nom de la mère")],
+        ["Nom du conjoint", valeur("nom_conjoint")],
+        ["Nombre d'enfants", valeur("nombre_enfants")],
+
         ["Date de naissance", valeur("date_naissance")],
         ["Lieu de naissance", valeur("lieu_naissance")],
         ["Nationalité", valeur("nationaliste")],
         ["Situation matrimoniale", valeur("situation_matrimoniale")],
-
-        ["Nom du père", valeur("nom_pere", "nom père")],
-        ["Nom de la mère", valeur("nom_mere", "nom mere", "nom mère")],
-        ["Nom du conjoint", valeur("nom_conjoint")],
-        ["Nombre d'enfants", valeur("nombre_enfants")],
 
         ["Adresse", valeur("adresse")],
         ["Téléphone", valeur("telephone", "telefone")],
@@ -2579,21 +2589,24 @@ function viewMember(index) {
         ["Fonction", valeur("fonction")],
         ["Profession", valeur("profession")],
         ["Assemblée", valeur("assemblee", "assemblée")],
-        ["Statut", valeur("statut", "status")],
+        ["Statut", valeur("statut")],
 
         ["Date d'adhésion", valeur("date_adhesion")],
-        ["Date de conversion", valeur("conversion_date", "date_conversion")],
-        ["Date de baptême", valeur("date_bapteme", "date_baptêteme")],
+        ["Date de conversion", valeur("conversion_date")],
+        ["Date de baptême", valeur("date_baptêteme", "date_bapteme")],
+
         ["Pasteur responsable", valeur("pasteur_responsable")],
         ["Formation biblique", valeur("formation_biblique")],
         ["Groupe d'église", valeur("groupe_eglise")],
 
         ["Personne à contacter en urgence", valeur("personne_urgence")],
-        ["Téléphone d'urgence", valeur("urgence_telephonique", "telephone_urgence")],
+        ["Téléphone d'urgence", valeur("urgence_ téléphonique", "urgence_telephonique", "telephone_urgence")],
         ["Relation d'urgence", valeur("relation_urgence")],
 
-        ["Responsable de l'enregistrement", valeur("responsable_enregistrement")],
-        ["Observations", valeur("observation", "observations")]
+        ["Date d'inscription", valeur("inscription de la date", "date_inscription")],
+        ["Responsable de l'enregistrement", valeur("responsable_anregistrement", "responsable_enregistrement")],
+        ["Observations", valeur("observation")],
+        ["Mis à jour le", valeur("mis à jour à", "updated_at")]
     ];
 
     let html = "";
@@ -2610,6 +2623,7 @@ function viewMember(index) {
     document.getElementById("memberDetails").innerHTML = html;
     document.getElementById("memberModal").classList.add("show");
 }
+
 
 
 
