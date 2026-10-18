@@ -720,6 +720,32 @@ td{
            name="nombre_enfants" min="0"
            placeholder="Nombre d'enfants">
 </div>
+        
+<div class="form-group">
+    <label for="code">Code du membre</label>
+    <input type="text" id="code" name="code"
+           placeholder="Code du membre">
+</div>
+
+<div class="form-group">
+    <label for="numero_carte">Numéro de carte</label>
+    <input type="text" id="numero_carte"
+           name="numero_carte"
+           placeholder="Numéro de carte">
+</div>
+
+<div class="form-group">
+    <label for="qr_code">Code QR</label>
+    <input type="text" id="qr_code" name="qr_code"
+           placeholder="Code ou contenu QR">
+</div>
+
+<div class="form-group">
+    <label for="photo">Photo du membre</label>
+    <input type="text" id="photo" name="photo"
+           placeholder="Lien de la photo">
+</div>
+
 
       <label>Date de naissance — Dat nesans</label>
       <input name="date_naissance" type="date">
@@ -2609,6 +2635,10 @@ function viewMember(index) {
         champ("Nationalité", "nationaliste", "nationalité", "nationalite"),
         champ("Situation matrimoniale", "situation_matrimoniale"),
         champ("Nombre d'enfants", "nombre_enfants")
+        champ("Code du membre", "code"),
+champ("Numéro de carte", "numero_carte"),
+champ("Code QR", "qr_code"),
+champ("Photo", "photo"),
     ]);
 
     html += section("2. Contact", [
