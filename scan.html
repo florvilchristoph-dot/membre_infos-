@@ -88,6 +88,7 @@
              */
             function onScanSuccess(decodedText) {
                 console.log(`Kòd jwenn: ${decodedText}`);
+                alert("QR Code la genyen: " + decodedText);
                 resultContainer.innerHTML = `<p style="color: green;">Manm idantifye! Y ap redirije w...</p>`;
                 
                 html5QrCode.stop().then(() => {
