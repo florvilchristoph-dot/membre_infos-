@@ -2864,6 +2864,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 
 
 /* OUVRIR LE FORMULAIRE — ACCÈS ADMINISTRATEUR UNIQUEMENT */
+    
 async function ouvrirFormulaireMembre() {
     const modal = document.getElementById("ajoutMembreModal");
     const form = document.getElementById("formAjoutMembre");
@@ -2874,48 +2875,61 @@ async function ouvrirFormulaireMembre() {
         return;
     }
 
-    // Vérifier que Supabase est disponible.
-    if (!window.supabase || !supabaseClient) {
-        alert("Connexion sécurisée indisponible. Réessayez.");
+    // Rekipere kliyan Supabase ki deja egziste a.
+    const client =
+        window.supabaseClient ||
+        window.clientMembresMEDFAH ||
+        window.supabaseClientMEDFAH ||
+        (typeof supabaseClient !== "undefined"
+            ? supabaseClient
+            : null);
+
+    if (!client || !client.auth) {
+        alert("Connexion Supabase indisponible. Réessayez.");
         return;
     }
 
     try {
-        // Vérifier la session réellement connectée.
-        const { data: sessionData, error: sessionError } =
-            await supabaseClient.auth.getSession();
+        // Verifye sesyon itilizatè a.
+        const { data, error } = await client.auth.getSession();
 
-        if (sessionError || !sessionData.session) {
-            modal.style.display = "none";
-            alert("Accès refusé. Connectez-vous comme administrateur.");
+        if (error || !data || !data.session) {
+            alert("Veuillez vous connecter avant d'ajouter un membre.");
             return;
         }
 
-        const userId = sessionData.session.user.id;
+        const userId = data.session.user.id;
 
-        // Vérifier le rôle enregistré dans Supabase.
-        const { data: roleData, error: roleError } =
-            await supabaseClient
-                .from("medfah_user_roles")
-                .select("role")
-                .eq("user_id", userId)
-                .maybeSingle();
+        // Verifye wòl administratè a nan Supabase.
+        const { data: role, error: roleError } = await client
+            .from("medfah_user_roles")
+            .select("role")
+            .eq("user_id", userId)
+            .maybeSingle();
 
-        if (roleError || !roleData ||
-            !["admin_principal", "admin_secondaire"].includes(roleData.role)) {
-            modal.style.display = "none";
-            alert("Accès refusé. Vous n'avez pas l'autorisation d'ajouter un membre.");
+        if (roleError) {
+            console.error("Erreur de vérification du rôle :", roleError);
+            alert("Impossible de vérifier votre autorisation.");
             return;
         }
 
-        // Autorisation confirmée : ouvrir le formulaire.
+        if (
+            !role ||
+            !["admin_principal", "admin_secondaire"].includes(role.role)
+        ) {
+            alert("Vous n'avez pas l'autorisation d'ajouter un membre.");
+            return;
+        }
+
+        // Louvri fòm nan sèlman si otorizasyon an valide.
         form.reset();
         message.textContent = "";
         modal.style.display = "block";
 
     } catch (error) {
-        console.error("Vérification des droits :", error);
-        modal.style.display = "none";
-        alert("Impossible de vérifier vos droits. Accès refusé.");
+        console.error("Erreur ouverture formulaire :", error);
+        alert("Une erreur est survenue. Réessayez.");
     }
+}
+
 }
