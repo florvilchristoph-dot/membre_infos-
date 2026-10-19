@@ -231,20 +231,20 @@ async function chargerStatistiques(){
 
 
 
-async function chargerMembres(recherche, app) {
+
+async function chargerMembre(id, app) {
     app.innerHTML = `
         <div class="message">
-            Chargement des membres...
+            Chargement du dossier du membre...
         </div>
     `;
 
     try {
-        // Récupérer le véritable jeton de la session administrateur
         const entetes = await obtenirEntetesAuthentifiees();
 
         const url =
             `${window.SUPABASE_URL}/rest/v1/membre_infos` +
-            `?select=*&order=id.desc`;
+            `?id=eq.${encodeURIComponent(id)}&select=*`;
 
         const response = await fetch(url, {
             method: "GET",
@@ -257,477 +257,42 @@ async function chargerMembres(recherche, app) {
         if (!response.ok) {
             const details = await response.text();
             console.error(
-                "Erreur Supabase :",
+                "Erreur chargement membre :",
                 response.status,
                 details
             );
-
-            throw new Error(
-                "Erreur Supabase : " + response.status
-            );
+            throw new Error("Erreur Supabase : " + response.status);
         }
 
-        const membres = await response.json();
+        const data = await response.json();
 
-        afficherListe(
-            membres,
-            recherche,
-            app
-        );
-
-    } catch (error) {
-        console.error(
-            "Chargement des membres impossible :",
-            error
-        );
-
-        app.innerHTML = `
-            <div class="message error">
-                Impossible de charger les membres.
-                <br><br>
-                ${error.message ===
-                "Session absente. Connectez-vous d'abord dans Administration."
-                    ? "Connectez-vous d'abord dans Administration."
-                    : "Vérifiez la session et les autorisations Supabase."}
-            </div>
-        `;
-    }
-}
-
-
-// ======================================================
-// AFFICHER LISTE
-// ======================================================
-
-function afficherListe(
-    membres,
-    recherche,
-    app
-){
-
-    let resultat =
-        filtrerMembres(
-            membres,
-            recherche
-        );
-
-
-    app.innerHTML = `
-
-        <div class="topbar">
-
-            <h2>
-                👥 Liste des Membres
-            </h2>
-
-            <div class="search-area">
-
-                <input
-                    type="search"
-                    id="searchMember"
-                    placeholder="Rechercher par nom, prénom, assemblée..."
-                    value="${echapper(recherche)}"
-                >
-
-                <button
-                    id="searchButton"
-                >
-                    🔍 Rechercher
-                </button>
-
-            </div>
-
-            <div class="result-info">
-                ${resultat.length}
-                membre(s) trouvé(s)
-            </div>
-
-        </div>
-
-        <div id="tableArea"></div>
-    `;
-
-
-    afficherTableau(
-        resultat
-    );
-
-
-    const input =
-        document.getElementById(
-            "searchMember"
-        );
-
-
-    const button =
-        document.getElementById(
-            "searchButton"
-        );
-
-
-    function effectuerRecherche(){
-
-        const texte =
-            input.value.trim();
-
-
-        const nouvelleURL =
-            texte
-                ? `membre.html?q=${encodeURIComponent(texte)}`
-                : "membre.html";
-
-
-        window.history.replaceState(
-            {},
-            "",
-            nouvelleURL
-        );
-
-
-        afficherTableau(
-            filtrerMembres(
-                membres,
-                texte
-            )
-        );
-
-    }
-
-
-    button.addEventListener(
-        "click",
-        effectuerRecherche
-    );
-
-
-    input.addEventListener(
-        "keydown",
-        event => {
-
-            if(event.key === "Enter"){
-
-                effectuerRecherche();
-
-            }
-
-        }
-    );
-
-}
-
-
-// ======================================================
-// TABLEAU
-// ======================================================
-
-function afficherTableau(
-    resultat
-){
-
-    const tableArea =
-        document.getElementById(
-            "tableArea"
-        );
-
-
-    const info =
-        document.querySelector(
-            ".result-info"
-        );
-
-
-    if(info){
-
-        info.textContent =
-            `${resultat.length} membre(s) trouvé(s)`;
-
-    }
-
-
-    if(!resultat.length){
-
-        tableArea.innerHTML = `
-            <div class="message">
-                Aucun membre ne correspond à votre recherche.
-            </div>
-        `;
-
-        return;
-    }
-
-
-    tableArea.innerHTML = `
-
-        <div class="table-wrapper">
-
-            <table>
-
-                <thead>
-
-                    <tr>
-                        <th>Nom</th>
-                        <th>Prénom</th>
-                        <th>Assemblée</th>
-                        <th>Téléphone</th>
-                        <th>Fonction</th>
-                        <th>Profession</th>
-                        <th>Action</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    ${resultat
-                        .map(
-                            membre =>
-                                ligneMembre(membre)
-                        )
-                        .join("")}
-
-                </tbody>
-
-            </table>
-
-        </div>
-    `;
-
-}
-
-
-// ======================================================
-// FILTRER
-// ======================================================
-
-function filtrerMembres(
-    membres,
-    recherche
-){
-
-    const texte =
-        String(
-            recherche || ""
-        )
-        .toLowerCase()
-        .trim();
-
-
-    if(!texte){
-
-        return membres;
-
-    }
-
-
-    return membres.filter(
-        membre => {
-
-            return Object.values(
-                membre
-            ).some(
-                valeur =>
-                    String(
-                        valeur ?? ""
-                    )
-                    .toLowerCase()
-                    .includes(texte)
-            );
-
-        }
-    );
-
-}
-
-
-// ======================================================
-// LIGNE MEMBRE
-// ======================================================
-
-function ligneMembre(
-    membre
-){
-
-    const nom =
-        getField(
-            membre,
-            "nom"
-        );
-
-
-    const prenom =
-        getField(
-            membre,
-            "prenom"
-        );
-
-
-    const assemblee =
-        getField(
-            membre,
-            "assemblee"
-        );
-
-
-    const telephone =
-        getField(
-            membre,
-            "telephone"
-        ) ||
-        getField(
-            membre,
-            "telefone"
-        ) ||
-        getField(
-            membre,
-            "phone"
-        );
-
-
-    const fonction =
-        getField(
-            membre,
-            "fonction"
-        );
-
-
-    const profession =
-        getField(
-            membre,
-            "profession"
-        );
-
-
-    return `
-
-        <tr>
-
-            <td>
-                ${echapper(nom || "-")}
-            </td>
-
-            <td>
-                ${echapper(prenom || "-")}
-            </td>
-
-            <td>
-                ${echapper(assemblee || "-")}
-            </td>
-
-            <td>
-                ${echapper(telephone || "-")}
-            </td>
-
-            <td>
-                ${echapper(fonction || "-")}
-            </td>
-
-            <td>
-                ${echapper(profession || "-")}
-            </td>
-
-            <td>
-
-                <button
-                    class="voir-btn"
-                    onclick="window.location.href='membre.html?id=${encodeURIComponent(membre.id)}'"
-                >
-                    Voir
-                </button>
-
-            </td>
-
-        </tr>
-    `;
-
-}
-
-
-// ======================================================
-// CHARGER UN MEMBRE
-// ======================================================
-
-async function chargerMembre(
-    id,
-    app
-){
-
-    app.innerHTML = `
-        <div class="message">
-            Chargement du dossier du membre...
-        </div>
-    `;
-
-
-    try{const entetes = await obtenirEntetesAuthentifiees();
-
-        const url =
-            `${window.SUPABASE_URL}/rest/v1/membre_infos` +
-            `?id=eq.${encodeURIComponent(id)}` +
-            `&select=*`;
-
-
-    
-const entetes = await obtenirEntetesAuthentifiees();
-
-const response = await fetch(url, {headers: {
-    ...entetes,
-    "Content-Type": "application/json"
-}
-    method: "GET",
-    : {
-        ...entetes,
-        "Content-Type": "application/json"
-    }
-});
-
-
-
-        if(!response.ok){
-
-            throw new Error(
-                "Erreur Supabase : " +
-                response.status
-            );
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        if(!data.length){
-
+        if (!data.length) {
             app.innerHTML = `
                 <div class="message error">
                     Aucun membre trouvé.
                 </div>
             `;
-
             return;
-
         }
 
+        afficherDossier(data[0], app);
 
-        afficherDossier(
-            data[0],
-            app
+    } catch (error) {
+        console.error(
+            "Erreur chargement dossier :",
+            error
         );
-
-
-    }catch(error){
-
-        console.error(error);
 
         app.innerHTML = `
             <div class="message error">
-                Impossible de charger le dossier.
+                Impossible de charger le dossier du membre.
+                <br><br>
+                ${echapper(error.message)}
             </div>
         `;
-
     }
-
 }
+
 
 
 // ======================================================
