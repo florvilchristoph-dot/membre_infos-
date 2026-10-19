@@ -44,9 +44,21 @@ async function obtenirEntetesAuthentifiees() {
 
 document.addEventListener("DOMContentLoaded", () => {
     if (!clientMembresMEDFAH) {
-        console.error("Configuration Supabase manquante.");
-        return;
+    console.error("Configuration Supabase manquante.");
+
+    const app = document.getElementById("app");
+
+    if (app) {
+        app.innerHTML = `
+            <div class="message error">
+                Configuration Supabase indisponible.
+                Vérifiez config.js.
+            </div>
+        `;
     }
+
+    return;
+}
 
     const currentPage = window.location.pathname
         .split("/")
@@ -286,6 +298,144 @@ async function chargerMembre(id, app) {
         app.innerHTML = `
             <div class="message error">
                 Impossible de charger le dossier du membre.
+                <br><br>
+                ${echapper(error.message)}
+            </div>
+        `;
+    }
+}
+
+async function chargerMembres(recherche, app) {
+    app.innerHTML = `
+        <div class="message">
+            Chargement des membres...
+        </div>
+    `;
+
+    try {
+        const url =
+            `${SUPABASE_URL}/rest/v1/rpc/liste_membres_publics`;
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "apikey": SUPABASE_ANON_KEY,
+                "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: "{}"
+        });
+
+        if (!response.ok) {
+            const details = await response.text();
+            console.error("Erreur liste des membres :", details);
+            throw new Error(
+                "Impossible de charger les membres (" +
+                response.status + ")."
+            );
+        }
+
+        const membres = await response.json();
+        const terme = String(recherche || "")
+            .trim()
+            .toLocaleLowerCase("fr");
+
+        const resultat = membres.filter(membre => {
+            const nomComplet =
+                `${membre.nom || ""} ${membre.prenom || ""}`
+                    .toLocaleLowerCase("fr");
+
+            return nomComplet.includes(terme);
+        });
+
+        app.innerHTML = `
+            <div class="topbar">
+                <h2>Liste des membres MEDFAH</h2>
+                <div class="search-area">
+                    <input
+                        id="rechercheMembrePublic"
+                        type="search"
+                        placeholder="Rechercher par nom ou prénom..."
+                        aria-label="Rechercher un membre"
+                    >
+                    <button id="boutonRecherchePublic" type="button">
+                        Rechercher
+                    </button>
+                </div>
+                <p class="result-info" id="nombreMembresPublic"></p>
+            </div>
+
+            <div class="table-wrapper">
+                <table style="min-width:0">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpsListeMembresPublic"></tbody>
+                </table>
+            </div>
+        `;
+
+        const champRecherche =
+            document.getElementById("rechercheMembrePublic");
+
+        const corps =
+            document.getElementById("corpsListeMembresPublic");
+
+        const nombre =
+            document.getElementById("nombreMembresPublic");
+
+        function afficherResultats(texte) {
+            const filtre = membres.filter(membre => {
+                const complet =
+                    `${membre.nom || ""} ${membre.prenom || ""}`
+                        .toLocaleLowerCase("fr");
+
+                return complet.includes(
+                    String(texte || "").trim().toLocaleLowerCase("fr")
+                );
+            });
+
+            nombre.textContent =
+                `${filtre.length} membre(s)`;
+
+            if (!filtre.length) {
+                corps.innerHTML = `
+                    <tr>
+                        <td colspan="2">Aucun membre trouvé.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            corps.innerHTML = filtre.map(membre => `
+                <tr>
+                    <td>${echapper(membre.nom || "-")}</td>
+                    <td>${echapper(membre.prenom || "-")}</td>
+                </tr>
+            `).join("");
+        }
+
+        champRecherche.value = recherche || "";
+        afficherResultats(recherche);
+
+        document.getElementById("boutonRecherchePublic")
+            .addEventListener("click", () => {
+                afficherResultats(champRecherche.value);
+            });
+
+        champRecherche.addEventListener("input", () => {
+            afficherResultats(champRecherche.value);
+        });
+
+    } catch (error) {
+        console.error("Chargement des membres :", error);
+
+        app.innerHTML = `
+            <div class="message error">
+                Impossible de charger les membres.
                 <br><br>
                 ${echapper(error.message)}
             </div>
