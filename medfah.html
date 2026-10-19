@@ -491,7 +491,7 @@ td{
 </section>
 
 <!-- ACCUEIL ADMINISTRATION MEDFAH -->
-<section class="hero" id="accueilAdmin">
+<section class="hero" id="accueilAdmin" hidden>
     <h2>Administration générale MEDFAH</h2>
     <p>
         Espace central de gestion de l’Église,
@@ -2861,92 +2861,61 @@ document.addEventListener("DOMContentLoaded", async function() {
     }
 });
 
-/* OUVRIR LE FORMULAIRE D'AJOUT D'UN MEMBRE */
-function ouvrirFormulaireMembre() {
+
+
+/* OUVRIR LE FORMULAIRE — ACCÈS ADMINISTRATEUR UNIQUEMENT */
+async function ouvrirFormulaireMembre() {
     const modal = document.getElementById("ajoutMembreModal");
     const form = document.getElementById("formAjoutMembre");
     const message = document.getElementById("messageAjoutMembre");
 
-    if (!modal || !form) {
+    if (!modal || !form || !message) {
         alert("Le formulaire d'ajout est introuvable.");
         return;
     }
 
-    form.reset();
-    message.textContent = "";
-    modal.style.display = "block";
-}
-
-/* FERMER LE FORMULAIRE */
-function fermerFormulaireMembre() {
-    document.getElementById("ajoutMembreModal").style.display = "none";
-}
-
-/* ENREGISTRER LE NOUVEAU MEMBRE */
-document.getElementById("formAjoutMembre").addEventListener("submit", async function(e) {
-    e.preventDefault();
-
-    const form = e.currentTarget;
-    const bouton = document.getElementById("btnEnregistrerMembre");
-    const message = document.getElementById("messageAjoutMembre");
-
-    if (!supabaseClient) {
-        message.textContent = "❌ Supabase n'est pas configuré.";
+    // Vérifier que Supabase est disponible.
+    if (!window.supabase || !supabaseClient) {
+        alert("Connexion sécurisée indisponible. Réessayez.");
         return;
     }
 
-    const donneesFormulaire = new FormData(form);
-    const donnees = Object.fromEntries(donneesFormulaire.entries());
-
-    /* Nettoyer les champs vides pour les dates et les textes */
-    Object.keys(donnees).forEach(function(cle) {
-        if (typeof donnees[cle] === "string") {
-            donnees[cle] = donnees[cle].trim();
-        }
-
-        if (donnees[cle] === "") {
-            donnees[cle] = null;
-        }
-    });
-
-    /* Générer un code de membre unique */
-    donnees.code = "MEDFAH-" + Date.now().toString(36).toUpperCase();
-    donnees.date_inscription = new Date().toISOString();
-    donnees.observation = donnees.observation || "Aucune observation.";
-
-    bouton.disabled = true;
-    message.textContent = "⏳ Enregistrement en cours...";
-
     try {
-        const { data, error } = await supabaseClient
-            .from("membre_infos")
-            .insert([donnees])
-            .select();
+        // Vérifier la session réellement connectée.
+        const { data: sessionData, error: sessionError } =
+            await supabaseClient.auth.getSession();
 
-        if (error) {
-            console.error("Erreur Supabase :", error);
-            message.textContent = "❌ Erreur : " + error.message;
+        if (sessionError || !sessionData.session) {
+            modal.style.display = "none";
+            alert("Accès refusé. Connectez-vous comme administrateur.");
             return;
         }
 
-        message.textContent = "✅ Membre enregistré avec succès !";
+        const userId = sessionData.session.user.id;
+
+        // Vérifier le rôle enregistré dans Supabase.
+        const { data: roleData, error: roleError } =
+            await supabaseClient
+                .from("medfah_user_roles")
+                .select("role")
+                .eq("user_id", userId)
+                .maybeSingle();
+
+        if (roleError || !roleData ||
+            !["admin_principal", "admin_secondaire"].includes(roleData.role)) {
+            modal.style.display = "none";
+            alert("Accès refusé. Vous n'avez pas l'autorisation d'ajouter un membre.");
+            return;
+        }
+
+        // Autorisation confirmée : ouvrir le formulaire.
         form.reset();
+        message.textContent = "";
+        modal.style.display = "block";
 
-        await loadMembers();
-
-        setTimeout(function() {
-            fermerFormulaireMembre();
-        }, 1200);
-
-    } catch (erreur) {
-        console.error(erreur);
-        message.textContent = "❌ Une erreur est survenue pendant l'enregistrement.";
-    } finally {
-        bouton.disabled = false;
+    } catch (error) {
+        console.error("Vérification des droits :", error);
+        modal.style.display = "none";
+        alert("Impossible de vérifier vos droits. Accès refusé.");
     }
-});
-
-</script>
-
-</body>
-</html>
+}
