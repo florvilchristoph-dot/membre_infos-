@@ -861,24 +861,13 @@ td{
 
 <!-- MODAL -->
 <div class="modal" id="memberModal">
-
-    <div class="modal-card"><div class="modal-card" style="max-height:90vh; overflow-y:auto;">
-
+    <div class="modal-card" style="max-height:90vh; overflow-y:auto;">
         <div class="modal-head">
-
             <h2>Informations du membre</h2>
-
-            <button class="close-modal"
-                    onclick="closeMember()">
-                ×
-            </button>
-
+            <button type="button" class="close-modal" onclick="closeMember()">×</button>
         </div>
-
         <div id="memberDetails" class="details"></div>
-
     </div>
-
 </div>
 
 
@@ -894,7 +883,11 @@ function initSupabase(){
 
     if(
         typeof SUPABASE_URL === "undefined" ||
-        typeof SUPABASE_ANON_KEY === "undefined"
+        typeof SUPABASE_ANON_KEY === "undefined" ||
+        !SUPABASE_URL ||
+        !SUPABASE_ANON_KEY ||
+        !window.supabase ||
+        typeof window.supabase.createClient !== "function"
     ){
 
         console.error("Configuration Supabase introuvable.");
@@ -2752,10 +2745,164 @@ function afficherZoneAdminMEDFAH(connecte) {
 }
 
 /* ==========================================
-   DÉMARRAGE
+   CONNEXION / RÔLES / DÉCONNEXION ADMIN MEDFAH
 ========================================== */
 
+async function verifierRoleAdminMEDFAH() {
+    if (!supabaseClient || !supabaseClient.auth) {
+        roleAdminMEDFAH = null;
+        afficherZoneAdminMEDFAH(false);
+        return false;
+    }
 
+    try {
+        const { data: sessionData, error: sessionError } =
+            await supabaseClient.auth.getSession();
+
+        if (sessionError || !sessionData || !sessionData.session) {
+            roleAdminMEDFAH = null;
+            afficherZoneAdminMEDFAH(false);
+            return false;
+        }
+
+        const userId = sessionData.session.user.id;
+        const { data: roleData, error: roleError } = await supabaseClient
+            .from("medfah_user_roles")
+            .select("role")
+            .eq("user_id", userId)
+            .maybeSingle();
+
+        if (roleError) {
+            console.error("Erreur lecture du rôle administrateur :", roleError);
+            roleAdminMEDFAH = null;
+            afficherZoneAdminMEDFAH(false);
+            return false;
+        }
+
+        if (
+            !roleData ||
+            !["admin_principal", "admin_secondaire"].includes(roleData.role)
+        ) {
+            roleAdminMEDFAH = null;
+            afficherZoneAdminMEDFAH(false);
+            return false;
+        }
+
+        roleAdminMEDFAH = roleData.role;
+        afficherZoneAdminMEDFAH(true);
+        return true;
+    } catch (error) {
+        console.error("Erreur vérification rôle MEDFAH :", error);
+        roleAdminMEDFAH = null;
+        afficherZoneAdminMEDFAH(false);
+        return false;
+    }
+}
+
+async function connecterAdminMEDFAH(event) {
+    if (event) event.preventDefault();
+
+    const formulaire = document.getElementById("formConnexionAdminMEDFAH");
+    const message = document.getElementById("messageConnexionAdminMEDFAH");
+    const bouton = formulaire
+        ? formulaire.querySelector('button[type="submit"]')
+        : null;
+    const email = document.getElementById("emailAdminMEDFAH");
+    const motPasse = document.getElementById("motPasseAdminMEDFAH");
+
+    if (!supabaseClient || !supabaseClient.auth) {
+        if (message) message.textContent =
+            "Configuration Supabase indisponible. Vérifiez config.js.";
+        return;
+    }
+
+    if (!email || !motPasse || !email.value.trim() || !motPasse.value) {
+        if (message) message.textContent =
+            "Veuillez saisir votre adresse e-mail et votre mot de passe.";
+        return;
+    }
+
+    if (bouton) bouton.disabled = true;
+    if (message) message.textContent = "Vérification de la connexion…";
+
+    try {
+        const { error } = await supabaseClient.auth.signInWithPassword({
+            email: email.value.trim(),
+            password: motPasse.value
+        });
+
+        if (error) throw error;
+
+        const autorise = await verifierRoleAdminMEDFAH();
+
+        if (!autorise) {
+            if (message) {
+                message.textContent =
+                    "Compte connecté, mais rôle administrateur non confirmé. Vérifiez la ligne de ce compte dans medfah_user_roles et les règles RLS.";
+            }
+            return;
+        }
+
+        if (message) message.textContent = "";
+        if (formulaire) formulaire.reset();
+
+        // Recharge la liste seulement après confirmation du rôle.
+        if (typeof loadMembers === "function") {
+            await loadMembers();
+        }
+    } catch (error) {
+        console.error("Erreur connexion administrateur MEDFAH :", error);
+        if (message) {
+            message.textContent =
+                "Connexion impossible. Vérifiez l’e-mail, le mot de passe et les autorisations Supabase.";
+        }
+    } finally {
+        if (bouton) bouton.disabled = false;
+    }
+}
+
+async function deconnecterAdminMEDFAH() {
+    if (!supabaseClient || !supabaseClient.auth) {
+        roleAdminMEDFAH = null;
+        afficherZoneAdminMEDFAH(false);
+        return;
+    }
+
+    try {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) throw error;
+
+        roleAdminMEDFAH = null;
+        afficherZoneAdminMEDFAH(false);
+
+        const contenu = document.getElementById("contenuSectionMEDFAH");
+        if (contenu) contenu.style.display = "none";
+
+        const titre = document.getElementById("titreSectionMEDFAH");
+        if (titre) titre.textContent = "";
+
+        const message = document.getElementById("messageConnexionAdminMEDFAH");
+        if (message) message.textContent = "";
+    } catch (error) {
+        console.error("Erreur déconnexion MEDFAH :", error);
+        alert("La déconnexion n’a pas abouti. Réessayez.");
+    }
+}
+
+function fermerFormulaireMembre() {
+    const modal = document.getElementById("ajoutMembreModal");
+    const form = document.getElementById("formAjoutMembre");
+    const message = document.getElementById("messageAjoutMembre");
+
+    if (modal) modal.style.display = "none";
+    if (form) form.reset();
+    if (message) message.textContent = "";
+}
+
+
+/* ==========================================
+   DÉMARRAGE
+========================================== */
 
 document.addEventListener("DOMContentLoaded", async function() {
     if (!initSupabase()) {
@@ -2849,4 +2996,6 @@ async function ouvrirFormulaireMembre() {
     }
 }
 
-
+</script>
+</body>
+</html>
