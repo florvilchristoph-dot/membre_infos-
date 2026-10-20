@@ -2733,105 +2733,22 @@ function afficherZoneAdminMEDFAH(connecte) {
     const sections = document.getElementById("sixSections");
     const contenu = document.getElementById("contenuSectionMEDFAH");
 
-    if (connexion) connexion.style.display = connecte ? "none" : "block";
-    if (accueil) accueil.style.display = connecte ? "block" : "none";
-    if (sections) sections.style.display = connecte ? "grid" : "none";
-    if (contenu && !connecte) contenu.style.display = "none";
-}
-
-async function verifierRoleAdminMEDFAH() {
-    if (!supabaseClient) return false;
-
-    const { data: sessionData, error: sessionError } =
-        await supabaseClient.auth.getSession();
-
-    if (sessionError || !sessionData.session) {
-        roleAdminMEDFAH = null;
-        afficherZoneAdminMEDFAH(false);
-        return false;
+    if (connexion) {
+        connexion.style.display = connecte ? "none" : "block";
     }
 
-    const { data: roleData, error: roleError } = await supabaseClient
-        .from("medfah_user_roles")
-        .select("role")
-        .eq("user_id", sessionData.session.user.id)
-        .maybeSingle();
-
-    if (
-        roleError ||
-        !roleData ||
-        !["admin_principal", "admin_secondaire"].includes(roleData.role)
-    ) {
-        await supabaseClient.auth.signOut();
-        roleAdminMEDFAH = null;
-        afficherZoneAdminMEDFAH(false);
-        return false;
+    if (accueil) {
+        accueil.hidden = !connecte;
+        accueil.style.display = connecte ? "block" : "none";
     }
 
-    roleAdminMEDFAH = roleData.role;
-    afficherZoneAdminMEDFAH(true);
-    return true;
-}
-
-async function connecterAdminMEDFAH(event) {
-    event.preventDefault();
-
-    const message = document.getElementById("messageConnexionAdminMEDFAH");
-    const bouton = document.querySelector(
-        "#formConnexionAdminMEDFAH button[type='submit']"
-    );
-
-    bouton.disabled = true;
-    message.textContent = "Vérification du compte...";
-
-    try {
-        const email = document.getElementById("emailAdminMEDFAH").value.trim();
-        const password = document.getElementById("motPasseAdminMEDFAH").value;
-
-        const { error } = await supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-
-        if (error) throw error;
-
-        const autorise = await verifierRoleAdminMEDFAH();
-
-        if (!autorise) {
-            message.textContent =
-                "Accès refusé : ce compte n'est pas autorisé à administrer la MEDFAH.";
-            return;
-        }
-
-        message.textContent = "";
-        document.getElementById("formConnexionAdminMEDFAH").reset();
-
-    } catch (erreur) {
-        console.error("Connexion administrateur :", erreur);
-        message.textContent =
-            "Connexion impossible. Vérifiez votre e-mail, votre mot de passe et les autorisations.";
-    } finally {
-        bouton.disabled = false;
-    }
-}
-
-async function deconnecterAdminMEDFAH() {
-    if (!supabaseClient) return;
-
-    const { error } = await supabaseClient.auth.signOut();
-
-    if (error) {
-        alert("La déconnexion a échoué. Réessayez.");
-        return;
+    if (sections) {
+        sections.style.display = connecte ? "grid" : "none";
     }
 
-    roleAdminMEDFAH = null;
-    afficherZoneAdminMEDFAH(false);
-
-    const contenu = document.getElementById("contenuSectionMEDFAH");
-    if (contenu) contenu.style.display = "none";
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (contenu && !connecte) {
+        contenu.style.display = "none";
+    }
 }
 
 /* ==========================================
