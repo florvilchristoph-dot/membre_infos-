@@ -600,7 +600,7 @@ td{
             <input
                 type="search"
                 id="searchInput"
-                placeholder="Rechercher un membre, un code, une assemblée..."
+                placeholder="Rechercher un membre par nom ou prénom..."
                 oninput="searchMembers()"
             >
 
@@ -653,11 +653,11 @@ td{
 
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
 
-        <button class="refresh" onclick="loadMembers()">
+        <button class="refresh" id="btnActualiserMembres" onclick="loadPublicMembers()">
             ↻ Actualiser
         </button>
 
-        <button class="refresh" onclick="ouvrirFormulaireMembre()">
+        <button class="refresh" id="btnAjouterMembre" onclick="ouvrirFormulaireMembre()" style="display:none">
             ➕ Ajouter un membre
         </button>
 
@@ -2336,8 +2336,68 @@ function showMembers(){
 ========================================== */
 
 let allMembers = [];
+let publicMembers = [];
+
+function afficherCommandesMembresAdmin(estAdmin){
+    const boutonAjouter = document.getElementById("btnAjouterMembre");
+    const boutonActualiser = document.getElementById("btnActualiserMembres");
+    if (boutonAjouter) boutonAjouter.style.display = estAdmin ? "inline-flex" : "none";
+    if (boutonActualiser) {
+        boutonActualiser.textContent = estAdmin ? "↻ Actualiser" : "↻ Actualiser";
+        boutonActualiser.onclick = estAdmin ? loadMembers : loadPublicMembers;
+    }
+}
+
+/* Chargement public sécurisé : uniquement nom et prénom via RPC Supabase */
+async function loadPublicMembers(){
+    afficherCommandesMembresAdmin(false);
+    const container = document.getElementById("membersContent");
+    if (!container) return;
+    container.innerHTML = '<div class="loading">Chargement de la liste publique...</div>';
+
+    if (!supabaseClient) {
+        container.innerHTML = '<div class="empty">Le service public est temporairement indisponible.</div>';
+        return;
+    }
+
+    try {
+        const { data, error } = await supabaseClient.rpc("get_public_member_names");
+        if (error) throw error;
+        publicMembers = (data || []).map(m => ({
+            nom: m.nom || "",
+            prenom: m.prenom || m.prénom || ""
+        }));
+        const total = document.getElementById("totalMembers");
+        if (total) total.textContent = publicMembers.length;
+        displayPublicMembers(publicMembers);
+    } catch (error) {
+        console.error("Erreur chargement liste publique MEDFAH:", error);
+        container.innerHTML = '<div class="empty">La liste publique n’est pas encore configurée dans Supabase. Veuillez appliquer le script SQL fourni pour activer l’affichage sécurisé des noms et prénoms.</div>';
+    }
+}
+
+function displayPublicMembers(members){
+    const container = document.getElementById("membersContent");
+    if (!container) return;
+    if (!members || members.length === 0) {
+        container.innerHTML = '<div class="empty">Aucun membre trouvé.</div>';
+        return;
+    }
+    let html = '<div class="table-wrap"><table><thead><tr><th>Nom</th><th>Prénom</th></tr></thead><tbody>';
+    for (const member of members) {
+        html += `<tr><td><strong>${escapeHTML(member.nom || "—")}</strong></td><td>${escapeHTML(member.prenom || "—")}</td></tr>`;
+    }
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+}
 
 async function loadMembers(){
+
+    if (!roleAdminMEDFAH || !["admin_principal", "admin_secondaire"].includes(roleAdminMEDFAH)) {
+        await loadPublicMembers();
+        return;
+    }
+    afficherCommandesMembresAdmin(true);
 
     const container =
         document.getElementById("membersContent");
@@ -2525,48 +2585,37 @@ function displayMembers(members){
 ========================================== */
 
 function searchMembers(){
-
-    const query =
-        document.getElementById("searchInput")
-        .value
+    const query = (document.getElementById("searchInput")?.value || "")
         .toLowerCase()
         .trim();
 
-    if(!query){
-
-        displayMembers(allMembers);
+    // Public : recherche uniquement sur nom et prénom.
+    if (!roleAdminMEDFAH) {
+        if (!query) {
+            displayPublicMembers(publicMembers);
+            return;
+        }
+        const resultsPublics = publicMembers.filter(member =>
+            `${member.nom || ""} ${member.prenom || ""}`
+                .toLowerCase()
+                .includes(query)
+        );
+        displayPublicMembers(resultsPublics);
         return;
     }
 
-    const results =
-        allMembers.filter(member => {
-
-            return [
-
-                member.nom,
-                member.prenom,
-                member.prénom,
-                member.code,
-                member.telephone,
-                member.téléphone,
-                member.adresse,
-                member.address,
-                member.profession,
-                member.fonction,
-                member.assemblee,
-                member.assemblée
-
-            ]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase()
-            .includes(query);
-
-        });
-
+    // Administrateurs autorisés : recherche dans la liste administrative.
+    if (!query) {
+        displayMembers(allMembers);
+        return;
+    }
+    const results = allMembers.filter(member => [
+        member.nom, member.prenom, member.prénom, member.code,
+        member.telephone, member.téléphone, member.adresse, member.address,
+        member.profession, member.fonction, member.assemblee, member.assemblée
+    ].filter(Boolean).join(" ").toLowerCase().includes(query));
     displayMembers(results);
 }
-
 
 /* ==========================================
    VOIR UN MEMBRE
@@ -2873,7 +2922,9 @@ async function deconnecterAdminMEDFAH() {
         if (error) throw error;
 
         roleAdminMEDFAH = null;
+        allMembers = [];
         afficherZoneAdminMEDFAH(false);
+        await loadPublicMembers();
 
         const contenu = document.getElementById("contenuSectionMEDFAH");
         if (contenu) contenu.style.display = "none";
@@ -2917,6 +2968,9 @@ document.addEventListener("DOMContentLoaded", async function() {
     }
 
     afficherZoneAdminMEDFAH(false);
+
+    // La liste publique charge uniquement les noms/prénoms via une fonction SQL sécurisée.
+    await loadPublicMembers();
 
     const autorise = await verifierRoleAdminMEDFAH();
 
