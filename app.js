@@ -314,7 +314,7 @@ async function chargerMembres(recherche, app) {
 
     try {
         const url =
-            `${SUPABASE_URL}/rest/v1/rpc/liste_membres_publics`;
+    `${SUPABASE_URL}/rest/v1/rpc/get_public_member_names`;
 
         const response = await fetch(url, {
             method: "POST",
