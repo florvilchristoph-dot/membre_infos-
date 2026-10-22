@@ -19,7 +19,7 @@
     },
     {
       "source": "/presence",
-      "destination": "/pr%C3%A9sence.html"
+      "destination": "/presence.html"
     }
   ]
 }
