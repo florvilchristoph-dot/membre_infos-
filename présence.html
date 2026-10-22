@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -6,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MEDFAH - Gestion des présences</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="config.js"></script>
   <style>
     * { box-sizing: border-box; }
@@ -23,19 +23,25 @@
     .error { background: #ffedd5; color: #9a3412; }
     .member { padding: 14px; margin-top: 16px; border: 1px solid #cbd5e1; border-radius: 8px; }
     .muted { color: #64748b; font-size: 14px; line-height: 1.5; }
+    #qrReader { width: 100%; margin-top: 12px; overflow: hidden; border-radius: 8px; }
   </style>
 </head>
 <body>
 <main>
   <h1>Présences — MEDFAH</h1>
-  <p>Choisissez un service, recherchez le membre et enregistrez sa présence.</p>
+  <p>Choisissez un service, scannez la carte du membre et enregistrez sa présence.</p>
 
   <label for="session">Service ouvert</label>
   <select id="session"><option value="">Chargement...</option></select>
   <button id="reloadSessions" class="secondary" type="button">Actualiser les services</button>
 
-  <label for="memberCode">Code du membre ou numéro de carte</label>
-  <input id="memberCode" type="search" placeholder="Saisir le code ou le numéro de carte" autocomplete="off">
+  <label>Scanner la carte MEDFAH</label>
+  <button id="startScanner" type="button">Ouvrir la caméra et scanner le QR</button>
+  <button id="stopScanner" class="secondary" type="button" disabled>Arrêter la caméra</button>
+  <div id="qrReader" hidden></div>
+
+  <label for="memberCode">Numéro de carte MEDFAH</label>
+  <input id="memberCode" type="search" placeholder="Ex. medfah0001" autocomplete="off">
   <button id="searchMember" type="button">Rechercher le membre</button>
 
   <div id="memberResult" class="member" hidden></div>
@@ -51,7 +57,7 @@
 
   <p class="muted">
     Seuls les services ouverts de la date du jour sont affichés.
-    Les absences ne sont pas attribuées automatiquement dans cette version.
+    Cette page n'attribue pas automatiquement les absences. Les QR des cartes doivent contenir le numéro de carte, par exemple medfah0001.
   </p>
 
   <button class="secondary" type="button" onclick="location.href='index.html'">Retour à l'accueil</button>
@@ -59,8 +65,8 @@
 
 <script>
 (() => {
-  const url = window.SUPABASE_URL;
-  const key = window.SUPABASE_ANON_KEY;
+  const url = window.SUPABASE_URL || (typeof SUPABASE_URL !== "undefined" ? SUPABASE_URL : "");
+  const key = window.SUPABASE_ANON_KEY || (typeof SUPABASE_ANON_KEY !== "undefined" ? SUPABASE_ANON_KEY : "");
 
   const sessionSelect = document.getElementById("session");
   const memberInput = document.getElementById("memberCode");
@@ -68,9 +74,15 @@
   const statusSelect = document.getElementById("attendanceStatus");
   const saveButton = document.getElementById("saveAttendance");
   const message = document.getElementById("message");
+  const qrReader = document.getElementById("qrReader");
+  const startScannerButton = document.getElementById("startScanner");
+  const stopScannerButton = document.getElementById("stopScanner");
 
   let client = null;
   let selectedMember = null;
+  let scanner = null;
+  let scannerRunning = false;
+  let scanBusy = false;
 
   if (url && key && window.supabase) {
     client = window.supabase.createClient(url, key);
@@ -82,7 +94,7 @@
   }
 
   async function headers() {
-    if (!client) throw new Error("Configuration Supabase indisponible.");
+    if (!client) throw new Error("Configuration Supabase indisponible. Vérifiez config.js.");
 
     const { data, error } = await client.auth.getSession();
     if (error) throw error;
@@ -116,7 +128,8 @@
     }
 
     if (response.status === 204) return [];
-    return response.json();
+    const text = await response.text();
+    return text ? JSON.parse(text) : [];
   }
 
   function dateHaiti() {
@@ -162,61 +175,120 @@
     }
   }
 
-  
-async function searchMember() {
-  selectedMember = null;
-  saveButton.disabled = true;
-  memberResult.hidden = true;
+  async function searchMember() {
+    selectedMember = null;
+    saveButton.disabled = true;
+    memberResult.hidden = true;
 
-  const value = memberInput.value.trim();
-
-  if (!value) {
-    showMessage("Saisissez le numéro de la carte MEDFAH.", "error");
-    return;
-  }
-
-  try {
-    const params = new URLSearchParams({
-      select: "id,nom,prenom,carte_numerique",
-      carte_numerique: "eq." + value,
-      limit: "1"
-    });
-
-    const rows = await requestTable("membre_infos", params);
-
-    if (!rows.length) {
-      showMessage("Aucun membre trouvé pour cette carte MEDFAH.", "error");
+    const value = memberInput.value.trim();
+    if (!value) {
+      showMessage("Saisissez ou scannez le numéro de la carte MEDFAH.", "error");
       return;
     }
 
-    selectedMember = rows[0];
-    memberResult.replaceChildren();
+    try {
+      const params = new URLSearchParams({
+        select: "id,nom,prenom,carte_numerique",
+        carte_numerique: "eq." + value,
+        limit: "1"
+      });
 
-    const name = document.createElement("strong");
-    name.textContent =
-      (selectedMember.nom || "") + " " +
-      (selectedMember.prenom || "");
+      const rows = await requestTable("membre_infos", params);
+      if (!rows.length) {
+        showMessage("Aucun membre trouvé. Vérifiez que le QR contient la valeur de carte_numerique, par exemple medfah0001.", "error");
+        return;
+      }
 
-    const details = document.createElement("p");
-    details.textContent =
-      "Carte MEDFAH : " +
-      (selectedMember.carte_numerique || "—");
+      selectedMember = rows[0];
+      memberResult.replaceChildren();
 
-    memberResult.appendChild(name);
-    memberResult.appendChild(details);
-    memberResult.hidden = false;
+      const name = document.createElement("strong");
+      name.textContent = (selectedMember.nom || "") + " " + (selectedMember.prenom || "");
 
-    saveButton.disabled = !sessionSelect.value;
+      const details = document.createElement("p");
+      details.textContent = "Carte MEDFAH : " + (selectedMember.carte_numerique || "—");
 
-    showMessage(
-      "Membre identifié. Vérifiez le service avant d'enregistrer.",
-      "success"
-    );
-  } catch (e) {
-    showMessage(e.message, "error");
+      memberResult.appendChild(name);
+      memberResult.appendChild(details);
+      memberResult.hidden = false;
+      saveButton.disabled = !sessionSelect.value;
+
+      showMessage("Membre identifié. Vérifiez le service avant d'enregistrer.", "success");
+    } catch (e) {
+      showMessage(e.message, "error");
+    }
   }
-}
 
+  function extractCardNumber(decodedText) {
+    const raw = String(decodedText || "").trim();
+    // QR prévu : le contenu est directement la valeur de carte_numerique.
+    // Accepte aussi une URL contenant cette valeur comme paramètre.
+    try {
+      const parsed = new URL(raw);
+      for (const value of parsed.searchParams.values()) {
+        if (/^medfah[0-9]+$/i.test(value.trim())) return value.trim();
+      }
+      const matchInPath = parsed.pathname.match(/medfah[0-9]+/i);
+      if (matchInPath) return matchInPath[0];
+    } catch (_) {}
+    const direct = raw.match(/^medfah[0-9]+$/i);
+    return direct ? direct[0] : raw;
+  }
+
+  async function startScanner() {
+    if (!window.Html5Qrcode) {
+      showMessage("Le lecteur QR n'a pas pu se charger. Actualisez la page et réessayez.", "error");
+      return;
+    }
+    if (scannerRunning) return;
+
+    qrReader.hidden = false;
+    startScannerButton.disabled = true;
+    showMessage("Ouverture de la caméra…");
+
+    try {
+      scanner = new Html5Qrcode("qrReader");
+      await scanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 240, height: 240 } },
+        async decodedText => {
+          if (scanBusy) return;
+          scanBusy = true;
+          memberInput.value = extractCardNumber(decodedText);
+          showMessage("QR lu. Recherche du membre…", "success");
+          try {
+            await scanner.stop();
+          } catch (_) {}
+          scannerRunning = false;
+          qrReader.hidden = true;
+          startScannerButton.disabled = false;
+          stopScannerButton.disabled = true;
+          await searchMember();
+          scanBusy = false;
+        },
+        () => {}
+      );
+      scannerRunning = true;
+      stopScannerButton.disabled = false;
+      showMessage("Pointez la caméra vers le QR de la carte MEDFAH.");
+    } catch (e) {
+      scannerRunning = false;
+      startScannerButton.disabled = false;
+      stopScannerButton.disabled = true;
+      qrReader.hidden = true;
+      showMessage("Impossible d'ouvrir la caméra. Autorisez l'accès à la caméra et utilisez le site en HTTPS. " + (e.message || ""), "error");
+    }
+  }
+
+  async function stopScanner() {
+    if (scanner && scannerRunning) {
+      try { await scanner.stop(); } catch (_) {}
+    }
+    scannerRunning = false;
+    qrReader.hidden = true;
+    startScannerButton.disabled = false;
+    stopScannerButton.disabled = true;
+  }
 
   async function saveAttendance() {
     if (!sessionSelect.value || !selectedMember) {
@@ -225,7 +297,6 @@ async function searchMember() {
     }
 
     saveButton.disabled = true;
-
     try {
       const duplicateParams = new URLSearchParams({
         select: "id",
@@ -233,7 +304,6 @@ async function searchMember() {
         membre_id: "eq." + selectedMember.id,
         limit: "1"
       });
-
       const existing = await requestTable("presences_eglise", duplicateParams);
 
       if (existing.length) {
@@ -241,15 +311,14 @@ async function searchMember() {
         return;
       }
 
-      const insertParams = new URLSearchParams();
-      await requestTable("presences_eglise", insertParams, {
+      await requestTable("presences_eglise", new URLSearchParams(), {
         method: "POST",
         body: {
           session_id: Number(sessionSelect.value),
           membre_id: Number(selectedMember.id),
           heure_pointage: new Date().toISOString(),
           statut: statusSelect.value,
-          mode_pointage: "manuel",
+          mode_pointage: "qr",
           observation: null
         }
       });
@@ -261,12 +330,14 @@ async function searchMember() {
     } catch (e) {
       showMessage(e.message, "error");
     } finally {
-      saveButton.disabled = !selectedMember;
+      saveButton.disabled = !sessionSelect.value || !selectedMember;
     }
   }
 
   document.getElementById("reloadSessions").addEventListener("click", loadSessions);
   document.getElementById("searchMember").addEventListener("click", searchMember);
+  startScannerButton.addEventListener("click", startScanner);
+  stopScannerButton.addEventListener("click", stopScanner);
   saveButton.addEventListener("click", saveAttendance);
 
   memberInput.addEventListener("keydown", e => {
@@ -277,9 +348,7 @@ async function searchMember() {
   });
 
   sessionSelect.addEventListener("change", () => {
-    selectedMember = null;
-    memberResult.hidden = true;
-    saveButton.disabled = true;
+    saveButton.disabled = !sessionSelect.value || !selectedMember;
   });
 
   loadSessions();
