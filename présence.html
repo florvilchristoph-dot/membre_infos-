@@ -162,55 +162,61 @@
     }
   }
 
-  async function searchMember() {
-    selectedMember = null;
-    saveButton.disabled = true;
-    memberResult.hidden = true;
+  
+async function searchMember() {
+  selectedMember = null;
+  saveButton.disabled = true;
+  memberResult.hidden = true;
 
-    const value = memberInput.value.trim();
-    if (!value) {
-      showMessage("Saisissez le code du membre ou le numéro de carte.", "error");
+  const value = memberInput.value.trim();
+
+  if (!value) {
+    showMessage("Saisissez le numéro de la carte MEDFAH.", "error");
+    return;
+  }
+
+  try {
+    const params = new URLSearchParams({
+      select: "id,nom,prenom,carte_numerique",
+      carte_numerique: "eq." + value,
+      limit: "1"
+    });
+
+    const rows = await requestTable("membre_infos", params);
+
+    if (!rows.length) {
+      showMessage("Aucun membre trouvé pour cette carte MEDFAH.", "error");
       return;
     }
 
-    try {
-      for (const field of ["numero_carte", "code"]) {
-        const params = new URLSearchParams({
-          select: "id,nom,prenom,code,numero_carte,statut",
-          [field]: "eq." + value,
-          limit: "1"
-        });
+    selectedMember = rows[0];
+    memberResult.replaceChildren();
 
-        const rows = await requestTable("membre_infos", params);
-        if (rows.length) {
-          selectedMember = rows[0];
-          break;
-        }
-      }
+    const name = document.createElement("strong");
+    name.textContent =
+      (selectedMember.nom || "") + " " +
+      (selectedMember.prenom || "");
 
-      if (!selectedMember) {
-        showMessage("Aucun membre trouvé avec ce code ou numéro de carte.", "error");
-        return;
-      }
+    const details = document.createElement("p");
+    details.textContent =
+      "Carte MEDFAH : " +
+      (selectedMember.carte_numerique || "—");
 
-      memberResult.replaceChildren();
+    memberResult.appendChild(name);
+    memberResult.appendChild(details);
+    memberResult.hidden = false;
 
-      const name = document.createElement("strong");
-      name.textContent = (selectedMember.nom || "") + " " + (selectedMember.prenom || "");
-      memberResult.appendChild(name);
+    saveButton.disabled = !sessionSelect.value;
 
-      const details = document.createElement("p");
-      details.textContent = "Code : " + (selectedMember.code || "—") +
-        " | Carte : " + (selectedMember.numero_carte || "—");
-      memberResult.appendChild(details);
-
-      memberResult.hidden = false;
-      saveButton.disabled = false;
-      showMessage("Membre identifié. Vérifiez le service avant d'enregistrer.", "success");
-    } catch (e) {
-      showMessage(e.message, "error");
-    }
+    showMessage(
+      "Membre identifié. Vérifiez le service avant d'enregistrer.",
+      "success"
+    );
+  } catch (e) {
+    showMessage(e.message, "error");
   }
+}
+
 
   async function saveAttendance() {
     if (!sessionSelect.value || !selectedMember) {
