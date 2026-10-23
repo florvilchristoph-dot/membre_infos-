@@ -19,7 +19,7 @@
     },
     {
       "source": "/presence",
-      "destination": "/presence.html"
+      "destination": "/pointage.html"
     }
   ]
 }
