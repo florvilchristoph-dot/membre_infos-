@@ -695,11 +695,14 @@ function echapper(
 ====================================================== */
 
 function initialiserPresenceMEDFAH() {
-    const page = location.pathname.split("/").pop().toLowerCase();
+   const page = location.pathname.split("/").pop().toLowerCase();
 
-    if (page !== "membre.html" || new URLSearchParams(location.search).has("id")) {
-        return;
-    }
+if (
+    !["membre.html", "membre"].includes(page) ||
+    new URLSearchParams(location.search).has("id")
+) {
+    return;
+}
 
     const app = document.getElementById("app");
 
