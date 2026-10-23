@@ -694,7 +694,7 @@ function echapper(
    Ajout indépendant : ne remplace pas les fonctions existantes
 ====================================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
+function initialiserPresenceMEDFAH() {
     const page = location.pathname.split("/").pop().toLowerCase();
 
     if (page !== "membre.html" || new URLSearchParams(location.search).has("id")) {
@@ -702,7 +702,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const app = document.getElementById("app");
-    if (!app || document.getElementById("modulePresenceMEDFAH")) return;
+
+    if (!app || document.getElementById("modulePresenceMEDFAH")) {
+        return;
+    }
 
     const module = document.createElement("section");
     module.id = "modulePresenceMEDFAH";
@@ -1089,5 +1092,11 @@ document.addEventListener("DOMContentLoaded", () => {
     sessionSelect.addEventListener("change", updateSaveButton);
 
     loadSessions();
-});
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialiserPresenceMEDFAH);
+} else {
+    initialiserPresenceMEDFAH();
+}
 
