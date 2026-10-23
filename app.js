@@ -688,3 +688,406 @@ function echapper(
     .replace(/'/g,"&#039;");
 
 }
+
+/* ======================================================
+   MEDFAH — MODULE DE PRÉSENCE
+   Ajout indépendant : ne remplace pas les fonctions existantes
+====================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+    const page = location.pathname.split("/").pop().toLowerCase();
+
+    if (page !== "membre.html" || new URLSearchParams(location.search).has("id")) {
+        return;
+    }
+
+    const app = document.getElementById("app");
+    if (!app || document.getElementById("modulePresenceMEDFAH")) return;
+
+    const module = document.createElement("section");
+    module.id = "modulePresenceMEDFAH";
+    module.style.cssText =
+        "margin-top:24px;padding:20px;background:white;" +
+        "border-radius:14px;box-shadow:0 4px 15px #00000012;";
+
+    module.innerHTML = `
+        <h2 style="color:#0d47a1">Présences MEDFAH</h2>
+        <p>Réservé aux administrateurs connectés.</p>
+
+        <label for="presenceSessionMEDFAH">Service ouvert</label>
+        <select id="presenceSessionMEDFAH"
+            style="width:100%;padding:12px;margin:8px 0;border:1px solid #cbd5e1;border-radius:8px">
+            <option value="">Chargement des services...</option>
+        </select>
+
+        <button type="button" id="presenceReloadMEDFAH"
+            style="width:100%;padding:12px;background:#475569;color:white;border:0;border-radius:8px">
+            Actualiser les services
+        </button>
+
+        <label for="presenceCardMEDFAH" style="display:block;margin-top:16px">
+            Numéro de carte MEDFAH
+        </label>
+        <input id="presenceCardMEDFAH" type="search"
+            placeholder="Ex. medfah0001" autocomplete="off"
+            style="width:100%;padding:12px;margin:8px 0;border:1px solid #cbd5e1;border-radius:8px">
+
+        <button type="button" id="presenceSearchMEDFAH"
+            style="width:100%;padding:12px;background:#0d47a1;color:white;border:0;border-radius:8px">
+            Rechercher le membre
+        </button>
+
+        <button type="button" id="presenceStartQRMEDFAH"
+            style="width:100%;padding:12px;margin-top:10px;background:#166534;color:white;border:0;border-radius:8px">
+            Scanner le QR Code
+        </button>
+
+        <button type="button" id="presenceStopQRMEDFAH" disabled
+            style="width:100%;padding:12px;margin-top:8px;background:#475569;color:white;border:0;border-radius:8px">
+            Arrêter la caméra
+        </button>
+
+        <div id="presenceQRReaderMEDFAH" hidden style="margin-top:12px"></div>
+        <div id="presenceMemberMEDFAH" style="margin-top:12px"></div>
+
+        <label for="presenceStatusMEDFAH" style="display:block;margin-top:16px">
+            Statut
+        </label>
+        <select id="presenceStatusMEDFAH"
+            style="width:100%;padding:12px;margin:8px 0;border:1px solid #cbd5e1;border-radius:8px">
+            <option value="présent">Présent</option>
+            <option value="en_retard">En retard</option>
+        </select>
+
+        <button type="button" id="presenceSaveMEDFAH" disabled
+            style="width:100%;padding:13px;margin-top:10px;background:#0d47a1;color:white;border:0;border-radius:8px">
+            Enregistrer la présence
+        </button>
+
+        <div id="presenceMessageMEDFAH" role="status" aria-live="polite"
+            style="margin-top:12px;overflow-wrap:anywhere"></div>
+    `;
+
+    app.prepend(module);
+
+    const byId = id => document.getElementById(id);
+    const sessionSelect = byId("presenceSessionMEDFAH");
+    const cardInput = byId("presenceCardMEDFAH");
+    const memberBox = byId("presenceMemberMEDFAH");
+    const statusSelect = byId("presenceStatusMEDFAH");
+    const saveButton = byId("presenceSaveMEDFAH");
+    const messageBox = byId("presenceMessageMEDFAH");
+    const qrBox = byId("presenceQRReaderMEDFAH");
+    const startButton = byId("presenceStartQRMEDFAH");
+    const stopButton = byId("presenceStopQRMEDFAH");
+
+    let selectedMember = null;
+    let qrScanner = null;
+    let scannerRunning = false;
+    let saving = false;
+
+    function message(text, error = false) {
+        messageBox.textContent = text;
+        messageBox.style.cssText =
+            "margin-top:12px;padding:12px;border-radius:8px;overflow-wrap:anywhere;" +
+            (error
+                ? "background:#ffedd5;color:#9a3412"
+                : "background:#dcfce7;color:#166534");
+    }
+
+    function getClient() {
+        if (!clientMembresMEDFAH) {
+            throw new Error("Configuration Supabase indisponible.");
+        }
+        return clientMembresMEDFAH;
+    }
+
+    async function authenticatedHeaders() {
+        const client = getClient();
+        const { data, error } = await client.auth.getSession();
+
+        if (error) throw error;
+
+        if (!data.session) {
+            throw new Error(
+                "Session administrateur absente. Connectez-vous dans Administration, puis revenez ici."
+            );
+        }
+
+        return {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: "Bearer " + data.session.access_token,
+            "Content-Type": "application/json"
+        };
+    }
+
+    async function tableRequest(table, params, method = "GET", body = null) {
+        const headers = await authenticatedHeaders();
+        const query = params.toString();
+        const response = await fetch(
+            `${SUPABASE_URL}/rest/v1/${table}${query ? "?" + query : ""}`,
+            {
+                method,
+                headers: {
+                    ...headers,
+                    ...(method === "POST"
+                        ? { Prefer: "return=representation" }
+                        : {})
+                },
+                body: body === null ? undefined : JSON.stringify(body)
+            }
+        );
+
+        if (!response.ok) {
+            const details = await response.text();
+            console.error("MEDFAH présence:", table, response.status, details);
+            throw new Error(
+                `Erreur ${response.status} sur ${table}. ${details}`
+            );
+        }
+
+        const text = await response.text();
+        return text ? JSON.parse(text) : [];
+    }
+
+    function haitiDate() {
+        const parts = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "America/Port-au-Prince",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+        }).formatToParts(new Date());
+
+        const value = type => parts.find(part => part.type === type).value;
+        return `${value("year")}-${value("month")}-${value("day")}`;
+    }
+
+    async function loadSessions() {
+        sessionSelect.innerHTML = "<option value=''>Chargement...</option>";
+
+        try {
+            const params = new URLSearchParams({
+                select: "id,nom_services,date_service,heure_debut,heure_fin,statut",
+                date_service: "eq." + haitiDate(),
+                statut: "eq.ouvert",
+                order: "heure_debut.asc"
+            });
+
+            const sessions = await tableRequest("sessions_presence", params);
+            sessionSelect.replaceChildren();
+
+            const first = document.createElement("option");
+            first.value = "";
+            first.textContent = sessions.length
+                ? "Choisir un service ouvert"
+                : "Aucun service ouvert aujourd'hui";
+            sessionSelect.appendChild(first);
+
+            sessions.forEach(session => {
+                const option = document.createElement("option");
+                option.value = session.id;
+                option.textContent =
+                    `${session.nom_services} — ${session.heure_debut} à ${session.heure_fin}`;
+                sessionSelect.appendChild(option);
+            });
+
+            updateSaveButton();
+        } catch (error) {
+            sessionSelect.innerHTML = "<option value=''>Erreur de chargement</option>";
+            message(error.message, true);
+        }
+    }
+
+    function updateSaveButton() {
+        saveButton.disabled = saving || !sessionSelect.value || !selectedMember;
+    }
+
+    async function searchMember() {
+        selectedMember = null;
+        memberBox.replaceChildren();
+        updateSaveButton();
+
+        const card = cardInput.value.trim();
+        if (!card) {
+            message("Saisissez ou scannez le numéro de carte MEDFAH.", true);
+            return;
+        }
+
+        try {
+            const params = new URLSearchParams({
+                select: "id,nom,prenom,carte_numerique",
+                carte_numerique: "eq." + card,
+                limit: "1"
+            });
+
+            const rows = await tableRequest("membre_infos", params);
+
+            if (!rows.length) {
+                message("Aucun membre trouvé. Vérifiez le numéro de carte.", true);
+                return;
+            }
+
+            selectedMember = rows[0];
+
+            const name = document.createElement("strong");
+            name.textContent =
+                `${selectedMember.nom || ""} ${selectedMember.prenom || ""}`.trim();
+
+            const cardInfo = document.createElement("p");
+            cardInfo.textContent =
+                "Carte MEDFAH : " + (selectedMember.carte_numerique || "—");
+
+            memberBox.append(name, cardInfo);
+            updateSaveButton();
+            message("Membre identifié. Vérifiez le service avant d'enregistrer.");
+        } catch (error) {
+            message(error.message, true);
+        }
+    }
+
+    function extractCardNumber(text) {
+        const raw = String(text || "").trim();
+
+        try {
+            const parsed = new URL(raw);
+            for (const value of parsed.searchParams.values()) {
+                if (/^medfah[0-9]+$/i.test(value.trim())) return value.trim();
+            }
+            const match = parsed.pathname.match(/medfah[0-9]+/i);
+            if (match) return match[0];
+        } catch (_) {}
+
+        const match = raw.match(/medfah[0-9]+/i);
+        return match ? match[0] : raw;
+    }
+
+    async function startQR() {
+        if (!window.Html5Qrcode) {
+            message("Le lecteur QR ne s'est pas chargé. Vérifiez la connexion Internet.", true);
+            return;
+        }
+
+        if (scannerRunning) return;
+
+        try {
+            qrBox.hidden = false;
+            startButton.disabled = true;
+            message("Ouverture de la caméra...");
+
+            qrScanner = new Html5Qrcode("presenceQRReaderMEDFAH");
+
+            await qrScanner.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 230, height: 230 } },
+                async decodedText => {
+                    if (!scannerRunning && !qrScanner) return;
+
+                    const card = extractCardNumber(decodedText);
+                    cardInput.value = card;
+                    await stopQR();
+                    await searchMember();
+                },
+                () => {}
+            );
+
+            scannerRunning = true;
+            stopButton.disabled = false;
+            message("Pointez la caméra vers le QR Code de la carte MEDFAH.");
+        } catch (error) {
+            scannerRunning = false;
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            qrBox.hidden = true;
+            message(
+                "Impossible d'ouvrir la caméra. Autorisez son accès et utilisez HTTPS. " +
+                (error.message || ""),
+                true
+            );
+        }
+    }
+
+    async function stopQR() {
+        if (qrScanner && scannerRunning) {
+            try {
+                await qrScanner.stop();
+            } catch (_) {}
+        }
+
+        scannerRunning = false;
+        qrScanner = null;
+        qrBox.hidden = true;
+        startButton.disabled = false;
+        stopButton.disabled = true;
+    }
+
+    async function saveAttendance() {
+        if (saving || !sessionSelect.value || !selectedMember) {
+            message("Choisissez un service et identifiez un membre.", true);
+            return;
+        }
+
+        saving = true;
+        updateSaveButton();
+
+        try {
+            const duplicateParams = new URLSearchParams({
+                select: "id",
+                session_id: "eq." + sessionSelect.value,
+                membre_id: "eq." + selectedMember.id,
+                limit: "1"
+            });
+
+            const existing = await tableRequest(
+                "presences_eglise",
+                duplicateParams
+            );
+
+            if (existing.length) {
+                message("Ce membre est déjà enregistré pour ce service.", true);
+                return;
+            }
+
+            await tableRequest(
+                "presences_eglise",
+                new URLSearchParams(),
+                "POST",
+                {
+                    session_id: Number(sessionSelect.value),
+                    membre_id: Number(selectedMember.id),
+                    heure_pointage: new Date().toISOString(),
+                    statut: statusSelect.value,
+                    mode_pointage: "qr",
+                    observation: null
+                }
+            );
+
+            message("Présence enregistrée avec succès.");
+            cardInput.value = "";
+            selectedMember = null;
+            memberBox.replaceChildren();
+        } catch (error) {
+            message(error.message, true);
+        } finally {
+            saving = false;
+            updateSaveButton();
+        }
+    }
+
+    byId("presenceReloadMEDFAH").addEventListener("click", loadSessions);
+    byId("presenceSearchMEDFAH").addEventListener("click", searchMember);
+    startButton.addEventListener("click", startQR);
+    stopButton.addEventListener("click", stopQR);
+    saveButton.addEventListener("click", saveAttendance);
+
+    cardInput.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            searchMember();
+        }
+    });
+
+    sessionSelect.addEventListener("change", updateSaveButton);
+
+    loadSessions();
+});
+
