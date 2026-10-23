@@ -18,9 +18,8 @@
       "destination": "/verify.html"
     },
     {
-  "source": "/presence",
-  "destination": "/presence.html"
-}
-  
+      "source": "/presence",
+      "destination": "/presence.html"
+    }
   ]
 }
