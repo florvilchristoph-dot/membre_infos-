@@ -84,7 +84,7 @@ async function chargerMembres(recherche, app) {
     const input=document.getElementById("rechercheMembrePublic"), body=document.getElementById("corpsListeMembresPublic"), count=document.getElementById("nombreMembresPublic");
     function afficher(q) {
       q=String(q||"").trim().toLocaleLowerCase("fr");
-      const rows=membres.filter(m=>`${m.nom||""} ${m.prenom||""}`.toLocaleLowerCase("fr").includes(q));
+    const rows=membres.filter(m=>`${m.nom||""} ${m.prenom||m["prénom"]||""}`.toLocaleLowerCase("fr").includes(q));
       count.textContent=`${rows.length} membre(s)`;
       body.innerHTML=rows.length ? rows.map(m=>`<tr><td>${echapper(m.nom||"-")}</td><td>${echapper(m.prenom||"-")}</td></tr>`).join("") : `<tr><td colspan="2">Aucun membre trouvé.</td></tr>`;
     }
