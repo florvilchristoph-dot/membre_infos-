@@ -1,296 +1,31 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>MEDFAH - Membres</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: "Segoe UI", Arial, sans-serif;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-
-      background:
-        linear-gradient(
-          rgba(255,255,255,.93),
-          rgba(255,255,255,.93)
-        ),
-        url("image.png") center center / cover fixed no-repeat;
-
-      color: #1f2937;
-    }
-
-    header {
-      background: #0d47a1;
-      color: white;
-      padding: 22px;
-      text-align: center;
-    }
-
-    header h1 {
-      margin: 0 0 6px;
-    }
-
-    header p {
-      margin: 0;
-      opacity: .9;
-    }
-
-    .container {
-      width: 95%;
-      max-width: 1200px;
-      margin: 25px auto;
-    }
-
-    .topbar {
-      background: white;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,.07);
-      margin-bottom: 20px;
-    }
-
-    .topbar h2 {
-      margin: 0 0 15px;
-      color: #0d47a1;
-    }
-
-    .search-area {
-      display: flex;
-      gap: 10px;
-    }
-
-    .search-area input {
-      flex: 1;
-      padding: 14px;
-      border: 1px solid #cbd5e1;
-      border-radius: 9px;
-      font-size: 16px;
-      outline: none;
-    }
-
-    .search-area input:focus {
-      border-color: #0d47a1;
-    }
-
-    .search-area button {
-      border: none;
-      background: #0d47a1;
-      color: white;
-      padding: 0 22px;
-      border-radius: 9px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .search-area button:hover {
-      background: #083578;
-    }
-
-    .result-info {
-      margin-top: 12px;
-      color: #64748b;
-      font-size: 14px;
-    }
-
-    .table-wrapper {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,.07);
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 850px;
-    }
-
-    th {
-      background: #f1f5f9;
-      color: #334155;
-      text-align: left;
-      padding: 15px;
-      font-size: 14px;
-    }
-
-    td {
-      padding: 14px 15px;
-      border-top: 1px solid #e2e8f0;
-      font-size: 14px;
-    }
-
-    tr:hover td {
-      background: #f8fafc;
-    }
-
-    .voir-btn {
-      background: #0d47a1;
-      color: white;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 7px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .voir-btn:hover {
-      background: #083578;
-    }
-
-    .message {
-      background: white;
-      padding: 30px;
-      text-align: center;
-      border-radius: 15px;
-      color: #64748b;
-      box-shadow: 0 4px 15px rgba(0,0,0,.07);
-    }
-
-    .error {
-      color: #b91c1c;
-    }
-
-    .back {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 11px 18px;
-      background: white;
-      color: #0d47a1;
-      text-decoration: none;
-      border-radius: 8px;
-      box-shadow: 0 3px 10px rgba(0,0,0,.08);
-    }
-
-    /* DOSSIER */
-
-    .dossier {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 18px rgba(0,0,0,.08);
-      overflow: hidden;
-    }
-
-    .dossier-header {
-      background: #0d47a1;
-      color: white;
-      padding: 25px;
-    }
-
-    .dossier-header h2 {
-      margin: 0 0 5px;
-    }
-
-    .dossier-body {
-      padding: 22px;
-    }
-
-    .section {
-      margin-bottom: 25px;
-    }
-
-    .section h3 {
-      color: #0d47a1;
-      border-bottom: 2px solid #e2e8f0;
-      padding-bottom: 9px;
-      margin-bottom: 15px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(
-        auto-fit,
-        minmax(230px, 1fr)
-      );
-      gap: 12px;
-    }
-
-    .field {
-      background: #f8fafc;
-      padding: 13px;
-      border-radius: 8px;
-    }
-
-    .field strong {
-      display: block;
-      color: #64748b;
-      font-size: 12px;
-      margin-bottom: 5px;
-    }
-
-    .field span {
-      color: #1e293b;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .action-btn {
-      border: none;
-      padding: 11px 18px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .primary {
-      background: #0d47a1;
-      color: white;
-    }
-
-    .secondary {
-      background: #e2e8f0;
-      color: #334155;
-    }
-
-    @media(max-width:650px) {
-      .search-area {
-        flex-direction: column;
-      }
-
-      .search-area button {
-        padding: 13px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEDFAH - Membres</title>
+<style>
+*{box-sizing:border-box;font-family:"Segoe UI",Arial,sans-serif}
+body{margin:0;min-height:100vh;background:linear-gradient(rgba(255,255,255,.93),rgba(255,255,255,.93)),url("image.png") center center/cover fixed no-repeat;color:#1f2937}
+header{background:#0d47a1;color:white;padding:22px;text-align:center}header h1{margin:0 0 6px}header p{margin:0;opacity:.9}
+.container{width:95%;max-width:1200px;margin:25px auto}.topbar{background:white;padding:20px;border-radius:15px;box-shadow:0 4px 15px #00000012;margin-bottom:20px}.topbar h2{margin:0 0 15px;color:#0d47a1}
+.search-area{display:flex;gap:10px}.search-area input{flex:1;padding:14px;border:1px solid #cbd5e1;border-radius:9px;font-size:16px}.search-area button{border:0;background:#0d47a1;color:white;padding:0 22px;border-radius:9px;cursor:pointer;font-weight:bold}.result-info{margin-top:12px;color:#64748b;font-size:14px}
+.table-wrapper{background:white;border-radius:15px;box-shadow:0 4px 15px #00000012;overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:0}th{background:#f1f5f9;color:#334155;text-align:left;padding:15px;font-size:14px}td{padding:14px 15px;border-top:1px solid #e2e8f0;font-size:14px}
+.message{background:white;padding:30px;text-align:center;border-radius:15px;color:#64748b;box-shadow:0 4px 15px #00000012}.error{color:#b91c1c}.back{display:inline-block;margin-top:20px;padding:11px 18px;background:white;color:#0d47a1;text-decoration:none;border-radius:8px;box-shadow:0 3px 10px #00000014}
+.dossier{background:white;border-radius:16px;box-shadow:0 4px 18px #00000014;overflow:hidden}.dossier-header{background:#0d47a1;color:white;padding:25px}.dossier-header h2{margin:0 0 5px}.dossier-body{padding:22px}.section{margin-bottom:25px}.section h3{color:#0d47a1;border-bottom:2px solid #e2e8f0;padding-bottom:9px;margin-bottom:15px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.field{background:#f8fafc;padding:13px;border-radius:8px}.field strong{display:block;color:#64748b;font-size:12px;margin-bottom:5px}.field span{color:#1e293b}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}.action-btn{border:0;padding:11px 18px;border-radius:8px;cursor:pointer;font-weight:bold}.primary{background:#0d47a1;color:white}.secondary{background:#e2e8f0;color:#334155}
+@media(max-width:650px){.search-area{flex-direction:column}.search-area button{padding:13px}}
+</style>
 </head>
-
 <body>
-
-<header>
-  <h1>MEDFAH</h1>
-  <p>Gestion des membres</p>
-</header>
-
+<header><h1>MEDFAH</h1><p>Gestion des membres</p></header>
 <div class="container">
-
-
-<div id="app">
-  <div class="message">
-    Chargement des membres...
-  </div>
+  <div id="app"><div class="message">Chargement des membres...</div></div>
+  <div id="presenceZoneMEDFAH"></div>
+  <a href="index.html" class="back">← Retour à l'accueil</a>
 </div>
-
-<a href="index.html" class="back">
-  ← Retour à l'accueil
-</a>
-
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
-
