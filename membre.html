@@ -1,31 +1,386 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MEDFAH - Membres</title>
-<style>
-*{box-sizing:border-box;font-family:"Segoe UI",Arial,sans-serif}
-body{margin:0;min-height:100vh;background:linear-gradient(rgba(255,255,255,.93),rgba(255,255,255,.93)),url("image.png") center center/cover fixed no-repeat;color:#1f2937}
-header{background:#0d47a1;color:white;padding:22px;text-align:center}header h1{margin:0 0 6px}header p{margin:0;opacity:.9}
-.container{width:95%;max-width:1200px;margin:25px auto}.topbar{background:white;padding:20px;border-radius:15px;box-shadow:0 4px 15px #00000012;margin-bottom:20px}.topbar h2{margin:0 0 15px;color:#0d47a1}
-.search-area{display:flex;gap:10px}.search-area input{flex:1;padding:14px;border:1px solid #cbd5e1;border-radius:9px;font-size:16px}.search-area button{border:0;background:#0d47a1;color:white;padding:0 22px;border-radius:9px;cursor:pointer;font-weight:bold}.result-info{margin-top:12px;color:#64748b;font-size:14px}
-.table-wrapper{background:white;border-radius:15px;box-shadow:0 4px 15px #00000012;overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:0}th{background:#f1f5f9;color:#334155;text-align:left;padding:15px;font-size:14px}td{padding:14px 15px;border-top:1px solid #e2e8f0;font-size:14px}
-.message{background:white;padding:30px;text-align:center;border-radius:15px;color:#64748b;box-shadow:0 4px 15px #00000012}.error{color:#b91c1c}.back{display:inline-block;margin-top:20px;padding:11px 18px;background:white;color:#0d47a1;text-decoration:none;border-radius:8px;box-shadow:0 3px 10px #00000014}
-.dossier{background:white;border-radius:16px;box-shadow:0 4px 18px #00000014;overflow:hidden}.dossier-header{background:#0d47a1;color:white;padding:25px}.dossier-header h2{margin:0 0 5px}.dossier-body{padding:22px}.section{margin-bottom:25px}.section h3{color:#0d47a1;border-bottom:2px solid #e2e8f0;padding-bottom:9px;margin-bottom:15px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.field{background:#f8fafc;padding:13px;border-radius:8px}.field strong{display:block;color:#64748b;font-size:12px;margin-bottom:5px}.field span{color:#1e293b}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}.action-btn{border:0;padding:11px 18px;border-radius:8px;cursor:pointer;font-weight:bold}.primary{background:#0d47a1;color:white}.secondary{background:#e2e8f0;color:#334155}
-@media(max-width:650px){.search-area{flex-direction:column}.search-area button{padding:13px}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MEDFAH - Gestion des membres</title>
+
+    <meta
+        name="description"
+        content="Liste publique des membres et module de présence de la Mission Église de Dieu de la Foi Apostolique d’Haïti."
+    >
+
+    <meta name="theme-color" content="#0d47a1">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                linear-gradient(
+                    rgba(255,255,255,.94),
+                    rgba(255,255,255,.94)
+                ),
+                url("image.png") center center / cover fixed no-repeat;
+            color: #1f2937;
+        }
+
+        header {
+            background: #0d47a1;
+            color: white;
+            padding: 22px 16px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 6px;
+            font-size: 28px;
+        }
+
+        header p {
+            margin: 0;
+            opacity: .92;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 25px auto;
+            padding-bottom: 30px;
+        }
+
+        .topbar {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px #00000012;
+            margin-bottom: 20px;
+        }
+
+        .topbar h2 {
+            margin: 0 0 15px;
+            color: #0d47a1;
+        }
+
+        .search-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-area input {
+            flex: 1;
+            min-width: 0;
+            padding: 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            font-size: 16px;
+        }
+
+        .search-area button {
+            border: 0;
+            background: #0d47a1;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        a:focus-visible {
+            outline: 3px solid #f59e0b;
+            outline-offset: 3px;
+        }
+
+        button:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .result-info {
+            margin-top: 12px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .table-wrapper {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px #00000012;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 0;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #334155;
+            text-align: left;
+            padding: 15px;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 14px 15px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .message {
+            background: white;
+            padding: 25px;
+            text-align: center;
+            border-radius: 15px;
+            color: #64748b;
+            box-shadow: 0 4px 15px #00000012;
+            overflow-wrap: anywhere;
+        }
+
+        .message.error {
+            color: #b91c1c;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 18px;
+            background: white;
+            color: #0d47a1;
+            text-decoration: none;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px #00000014;
+            font-weight: 600;
+        }
+
+        .dossier {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 18px #00000014;
+            overflow: hidden;
+        }
+
+        .dossier-header {
+            background: #0d47a1;
+            color: white;
+            padding: 25px;
+        }
+
+        .dossier-header h2 {
+            margin: 0 0 5px;
+        }
+
+        .dossier-body {
+            padding: 22px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section h3 {
+            color: #0d47a1;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 9px;
+            margin-bottom: 15px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(230px, 1fr));
+            gap: 12px;
+        }
+
+        .field {
+            background: #f8fafc;
+            padding: 13px;
+            border-radius: 8px;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .field strong {
+            display: block;
+            color: #64748b;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .field span {
+            color: #1e293b;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            border: 0;
+            padding: 11px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .primary {
+            background: #0d47a1;
+            color: white;
+        }
+
+        .secondary {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        #presenceZoneMEDFAH {
+            margin-top: 20px;
+        }
+
+        #presenceZoneMEDFAH input,
+        #presenceZoneMEDFAH select,
+        #presenceZoneMEDFAH button {
+            max-width: 100%;
+            font-size: 16px;
+            border-radius: 8px;
+        }
+
+        #presenceZoneMEDFAH button {
+            cursor: pointer;
+        }
+
+        #presenceQRReaderMEDFAH {
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px 12px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        @media (max-width: 650px) {
+            header h1 {
+                font-size: 24px;
+            }
+
+            .container {
+                width: 94%;
+                margin: 16px auto;
+            }
+
+            .search-area {
+                flex-direction: column;
+            }
+
+            .search-area button {
+                width: 100%;
+                padding: 13px;
+            }
+
+            .dossier-body {
+                padding: 15px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            header,
+            .back,
+            footer,
+            #presenceZoneMEDFAH,
+            .search-area,
+            .actions {
+                display: none !important;
+            }
+
+            .container {
+                width: 100%;
+                max-width: none;
+                margin: 0;
+            }
+
+            .dossier {
+                box-shadow: none;
+            }
+        }
+    </style>
 </head>
+
 <body>
-<header><h1>MEDFAH</h1><p>Gestion des membres</p></header>
-<div class="container">
-  <div id="app"><div class="message">Chargement des membres...</div></div>
-  <div id="presenceZoneMEDFAH"></div>
-  <a href="index.html" class="back">← Retour à l'accueil</a>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://unpkg.com/html5-qrcode"></script>
-<script src="config.js"></script>
-<script src="app.js?v=20261024"></script>
+
+    <header>
+        <h1>MEDFAH</h1>
+        <p>Gestion des membres</p>
+    </header>
+
+    <main class="container">
+
+        <div id="app" aria-live="polite">
+            <div class="message">
+                Chargement des membres...
+            </div>
+        </div>
+
+        <div id="presenceZoneMEDFAH"></div>
+
+        <a href="index.html" class="back">
+            ← Retour à l'accueil
+        </a>
+
+    </main>
+
+    <footer>
+        Mission Église de Dieu de la Foi Apostolique d’Haïti
+        — MEDFAH
+    </footer>
+
+    <!-- Bibliothèque Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Lecteur QR Code -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <!-- Configuration existante du projet -->
+    <script src="config.js"></script>
+
+    <!-- Application MEDFAH -->
+    <script src="app.js?v=20261025"></script>
+
 </body>
 </html>
