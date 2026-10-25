@@ -552,7 +552,7 @@ td{
     <div class="stat">
         <div class="stat-icon">🗂️</div>
         <h3>05. Archives de l’Église</h3>
-        <p>Achiv, pwosè-vèbal ak rapò yo.</p>
+        <p>Pwosè-vèbal, rapò, foto ak videyo istorik klase pa ane.</p>
         <button class="view-btn"
             onclick="ouvrirSectionMEDFAH('archives')">
             Ouvrir la section
@@ -565,6 +565,15 @@ td{
         <p>Lèt, envitasyon, atestasyon ak fòmilè.</p>
         <button class="view-btn"
             onclick="ouvrirSectionMEDFAH('documents')">
+            Ouvrir la section
+        </button>
+    </div>
+
+    <div class="stat">
+        <div class="stat-icon">📋</div>
+        <h3>07. Présences</h3>
+        <p>Créer les services et suivre les présences des membres.</p>
+        <button class="view-btn" onclick="ouvrirSectionMEDFAH('presences')">
             Ouvrir la section
         </button>
     </div>
@@ -600,7 +609,7 @@ td{
             <input
                 type="search"
                 id="searchInput"
-                placeholder="Rechercher un membre par nom ou prénom..."
+                placeholder="Rechercher un membre, un code, une assemblée..."
                 oninput="searchMembers()"
             >
 
@@ -653,11 +662,11 @@ td{
 
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
 
-        <button class="refresh" id="btnActualiserMembres" onclick="loadPublicMembers()">
+        <button class="refresh" onclick="loadMembers()">
             ↻ Actualiser
         </button>
 
-        <button class="refresh" id="btnAjouterMembre" onclick="ouvrirFormulaireMembre()" style="display:none">
+        <button class="refresh" onclick="ouvrirFormulaireMembre()">
             ➕ Ajouter un membre
         </button>
 
@@ -861,13 +870,24 @@ td{
 
 <!-- MODAL -->
 <div class="modal" id="memberModal">
-    <div class="modal-card" style="max-height:90vh; overflow-y:auto;">
+
+    <div class="modal-card"><div class="modal-card" style="max-height:90vh; overflow-y:auto;">
+
         <div class="modal-head">
+
             <h2>Informations du membre</h2>
-            <button type="button" class="close-modal" onclick="closeMember()">×</button>
+
+            <button class="close-modal"
+                    onclick="closeMember()">
+                ×
+            </button>
+
         </div>
+
         <div id="memberDetails" class="details"></div>
+
     </div>
+
 </div>
 
 
@@ -883,11 +903,7 @@ function initSupabase(){
 
     if(
         typeof SUPABASE_URL === "undefined" ||
-        typeof SUPABASE_ANON_KEY === "undefined" ||
-        !SUPABASE_URL ||
-        !SUPABASE_ANON_KEY ||
-        !window.supabase ||
-        typeof window.supabase.createClient !== "function"
+        typeof SUPABASE_ANON_KEY === "undefined"
     ){
 
         console.error("Configuration Supabase introuvable.");
@@ -911,7 +927,7 @@ function initSupabase(){
      
 
 /* ==========================================
-   MEDFAH — NAVIGATION DES 6 SECTIONS
+   MEDFAH — NAVIGATION DES SECTIONS
 ========================================== */
 
 const sectionsMEDFAH = {
@@ -943,11 +959,12 @@ const sectionsMEDFAH = {
         ]
     },
     archives: {
-        titre: "05. Archives de l’Église",
+        titre: "05. Archives historiques de l’Église",
         details: [
-            "Procès-verbaux",
-            "Rapports anciens",
-            "Décisions classées par année"
+            "Procès-verbaux et rapports anciens",
+            "Décisions classées par année",
+            "Photos historiques classées par année et activité",
+            "Vidéos historiques classées par année et activité"
         ]
     },
     documents: {
@@ -958,7 +975,8 @@ const sectionsMEDFAH = {
             "Formulaires et règlements",
             "Documents PDF"
         ]
-    }
+    },
+    presences: { titre: "07. Présences des membres" }
 };
 
 
@@ -1412,6 +1430,11 @@ if (cle === "documents") {
     return;
 }
 
+    if (cle === "presences") {
+        await afficherModulePresencesMEDFAH(zone);
+        return;
+    }
+
     zone.innerHTML =
         "<ul style='line-height:2;padding-left:22px'>" +
         (section.details || []).map(item =>
@@ -1420,6 +1443,117 @@ if (cle === "documents") {
         "</ul><p>Ce module sera développé dans une prochaine étape.</p>";
 }
 
+
+/* =====================================================
+   SECTION 7 — PRÉSENCES MEDFAH
+   Utilise les tables existantes : sessions_presence et presences_eglise.
+   N'efface aucune donnée et ne marque pas automatiquement les absents.
+===================================================== */
+
+async function afficherModulePresencesMEDFAH(zone) {
+    if (!supabaseClient) {
+        zone.innerHTML = '<p class="empty">Connexion Supabase indisponible.</p>';
+        return;
+    }
+    zone.innerHTML = `
+      <div style="padding:12px">
+        <h3>Gestion des présences</h3>
+        <p>Créez une séance de service, puis consultez les séances enregistrées.</p>
+        <form id="formSessionPresenceMEDFAH">
+          <label for="presenceService">Service *</label>
+          <select id="presenceService" required style="display:block;width:100%;padding:10px;margin:6px 0 12px">
+            <option value="École dominicale">École dominicale</option>
+            <option value="Grand culte">Grand culte</option>
+            <option value="Étude biblique">Étude biblique</option>
+            <option value="Service de prière">Service de prière</option>
+            <option value="Service de jeûne">Service de jeûne</option>
+            <option value="Réunion des membres">Réunion des membres</option>
+            <option value="Veillée de nuit">Veillée de nuit</option>
+            <option value="Sainte-Cène">Sainte-Cène</option>
+          </select>
+          <label for="presenceDate">Date du service *</label>
+          <input id="presenceDate" type="date" required style="display:block;width:100%;padding:10px;margin:6px 0 12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div><label for="presenceDebut">Heure de début *</label><input id="presenceDebut" type="time" required style="width:100%;padding:10px;margin:6px 0 12px"></div>
+            <div><label for="presenceFin">Heure de fin *</label><input id="presenceFin" type="time" required style="width:100%;padding:10px;margin:6px 0 12px"></div>
+          </div>
+          <button type="submit" class="view-btn">Créer le service</button>
+          <p id="messageSessionPresenceMEDFAH" role="status"></p>
+        </form>
+        <hr><h3>Services enregistrés</h3>
+        <button type="button" class="refresh" id="actualiserSessionsPresenceMEDFAH">↻ Actualiser</button>
+        <div id="listeSessionsPresenceMEDFAH" style="margin-top:12px">Chargement des services...</div>
+      </div>`;
+    const dateInput = document.getElementById('presenceDate');
+    if (dateInput) dateInput.value = new Date().toLocaleDateString('en-CA');
+    document.getElementById('formSessionPresenceMEDFAH').addEventListener('submit', enregistrerSessionPresenceMEDFAH);
+    document.getElementById('actualiserSessionsPresenceMEDFAH').addEventListener('click', chargerSessionsPresenceMEDFAH);
+    await chargerSessionsPresenceMEDFAH();
+}
+
+async function enregistrerSessionPresenceMEDFAH(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const message = document.getElementById('messageSessionPresenceMEDFAH');
+    const bouton = form.querySelector('button[type="submit"]');
+    if (!supabaseClient || !roleAdminMEDFAH) { message.textContent = 'Connectez-vous avec un compte administrateur.'; return; }
+    bouton.disabled = true;
+    message.textContent = 'Enregistrement en cours...';
+    try {
+        const donnees = {
+            nom_services: document.getElementById('presenceService').value,
+            date_service: document.getElementById('presenceDate').value,
+            heure_debut: document.getElementById('presenceDebut').value,
+            heure_fin: document.getElementById('presenceFin').value,
+            statut: 'planifie'
+        };
+        const { error } = await supabaseClient.from('sessions_presence').insert(donnees);
+        if (error) throw error;
+        message.textContent = 'Service enregistré avec succès.';
+        form.reset();
+        document.getElementById('presenceDate').value = new Date().toLocaleDateString('en-CA');
+        await chargerSessionsPresenceMEDFAH();
+    } catch (e) {
+        console.error('Erreur session de présence MEDFAH:', e);
+        message.textContent = 'Enregistrement impossible : ' + (e.message || 'erreur Supabase') + '. Vérifiez les droits RLS et les colonnes de sessions_presence.';
+    } finally { bouton.disabled = false; }
+}
+
+async function chargerSessionsPresenceMEDFAH() {
+    const liste = document.getElementById('listeSessionsPresenceMEDFAH');
+    if (!liste || !supabaseClient) return;
+    liste.textContent = 'Chargement des services...';
+    try {
+        const { data, error } = await supabaseClient.from('sessions_presence')
+          .select('id,nom_services,date_service,heure_debut,heure_fin,statut')
+          .order('date_service', { ascending: false });
+        if (error) throw error;
+        if (!data || !data.length) { liste.innerHTML = '<p class="empty">Aucun service enregistré pour le moment.</p>'; return; }
+        liste.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Service</th><th>Date</th><th>Horaire</th><th>Statut</th><th>Présences</th></tr></thead><tbody>' + data.map(s =>
+          '<tr><td>' + escapeHTML(s.nom_services || '') + '</td><td>' + escapeHTML(s.date_service || '') + '</td><td>' + escapeHTML((s.heure_debut || '') + ' – ' + (s.heure_fin || '')) + '</td><td>' + escapeHTML(s.statut || '') + '</td><td><button class="refresh" type="button" onclick="voirPresencesSessionMEDFAH(' + Number(s.id) + ')">Voir</button></td></tr>'
+        ).join('') + '</tbody></table></div><div id="detailsPresencesSessionMEDFAH" style="margin-top:14px"></div>';
+    } catch (e) {
+        console.error('Erreur chargement sessions:', e);
+        liste.textContent = 'Chargement impossible : ' + (e.message || 'erreur Supabase') + '. Vérifiez les autorisations de lecture sur sessions_presence.';
+    }
+}
+
+async function voirPresencesSessionMEDFAH(sessionId) {
+    const cible = document.getElementById('detailsPresencesSessionMEDFAH');
+    if (!cible || !supabaseClient) return;
+    cible.textContent = 'Chargement des présences...';
+    try {
+        const { data, error } = await supabaseClient.from('presences_eglise')
+          .select('id,membre_id,heure_pointage,statut,mode_pointage,observation')
+          .eq('session_id', sessionId).order('heure_pointage', { ascending: true });
+        if (error) throw error;
+        if (!data || !data.length) { cible.innerHTML = '<p>Aucun pointage enregistré pour ce service. Le marquage des absents n’est pas automatique.</p>'; return; }
+        cible.innerHTML = '<h4>Présences enregistrées</h4><div class="table-wrap"><table><thead><tr><th>ID membre</th><th>Heure</th><th>Statut</th><th>Mode</th></tr></thead><tbody>' + data.map(p => '<tr><td>' + escapeHTML(p.membre_id ?? '') + '</td><td>' + escapeHTML(p.heure_pointage || '') + '</td><td>' + escapeHTML(p.statut || '') + '</td><td>' + escapeHTML(p.mode_pointage || '') + '</td></tr>').join('') + '</tbody></table></div>';
+    } catch (e) {
+        console.error('Erreur chargement présences:', e);
+        cible.textContent = 'Impossible de lire les présences : ' + (e.message || 'erreur Supabase') + '. Vérifiez les droits RLS sur presences_eglise.';
+    }
+}
 
 /* ==========================================
    PROGRAMMATION DE L'ÉGLISE
@@ -2336,68 +2470,8 @@ function showMembers(){
 ========================================== */
 
 let allMembers = [];
-let publicMembers = [];
-
-function afficherCommandesMembresAdmin(estAdmin){
-    const boutonAjouter = document.getElementById("btnAjouterMembre");
-    const boutonActualiser = document.getElementById("btnActualiserMembres");
-    if (boutonAjouter) boutonAjouter.style.display = estAdmin ? "inline-flex" : "none";
-    if (boutonActualiser) {
-        boutonActualiser.textContent = estAdmin ? "↻ Actualiser" : "↻ Actualiser";
-        boutonActualiser.onclick = estAdmin ? loadMembers : loadPublicMembers;
-    }
-}
-
-/* Chargement public sécurisé : uniquement nom et prénom via RPC Supabase */
-async function loadPublicMembers(){
-    afficherCommandesMembresAdmin(false);
-    const container = document.getElementById("membersContent");
-    if (!container) return;
-    container.innerHTML = '<div class="loading">Chargement de la liste publique...</div>';
-
-    if (!supabaseClient) {
-        container.innerHTML = '<div class="empty">Le service public est temporairement indisponible.</div>';
-        return;
-    }
-
-    try {
-        const { data, error } = await supabaseClient.rpc("get_public_member_names");
-        if (error) throw error;
-        publicMembers = (data || []).map(m => ({
-            nom: m.nom || "",
-            prenom: m.prenom || m.prénom || ""
-        }));
-        const total = document.getElementById("totalMembers");
-        if (total) total.textContent = publicMembers.length;
-        displayPublicMembers(publicMembers);
-    } catch (error) {
-        console.error("Erreur chargement liste publique MEDFAH:", error);
-        container.innerHTML = '<div class="empty">La liste publique n’est pas encore configurée dans Supabase. Veuillez appliquer le script SQL fourni pour activer l’affichage sécurisé des noms et prénoms.</div>';
-    }
-}
-
-function displayPublicMembers(members){
-    const container = document.getElementById("membersContent");
-    if (!container) return;
-    if (!members || members.length === 0) {
-        container.innerHTML = '<div class="empty">Aucun membre trouvé.</div>';
-        return;
-    }
-    let html = '<div class="table-wrap"><table><thead><tr><th>Nom</th><th>Prénom</th></tr></thead><tbody>';
-    for (const member of members) {
-        html += `<tr><td><strong>${escapeHTML(member.nom || "—")}</strong></td><td>${escapeHTML(member.prenom || "—")}</td></tr>`;
-    }
-    html += '</tbody></table></div>';
-    container.innerHTML = html;
-}
 
 async function loadMembers(){
-
-    if (!roleAdminMEDFAH || !["admin_principal", "admin_secondaire"].includes(roleAdminMEDFAH)) {
-        await loadPublicMembers();
-        return;
-    }
-    afficherCommandesMembresAdmin(true);
 
     const container =
         document.getElementById("membersContent");
@@ -2585,37 +2659,48 @@ function displayMembers(members){
 ========================================== */
 
 function searchMembers(){
-    const query = (document.getElementById("searchInput")?.value || "")
+
+    const query =
+        document.getElementById("searchInput")
+        .value
         .toLowerCase()
         .trim();
 
-    // Public : recherche uniquement sur nom et prénom.
-    if (!roleAdminMEDFAH) {
-        if (!query) {
-            displayPublicMembers(publicMembers);
-            return;
-        }
-        const resultsPublics = publicMembers.filter(member =>
-            `${member.nom || ""} ${member.prenom || ""}`
-                .toLowerCase()
-                .includes(query)
-        );
-        displayPublicMembers(resultsPublics);
-        return;
-    }
+    if(!query){
 
-    // Administrateurs autorisés : recherche dans la liste administrative.
-    if (!query) {
         displayMembers(allMembers);
         return;
     }
-    const results = allMembers.filter(member => [
-        member.nom, member.prenom, member.prénom, member.code,
-        member.telephone, member.téléphone, member.adresse, member.address,
-        member.profession, member.fonction, member.assemblee, member.assemblée
-    ].filter(Boolean).join(" ").toLowerCase().includes(query));
+
+    const results =
+        allMembers.filter(member => {
+
+            return [
+
+                member.nom,
+                member.prenom,
+                member.prénom,
+                member.code,
+                member.telephone,
+                member.téléphone,
+                member.adresse,
+                member.address,
+                member.profession,
+                member.fonction,
+                member.assemblee,
+                member.assemblée
+
+            ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase()
+            .includes(query);
+
+        });
+
     displayMembers(results);
 }
+
 
 /* ==========================================
    VOIR UN MEMBRE
@@ -2794,166 +2879,10 @@ function afficherZoneAdminMEDFAH(connecte) {
 }
 
 /* ==========================================
-   CONNEXION / RÔLES / DÉCONNEXION ADMIN MEDFAH
-========================================== */
-
-async function verifierRoleAdminMEDFAH() {
-    if (!supabaseClient || !supabaseClient.auth) {
-        roleAdminMEDFAH = null;
-        afficherZoneAdminMEDFAH(false);
-        return false;
-    }
-
-    try {
-        const { data: sessionData, error: sessionError } =
-            await supabaseClient.auth.getSession();
-
-        if (sessionError || !sessionData || !sessionData.session) {
-            roleAdminMEDFAH = null;
-            afficherZoneAdminMEDFAH(false);
-            return false;
-        }
-
-        const userId = sessionData.session.user.id;
-        const { data: roleData, error: roleError } = await supabaseClient
-            .from("medfah_user_roles")
-            .select("role")
-            .eq("user_id", userId)
-            .maybeSingle();
-
-        if (roleError) {
-            console.error("Erreur lecture du rôle administrateur :", roleError);
-            roleAdminMEDFAH = null;
-            afficherZoneAdminMEDFAH(false);
-            return false;
-        }
-
-        if (
-            !roleData ||
-            !["admin_principal", "admin_secondaire"].includes(roleData.role)
-        ) {
-            roleAdminMEDFAH = null;
-            afficherZoneAdminMEDFAH(false);
-            return false;
-        }
-
-        roleAdminMEDFAH = roleData.role;
-        afficherZoneAdminMEDFAH(true);
-        return true;
-    } catch (error) {
-        console.error("Erreur vérification rôle MEDFAH :", error);
-        roleAdminMEDFAH = null;
-        afficherZoneAdminMEDFAH(false);
-        return false;
-    }
-}
-
-async function connecterAdminMEDFAH(event) {
-    if (event) event.preventDefault();
-
-    const formulaire = document.getElementById("formConnexionAdminMEDFAH");
-    const message = document.getElementById("messageConnexionAdminMEDFAH");
-    const bouton = formulaire
-        ? formulaire.querySelector('button[type="submit"]')
-        : null;
-    const email = document.getElementById("emailAdminMEDFAH");
-    const motPasse = document.getElementById("motPasseAdminMEDFAH");
-
-    if (!supabaseClient || !supabaseClient.auth) {
-        if (message) message.textContent =
-            "Configuration Supabase indisponible. Vérifiez config.js.";
-        return;
-    }
-
-    if (!email || !motPasse || !email.value.trim() || !motPasse.value) {
-        if (message) message.textContent =
-            "Veuillez saisir votre adresse e-mail et votre mot de passe.";
-        return;
-    }
-
-    if (bouton) bouton.disabled = true;
-    if (message) message.textContent = "Vérification de la connexion…";
-
-    try {
-        const { error } = await supabaseClient.auth.signInWithPassword({
-            email: email.value.trim(),
-            password: motPasse.value
-        });
-
-        if (error) throw error;
-
-        const autorise = await verifierRoleAdminMEDFAH();
-
-        if (!autorise) {
-            if (message) {
-                message.textContent =
-                    "Compte connecté, mais rôle administrateur non confirmé. Vérifiez la ligne de ce compte dans medfah_user_roles et les règles RLS.";
-            }
-            return;
-        }
-
-        if (message) message.textContent = "";
-        if (formulaire) formulaire.reset();
-
-        // Recharge la liste seulement après confirmation du rôle.
-        if (typeof loadMembers === "function") {
-            await loadMembers();
-        }
-    } catch (error) {
-        console.error("Erreur connexion administrateur MEDFAH :", error);
-        if (message) {
-            message.textContent =
-                "Connexion impossible. Vérifiez l’e-mail, le mot de passe et les autorisations Supabase.";
-        }
-    } finally {
-        if (bouton) bouton.disabled = false;
-    }
-}
-
-async function deconnecterAdminMEDFAH() {
-    if (!supabaseClient || !supabaseClient.auth) {
-        roleAdminMEDFAH = null;
-        afficherZoneAdminMEDFAH(false);
-        return;
-    }
-
-    try {
-        const { error } = await supabaseClient.auth.signOut();
-        if (error) throw error;
-
-        roleAdminMEDFAH = null;
-        allMembers = [];
-        afficherZoneAdminMEDFAH(false);
-        await loadPublicMembers();
-
-        const contenu = document.getElementById("contenuSectionMEDFAH");
-        if (contenu) contenu.style.display = "none";
-
-        const titre = document.getElementById("titreSectionMEDFAH");
-        if (titre) titre.textContent = "";
-
-        const message = document.getElementById("messageConnexionAdminMEDFAH");
-        if (message) message.textContent = "";
-    } catch (error) {
-        console.error("Erreur déconnexion MEDFAH :", error);
-        alert("La déconnexion n’a pas abouti. Réessayez.");
-    }
-}
-
-function fermerFormulaireMembre() {
-    const modal = document.getElementById("ajoutMembreModal");
-    const form = document.getElementById("formAjoutMembre");
-    const message = document.getElementById("messageAjoutMembre");
-
-    if (modal) modal.style.display = "none";
-    if (form) form.reset();
-    if (message) message.textContent = "";
-}
-
-
-/* ==========================================
    DÉMARRAGE
 ========================================== */
+
+
 
 document.addEventListener("DOMContentLoaded", async function() {
     if (!initSupabase()) {
@@ -2968,9 +2897,6 @@ document.addEventListener("DOMContentLoaded", async function() {
     }
 
     afficherZoneAdminMEDFAH(false);
-
-    // La liste publique charge uniquement les noms/prénoms via une fonction SQL sécurisée.
-    await loadPublicMembers();
 
     const autorise = await verifierRoleAdminMEDFAH();
 
@@ -3050,6 +2976,4 @@ async function ouvrirFormulaireMembre() {
     }
 }
 
-</script>
-</body>
-</html>
+
