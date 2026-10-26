@@ -26,7 +26,6 @@ header{
     border-bottom:1px solid #e5e7eb;
     padding:12px 20px;
     min-height:82px;
-
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -69,7 +68,8 @@ header{
     position:absolute;
     right:18px;
     top:75px;
-    width:230px;
+    width:250px;
+    max-width:calc(100vw - 30px);
     background:white;
     border-radius:15px;
     box-shadow:0 8px 25px rgba(0,0,0,.15);
@@ -117,6 +117,7 @@ header{
 .intro p{
     color:#697386;
     font-size:15px;
+    line-height:1.5;
 }
 
 /* ================= SEARCH ================= */
@@ -133,6 +134,7 @@ header{
 
 .search-box input{
     flex:1;
+    min-width:0;
     border:1px solid #d7dce4;
     border-radius:11px;
     padding:13px;
@@ -201,13 +203,14 @@ header{
 }
 
 .action{
+    display:block;
     background:white;
     border-radius:16px;
     padding:20px 15px;
     text-decoration:none;
     color:#172033;
     box-shadow:0 3px 15px rgba(0,0,0,.05);
-    transition:.2s;
+    transition:transform .2s, box-shadow .2s;
 }
 
 .action:hover{
@@ -229,7 +232,7 @@ header{
 .action-description{
     color:#697386;
     font-size:12px;
-    line-height:1.35;
+    line-height:1.5;
 }
 
 /* ================= FOOTER ================= */
@@ -263,6 +266,7 @@ footer{
         width:46px;
         height:44px;
         font-size:23px;
+        flex-shrink:0;
     }
 
     .container{
@@ -287,7 +291,7 @@ footer{
     }
 
     .stats{
-        grid-template-columns:repeat(3,1fr);
+        grid-template-columns:repeat(3,minmax(0,1fr));
         gap:8px;
     }
 
@@ -308,12 +312,35 @@ footer{
     }
 
     .actions{
-        grid-template-columns:repeat(2,1fr);
+        grid-template-columns:repeat(2,minmax(0,1fr));
         gap:10px;
     }
 
     .action{
         padding:17px 13px;
+    }
+}
+
+@media(max-width:360px){
+    .header-title{
+        font-size:13px;
+        max-width:175px;
+    }
+
+    .stats{
+        gap:5px;
+    }
+
+    .stat{
+        padding:11px 6px;
+    }
+
+    .stat-number{
+        font-size:18px;
+    }
+
+    .stat-title{
+        font-size:10px;
     }
 }
 </style>
@@ -322,75 +349,63 @@ footer{
 <body>
 
 <header>
-
     <div class="header-left">
-
         <img
-    src="logo-medfah.jpg"
-    alt="Logo MEDFAH"
-    class="logo"
->
+            src="logo-medfah.jpg"
+            alt="Logo MEDFAH"
+            class="logo"
+        >
 
         <div class="header-title">
             Mission Église de Dieu de la Foi
             Apostolique d’Haïti
         </div>
-
     </div>
 
     <button
+        type="button"
         class="menu-button"
+        id="menuButton"
+        aria-label="Ouvrir le menu"
+        aria-expanded="false"
+        aria-controls="menu"
         onclick="ouvrirMenu()"
     >
         ☰
     </button>
-
 </header>
 
-
-<!-- MENU -->
+<!-- MENU PRINCIPAL -->
 
 <nav id="menu" class="menu">
 
-    <a href="index.html">
-        🏠 Accueil
-    </a>
+    <a href="index.html">🏠 Accueil</a>
 
-    <a href="membre.html">
-        👥 Liste des Membres
-    </a>
+    <a href="membre.html">👥 Liste des Membres</a>
 
-    <a href="scan.html">
-        📷 Scanner QR Code
-    </a>
+    <a href="programmation.html">📅 Programmation de l’Église</a>
 
-    <a href="verify.html">
-        ✓ Vérifier Carte
-    </a>
+    <a href="scan.html">📷 Scanner QR Code</a>
 
-    <a href="medfah.html">
-        ⚙️ Administration
-    </a>
+    <a href="verify.html">✓ Vérifier Carte</a>
+
+    <a href="medfah.html">⚙️ Administration</a>
 
 </nav>
 
-
 <main class="container">
 
-    <section class="intro">
+    <!-- ACCUEIL -->
 
-        <h1>
-            Bienvenue sur MEDFAH
-        </h1>
+    <section class="intro">
+        <h1>Bienvenue sur MEDFAH</h1>
 
         <p>
             Plateforme officielle de gestion des membres et des cartes.
         </p>
-
     </section>
 
-
-    <!-- RECHERCHE -->
+    <!-- RECHERCHE DES MEMBRES -->
 
     <section class="search-box">
 
@@ -398,98 +413,61 @@ footer{
             type="search"
             id="homeSearch"
             placeholder="Rechercher un membre..."
+            aria-label="Rechercher un membre"
         >
 
-        <button onclick="rechercherMembre()">
+        <button
+            type="button"
+            onclick="rechercherMembre()"
+        >
             🔎 Rechercher
         </button>
 
     </section>
-
 
     <!-- STATISTIQUES -->
 
     <section class="stats">
 
         <div class="stat">
+            <div class="stat-icon">👥</div>
 
-            <div class="stat-icon">
-                👥
-            </div>
+            <div class="stat-number" id="totalMembers">—</div>
 
-            <div
-                class="stat-number"
-                id="totalMembers"
-            >
-                —
-            </div>
-
-            <div class="stat-title">
-                Membres
-            </div>
-
+            <div class="stat-title">Membres</div>
         </div>
 
-
         <div class="stat">
+            <div class="stat-icon">⛪</div>
 
-            <div class="stat-icon">
-                ⛪
-            </div>
+            <div class="stat-number" id="totalAssemblees">—</div>
 
-            <div
-                class="stat-number"
-                id="totalAssemblees"
-            >
-                —
-            </div>
-
-            <div class="stat-title">
-                Assemblées
-            </div>
-
+            <div class="stat-title">Assemblées</div>
         </div>
 
-
         <div class="stat">
+            <div class="stat-icon">💳</div>
 
-            <div class="stat-icon">
-                💳
-            </div>
+            <div class="stat-number" id="totalCartes">—</div>
 
-            <div
-                class="stat-number"
-                id="totalCartes"
-            >
-                —
-            </div>
-
-            <div class="stat-title">
-                Cartes
-            </div>
-
+            <div class="stat-title">Cartes</div>
         </div>
 
     </section>
 
-
-    <!-- SERVICES -->
+    <!-- SERVICES MEDFAH -->
 
     <div class="services-title">
         Services MEDFAH
     </div>
 
-
     <section class="actions">
 
-        <a
-            href="scan.html"
-            class="action"
-        >
+        <!-- SCANNER QR CODE -->
 
-            <div class="action-icon">
-                📷
-            </div>
+        <a href="scan.html" class="action">
+
+            <div class="action-icon">📷</div>
 
             <div class="action-title">
                 Scanner QR Code
@@ -501,35 +479,43 @@ footer{
 
         </a>
 
+        <!-- MEMBRES -->
 
-        <a
-            href="membre.html"
-            class="action"
-        >
+        <a href="membre.html" class="action">
 
-            <div class="action-icon">
-                👥
-            </div>
+            <div class="action-icon">👥</div>
 
             <div class="action-title">
                 Membres
             </div>
 
             <div class="action-description">
-                Consulter les membres de l’Église.
+                Consulter les noms et prénoms des membres.
             </div>
 
         </a>
 
+        <!-- PROGRAMMATION DE L'ÉGLISE -->
 
-        <a
-            href="verify.html"
-            class="action"
-        >
+        <a href="programmation.html" class="action">
 
-            <div class="action-icon">
-                ✓
+            <div class="action-icon">📅</div>
+
+            <div class="action-title">
+                Programmation de l’Église
             </div>
+
+            <div class="action-description">
+                Consulter les activités et le programme de l’Église.
+            </div>
+
+        </a>
+
+        <!-- VÉRIFICATION DE CARTE -->
+
+        <a href="verify.html" class="action">
+
+            <div class="action-icon">✓</div>
 
             <div class="action-title">
                 Vérifier Carte
@@ -541,15 +527,11 @@ footer{
 
         </a>
 
+        <!-- ADMINISTRATION -->
 
-        <a
-            href="medfah.html"
-            class="action"
-        >
+        <a href="medfah.html" class="action">
 
-            <div class="action-icon">
-                ⚙️
-            </div>
+            <div class="action-icon">⚙️</div>
 
             <div class="action-title">
                 Administration
@@ -565,63 +547,76 @@ footer{
 
 </main>
 
-
 <footer>
     © 2026 MEDFAH — Tous droits réservés.
 </footer>
 
+<!-- CONSERVATION DES SCRIPTS EXISTANTS -->
 
 <script src="config.js"></script>
 <script src="app.js"></script>
 
 <script>
-
 function ouvrirMenu(){
 
-    document
-        .getElementById("menu")
-        .classList.toggle("show");
+    const menu = document.getElementById("menu");
+    const bouton = document.getElementById("menuButton");
 
+    menu.classList.toggle("show");
+
+    bouton.setAttribute(
+        "aria-expanded",
+        menu.classList.contains("show") ? "true" : "false"
+    );
 }
-
 
 function rechercherMembre(){
 
-    const texte =
-        document
-            .getElementById("homeSearch")
-            .value
-            .trim();
+    const champ = document.getElementById("homeSearch");
+    const texte = champ.value.trim();
 
     if(texte){
 
         window.location.href =
-            "membre.html?q=" +
-            encodeURIComponent(texte);
+            "membre.html?q=" + encodeURIComponent(texte);
 
     }else{
 
-        window.location.href =
-            "membre.html";
+        window.location.href = "membre.html";
 
     }
-
 }
-
 
 document
     .getElementById("homeSearch")
-    .addEventListener(
-        "keydown",
-        function(event){
+    .addEventListener("keydown", function(event){
 
-            if(event.key === "Enter"){
-                rechercherMembre();
-            }
-
+        if(event.key === "Enter"){
+            rechercherMembre();
         }
-    );
 
+    });
+
+/* Fermer le menu quand on clique en dehors */
+
+document.addEventListener("click", function(event){
+
+    const menu = document.getElementById("menu");
+    const bouton = document.getElementById("menuButton");
+
+    if(
+        menu &&
+        bouton &&
+        !menu.contains(event.target) &&
+        !bouton.contains(event.target)
+    ){
+
+        menu.classList.remove("show");
+        bouton.setAttribute("aria-expanded", "false");
+
+    }
+
+});
 </script>
 
 </body>
