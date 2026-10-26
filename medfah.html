@@ -1014,70 +1014,149 @@ async function ouvrirSectionMEDFAH(cle) {
         return;
     }
 
-    if (cle === "programmation") {
-        zone.innerHTML = `
-            <div style="padding:15px">
-                <h3>Programmation de l’Église</h3>
-                <form id="formProgrammationMEDFAH">
-                    <label>Titre du programme *</label>
-                    <input id="progTitre" required
-                        style="width:100%;padding:10px;margin:6px 0 12px">
+    
+if (cle === "programmation") {
+    zone.innerHTML = `
+        <div style="padding:15px">
+            <h3>📅 Programmation de l’Église</h3>
 
-                    <label>Catégorie</label>
-                    <select id="progCategorie"
+            <p>Chwazi peryòd pwogram ou vle òganize a.</p>
+
+            <label for="progPeriode">Période du programme</label>
+            <select id="progPeriode"
+                style="width:100%;padding:10px;margin:6px 0 12px">
+                <option value="semaine">Semaine</option>
+                <option value="mois">Mois</option>
+                <option value="annee">Année</option>
+            </select>
+
+            <form id="formProgrammationMEDFAH">
+                <label for="progTitre">Titre du programme *</label>
+                <input id="progTitre" required
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+
+                <label for="progCategorie">Catégorie</label>
+                <select id="progCategorie"
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+                    <option value="Culte">Culte</option>
+                    <option value="Réunion">Réunion</option>
+                    <option value="Conférence">Conférence</option>
+                    <option value="Campagne spirituelle">Campagne spirituelle</option>
+                    <option value="Autre">Autre</option>
+                </select>
+
+                <label for="progDateDebut">Date et heure *</label>
+                <input id="progDateDebut" type="datetime-local" required
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+
+                <label for="progDateFin">Date et heure de fin</label>
+                <input id="progDateFin" type="datetime-local"
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+
+                <div id="champsProgrammeSemaine"
+                    style="border:1px solid #d8dde6;border-radius:10px;padding:12px;margin:10px 0">
+                    <h4>📋 Détails du programme hebdomadaire</h4>
+
+                    <label for="progJour">Jour</label>
+                    <select id="progJour"
                         style="width:100%;padding:10px;margin:6px 0 12px">
-                        <option value="Culte">Culte</option>
-                        <option value="Réunion">Réunion</option>
-                        <option value="Conférence">Conférence</option>
-                        <option value="Campagne spirituelle">Campagne spirituelle</option>
-                        <option value="Autre">Autre</option>
+                        <option value="">Choisir un jour</option>
+                        <option>Lundi</option>
+                        <option>Mardi</option>
+                        <option>Mercredi</option>
+                        <option>Jeudi</option>
+                        <option>Vendredi</option>
+                        <option>Samedi</option>
+                        <option>Dimanche</option>
                     </select>
 
-                    <label>Date et heure *</label>
-                    <input id="progDateDebut" type="datetime-local" required
+                    <label for="progHeure">Heure</label>
+                    <input id="progHeure" type="text"
+                        placeholder="Ex. : 7h00 - 10h00"
                         style="width:100%;padding:10px;margin:6px 0 12px">
 
-                    <label>Date et heure de fin</label>
-                    <input id="progDateFin" type="datetime-local"
+                    <label for="progDirigeant">Dirigeant/e</label>
+                    <input id="progDirigeant"
                         style="width:100%;padding:10px;margin:6px 0 12px">
 
-                    <label>Lieu</label>
-                    <input id="progLieu"
+                    <label for="progLecteur">Lecteur/trice</label>
+                    <input id="progLecteur"
                         style="width:100%;padding:10px;margin:6px 0 12px">
 
-                    <label>Responsable</label>
-                    <input id="progResponsable"
+                    <label for="progMessage">Message</label>
+                    <input id="progMessage"
                         style="width:100%;padding:10px;margin:6px 0 12px">
 
-                    <label>Description</label>
-                    <textarea id="progDescription"
+                    <label for="progAutre">Autre</label>
+                    <textarea id="progAutre" rows="2"
                         style="width:100%;padding:10px;margin:6px 0 12px"></textarea>
-
-                    <label>Statut</label>
-                    <select id="progStatut"
-                        style="width:100%;padding:10px;margin:6px 0 12px">
-                        <option value="Planifié">Planifié</option>
-                        <option value="Réalisé">Réalisé</option>
-                        <option value="Reporté">Reporté</option>
-                        <option value="Annulé">Annulé</option>
-                    </select>
-
-                    <button type="submit" class="view-btn">
-                        Enregistrer le programme
-                    </button>
-                </form>
-
-                <hr>
-                <h3>Liste des programmes</h3>
-                <div id="listeProgrammationMEDFAH">
-                    Chargement...
                 </div>
-            </div>
-        `;
 
-        await chargerProgrammationMEDFAH();
-        return;
+                <label for="progLieu">Lieu</label>
+                <input id="progLieu"
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+
+                <label for="progResponsable">Responsable</label>
+                <input id="progResponsable"
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+
+                <label for="progDescription">Description</label>
+                <textarea id="progDescription"
+                    style="width:100%;padding:10px;margin:6px 0 12px"></textarea>
+
+                <label for="progStatut">Statut</label>
+                <select id="progStatut"
+                    style="width:100%;padding:10px;margin:6px 0 12px">
+                    <option value="Planifié">Planifié</option>
+                    <option value="Réalisé">Réalisé</option>
+                    <option value="Reporté">Reporté</option>
+                    <option value="Annulé">Annulé</option>
+                </select>
+
+                <button type="submit" class="view-btn">
+                    Enregistrer le programme
+                </button>
+            </form>
+
+            <hr>
+
+            <h3>Liste des programmes</h3>
+
+            <label for="filtrePeriodeProgrammation">
+                Afficher les programmes
+            </label>
+            <select id="filtrePeriodeProgrammation"
+                style="width:100%;padding:10px;margin:6px 0 12px">
+                <option value="">Toutes les périodes</option>
+                <option value="semaine">Semaine</option>
+                <option value="mois">Mois</option>
+                <option value="annee">Année</option>
+            </select>
+
+            <div id="listeProgrammationMEDFAH">
+                Chargement...
+            </div>
+        </div>
+    `;
+
+    const periode = document.getElementById("progPeriode");
+    const champsSemaine = document.getElementById("champsProgrammeSemaine");
+
+    function actualiserChampsPeriode() {
+        champsSemaine.style.display =
+            periode.value === "semaine" ? "block" : "none";
     }
+
+    periode.addEventListener("change", actualiserChampsPeriode);
+    actualiserChampsPeriode();
+
+    document.getElementById("filtrePeriodeProgrammation")
+        .addEventListener("change", afficherListeProgrammationMEDFAH);
+
+    await chargerProgrammationMEDFAH();
+    return;
+}
+
 
     if (cle === "activites") {
         zone.innerHTML = `
