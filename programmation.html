@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programmation de l’Église — MEDFAH</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:"Segoe UI",Arial,sans-serif;
+}
+
+body{
+    background:#f5f7fb;
+    color:#172033;
+}
+
+header{
+    background:white;
+    padding:16px 5%;
+    border-bottom:1px solid #e5e7eb;
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo{
+    width:52px;
+    height:52px;
+    object-fit:contain;
+}
+
+header h1{
+    font-size:18px;
+}
+
+.container{
+    width:92%;
+    max-width:950px;
+    margin:28px auto;
+}
+
+.intro{
+    text-align:center;
+    margin-bottom:24px;
+}
+
+.intro h2{
+    font-size:27px;
+    margin-bottom:8px;
+}
+
+.intro p{
+    color:#697386;
+    line-height:1.5;
+}
+
+.actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+.back{
+    display:inline-block;
+    text-decoration:none;
+    color:white;
+    background:#172033;
+    padding:11px 16px;
+    border-radius:10px;
+}
+
+#filtreCategorie{
+    padding:11px;
+    border:1px solid #d7dce4;
+    border-radius:10px;
+    background:white;
+    max-width:100%;
+}
+
+.message{
+    background:white;
+    border-radius:14px;
+    padding:20px;
+    text-align:center;
+    color:#697386;
+    line-height:1.6;
+    box-shadow:0 3px 15px rgba(0,0,0,.05);
+}
+
+.liste{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px;
+}
+
+.activite{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 3px 15px rgba(0,0,0,.05);
+    border-left:4px solid #172033;
+    overflow-wrap:anywhere;
+}
+
+.activite h3{
+    font-size:19px;
+    margin-bottom:12px;
+}
+
+.badge{
+    display:inline-block;
+    background:#edf2f7;
+    color:#334155;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:12px;
+    margin-bottom:12px;
+}
+
+.detail{
+    margin:7px 0;
+    font-size:14px;
+    line-height:1.5;
+}
+
+.description{
+    margin-top:12px;
+    color:#596579;
+    line-height:1.6;
+    white-space:pre-wrap;
+}
+
+footer{
+    text-align:center;
+    padding:30px 10px;
+    color:#8a93a3;
+    font-size:12px;
+}
+
+@media(max-width:650px){
+    .liste{
+        grid-template-columns:1fr;
+    }
+
+    .intro h2{
+        font-size:23px;
+    }
+
+    header h1{
+        font-size:15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <img src="logo-medfah.jpg" alt="Logo MEDFAH" class="logo">
+    <h1>Mission Église de Dieu de la Foi Apostolique d’Haïti</h1>
+</header>
+
+<main class="container">
+
+    <section class="intro">
+        <h2>📅 Programmation de l’Église</h2>
+        <p>Consultez les activités et les programmes de MEDFAH.</p>
+    </section>
+
+    <div class="actions">
+        <a href="index.html" class="back">← Retour à l’accueil</a>
+
+        <select id="filtreCategorie" aria-label="Filtrer par catégorie">
+            <option value="">Toutes les catégories</option>
+        </select>
+    </div>
+
+    <div id="message" class="message">
+        Chargement du programme...
+    </div>
+
+    <section id="listeActivites" class="liste"></section>
+
+</main>
+
+<footer>© 2026 MEDFAH — Tous droits réservés.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<script>
+(function(){
+
+    const message = document.getElementById("message");
+    const liste = document.getElementById("listeActivites");
+    const filtre = document.getElementById("filtreCategorie");
+
+    function afficherErreur(texte){
+        message.hidden = false;
+        message.textContent = texte;
+        liste.replaceChildren();
+    }
+
+    function texteSecurise(valeur){
+        return valeur == null ? "" : String(valeur);
+    }
+
+    function ajouterDetail(parent, etiquette, valeur){
+        if(valeur === null || valeur === undefined || valeur === ""){
+            return;
+        }
+
+        const p = document.createElement("p");
+        p.className = "detail";
+
+        const fort = document.createElement("strong");
+        fort.textContent = etiquette + " : ";
+
+        p.appendChild(fort);
+        p.appendChild(document.createTextNode(texteSecurise(valeur)));
+        parent.appendChild(p);
+    }
+
+    function formaterDate(valeur){
+        if(!valeur) return "";
+
+        const date = new Date(valeur + "T00:00:00");
+
+        if(Number.isNaN(date.getTime())){
+            return valeur;
+        }
+
+        return date.toLocaleDateString("fr-FR", {
+            day:"2-digit",
+            month:"long",
+            year:"numeric"
+        });
+    }
+
+    function afficherActivites(donnees){
+        liste.replaceChildren();
+
+        const categorieChoisie = filtre.value;
+
+        const resultats = donnees.filter(function(a){
+            return !categorieChoisie ||
+                texteSecurise(a.categorie) === categorieChoisie;
+        });
+
+        if(resultats.length === 0){
+            message.hidden = false;
+            message.textContent = donnees.length === 0
+                ? "Aucune activité n’est actuellement disponible."
+                : "Aucune activité ne correspond à cette catégorie.";
+            return;
+        }
+
+        message.hidden = true;
+
+        resultats.forEach(function(a){
+            const carte = document.createElement("article");
+            carte.className = "activite";
+
+            const titre = document.createElement("h3");
+            titre.textContent = a.titre || "Activité sans titre";
+            carte.appendChild(titre);
+
+            if(a.categorie){
+                const badge = document.createElement("span");
+                badge.className = "badge";
+                badge.textContent = a.categorie;
+                carte.appendChild(badge);
+            }
+
+            ajouterDetail(carte, "Date de début", formaterDate(a.date_debut));
+            ajouterDetail(carte, "Date de fin", formaterDate(a.date_fin));
+            ajouterDetail(carte, "Lieu", a.lieu);
+            ajouterDetail(carte, "Responsable", a.responsable);
+
+            if(a.description){
+                const description = document.createElement("p");
+                description.className = "description";
+                description.textContent = a.description;
+                carte.appendChild(description);
+            }
+
+            liste.appendChild(carte);
+        });
+    }
+
+    async function chargerProgrammation(){
+
+        try{
+            const url = window.SUPABASE_URL;
+            const cle = window.SUPABASE_ANON_KEY;
+
+            if(!url || !cle){
+                throw new Error(
+                    "Configuration Supabase introuvable. Vérifiez config.js."
+                );
+            }
+
+            const endpoint =
+                url.replace(/\/+$/, "") +
+                "/rest/v1/programmation_eglise" +
+                "?select=id,titre,categorie,date_debut,date_fin,lieu,responsable,description,statut" +
+                "&order=date_debut.asc";
+
+            const reponse = await fetch(endpoint, {
+                method:"GET",
+                headers:{
+                    "apikey":cle,
+                    "Authorization":"Bearer " + cle
+                }
+            });
+
+            if(!reponse.ok){
+                const details = await reponse.text();
+                console.error("Erreur programmation Supabase:", details);
+
+                throw new Error(
+                    "Supabase a refusé la lecture des activités (HTTP " +
+                    reponse.status +
+                    "). Vérifiez les politiques RLS de programmation_eglise."
+                );
+            }
+
+            const donnees = await reponse.json();
+
+            if(!Array.isArray(donnees)){
+                throw new Error("La réponse Supabase n’est pas une liste valide.");
+            }
+
+            const categories = [...new Set(
+                donnees
+                    .map(a => texteSecurise(a.categorie).trim())
+                    .filter(Boolean)
+            )].sort();
+
+            categories.forEach(function(categorie){
+                const option = document.createElement("option");
+                option.value = categorie;
+                option.textContent = categorie;
+                filtre.appendChild(option);
+            });
+
+            filtre.addEventListener("change", function(){
+                afficherActivites(donnees);
+            });
+
+            afficherActivites(donnees);
+
+        }catch(erreur){
+            console.error("Chargement programmation:", erreur);
+            afficherErreur(
+                erreur.message ||
+                "Impossible de charger la programmation. Réessayez plus tard."
+            );
+        }
+    }
+
+    chargerProgrammation();
+
+})();
+</script>
+
+</body>
+</html>
