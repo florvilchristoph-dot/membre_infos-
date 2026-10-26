@@ -1638,6 +1638,7 @@ async function voirPresencesSessionMEDFAH(sessionId) {
    PROGRAMMATION DE L'ÉGLISE
 ========================================== */
 
+
 async function chargerProgrammationMEDFAH() {
     const liste = document.getElementById("listeProgrammationMEDFAH");
     const form = document.getElementById("formProgrammationMEDFAH");
@@ -1651,30 +1652,50 @@ async function chargerProgrammationMEDFAH() {
 
     if (form.dataset.connecte !== "oui") {
         form.dataset.connecte = "oui";
+
         form.addEventListener("submit", async function(event) {
             event.preventDefault();
 
             const bouton = form.querySelector('button[type="submit"]');
-            bouton.disabled = true;
+            if (bouton) bouton.disabled = true;
 
             try {
-                const debut = document.getElementById("progDateDebut").value;
-                const fin = document.getElementById("progDateFin").value;
+                const valeur = id => {
+                    const element = document.getElementById(id);
+                    return element ? element.value.trim() : "";
+                };
+
+                const debut = valeur("progDateDebut");
+                const fin = valeur("progDateFin");
+
+                if (!debut) {
+                    alert("Veuillez choisir la date du programme.");
+                    return;
+                }
 
                 if (fin && new Date(fin) < new Date(debut)) {
                     alert("La date de fin doit être égale ou postérieure à la date de début.");
                     return;
                 }
 
+                const periode = valeur("progPeriode") || "semaine";
+
                 const donnees = {
-                    titre: document.getElementById("progTitre").value.trim(),
-                    categorie: document.getElementById("progCategorie").value,
+                    titre: valeur("progTitre"),
+                    categorie: valeur("progCategorie"),
                     date_debut: new Date(debut).toISOString(),
                     date_fin: fin ? new Date(fin).toISOString() : null,
-                    lieu: document.getElementById("progLieu").value.trim(),
-                    responsable: document.getElementById("progResponsable").value.trim(),
-                    description: document.getElementById("progDescription").value.trim(),
-                    statut: document.getElementById("progStatut").value
+                    lieu: valeur("progLieu"),
+                    responsable: valeur("progResponsable"),
+                    description: valeur("progDescription"),
+                    statut: valeur("progStatut"),
+                    periode_programme: periode,
+                    jour_programme: valeur("progJour"),
+                    heure_programme: valeur("progHeure"),
+                    dirigeant: valeur("progDirigeant"),
+                    lecteur: valeur("progLecteur"),
+                    message: valeur("progMessage"),
+                    autre: valeur("progAutre")
                 };
 
                 const { error } = await supabaseClient
@@ -1685,16 +1706,116 @@ async function chargerProgrammationMEDFAH() {
 
                 alert("Programme enregistré avec succès !");
                 form.reset();
+
+                const bloc = document.getElementById("champsProgrammeSemaine");
+                if (bloc) {
+                    bloc.style.display =
+                        document.getElementById("progPeriode")?.value === "semaine"
+                            ? "block"
+                            : "none";
+                }
+
                 await afficherListeProgrammationMEDFAH();
 
             } catch (erreur) {
                 console.error("Erreur programmation :", erreur);
-                alert("Enregistrement impossible. Vérifiez les autorisations Supabase.");
+                alert(
+                    "Enregistrement impossible : " +
+                    (erreur.message || "vérifiez les autorisations Supabase.")
+                );
             } finally {
-                bouton.disabled = false;
+                if (bouton) bouton.disabled = false;
             }
         });
     }
+
+    await afficherListeProgrammationMEDFAH();
+}
+
+
+async function afficherListeProgrammationMEDFAH() {
+    const liste = document.getElementById("listeProgrammationMEDFAH");
+    if (!liste || !supabaseClient) return;
+
+    liste.textContent = "Chargement des programmes...";
+
+    try {
+        const { data, error } = await supabaseClient
+            .from("programmation_eglise")
+            .select("*")
+            .order("date_debut", { ascending: true });
+
+        if (error) throw error;
+
+        let programmes = data || [];
+
+        const filtre = document.getElementById("filtrePeriodeProgrammation");
+        if (filtre && filtre.value) {
+            programmes = programmes.filter(prog =>
+                (prog.periode_programme || "semaine") === filtre.value
+            );
+        }
+
+        if (programmes.length === 0) {
+            liste.textContent = "Aucun programme pour cette période.";
+            return;
+        }
+
+        const echapper = valeur =>
+            typeof escapeHTML === "function"
+                ? escapeHTML(String(valeur ?? ""))
+                : String(valeur ?? "").replace(/[&<>"']/g, c => ({
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#39;"
+                }[c]));
+
+        liste.innerHTML = programmes.map(prog => {
+            const debut = prog.date_debut
+                ? new Date(prog.date_debut).toLocaleString("fr-FR")
+                : "Non précisée";
+
+            const fin = prog.date_fin
+                ? new Date(prog.date_fin).toLocaleString("fr-FR")
+                : "";
+
+            return `
+                <article style="border:1px solid #ccc;border-radius:10px;padding:14px;margin:12px 0">
+                    <h4>${echapper(prog.titre || "")}</h4>
+
+                    <p><strong>Période :</strong>
+                        ${echapper(prog.periode_programme || "semaine")}</p>
+
+                    <p><strong>Catégorie :</strong>
+                        ${echapper(prog.categorie || "")}</p>
+
+                    <p><strong>Début :</strong> ${echapper(debut)}</p>
+                    ${fin ? `<p><strong>Fin :</strong> ${echapper(fin)}</p>` : ""}
+
+                    ${prog.jour_programme ? `<p><strong>Jour :</strong> ${echapper(prog.jour_programme)}</p>` : ""}
+                    ${prog.heure_programme ? `<p><strong>Heure :</strong> ${echapper(prog.heure_programme)}</p>` : ""}
+                    <p><strong>Lieu :</strong> ${echapper(prog.lieu || "Non précisé")}</p>
+                    ${prog.dirigeant ? `<p><strong>Dirigeant/e :</strong> ${echapper(prog.dirigeant)}</p>` : ""}
+                    ${prog.lecteur ? `<p><strong>Lecteur/trice :</strong> ${echapper(prog.lecteur)}</p>` : ""}
+                    ${prog.message ? `<p><strong>Message :</strong> ${echapper(prog.message)}</p>` : ""}
+                    <p><strong>Responsable :</strong> ${echapper(prog.responsable || "Non précisé")}</p>
+                    ${prog.autre ? `<p><strong>Autre :</strong> ${echapper(prog.autre)}</p>` : ""}
+                    <p><strong>Statut :</strong> ${echapper(prog.statut || "")}</p>
+                    <p><strong>Description :</strong> ${echapper(prog.description || "Aucune")}</p>
+                </article>
+            `;
+        }).join("");
+
+    } catch (erreur) {
+        console.error("Erreur chargement programmation :", erreur);
+        liste.textContent =
+            "Liste indisponible : " +
+            (erreur.message || "vérifiez les autorisations Supabase.");
+    }
+}
+
 
     await afficherListeProgrammationMEDFAH();
 }
