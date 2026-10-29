@@ -1580,7 +1580,7 @@ async function enregistrerSessionPresenceMEDFAH(event) {
     message.textContent = 'Enregistrement en cours...';
     try {
         const donnees = {
-            nom_services: document.getElementById('presenceService').value,
+            nom_service: document.getElementById('presenceService').value,
             date_service: document.getElementById('presenceDate').value,
             heure_debut: document.getElementById('presenceDebut').value,
             heure_fin: document.getElementById('presenceFin').value,
@@ -1604,12 +1604,12 @@ async function chargerSessionsPresenceMEDFAH() {
     liste.textContent = 'Chargement des services...';
     try {
         const { data, error } = await supabaseClient.from('sessions_presence')
-          .select('id,nom_services,date_service,heure_debut,heure_fin,statut')
+          .select('id,nom_service,date_service,heure_debut,heure_fin,statut')
           .order('date_service', { ascending: false });
         if (error) throw error;
         if (!data || !data.length) { liste.innerHTML = '<p class="empty">Aucun service enregistré pour le moment.</p>'; return; }
         liste.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Service</th><th>Date</th><th>Horaire</th><th>Statut</th><th>Présences</th></tr></thead><tbody>' + data.map(s =>
-          '<tr><td>' + escapeHTML(s.nom_services || '') + '</td><td>' + escapeHTML(s.date_service || '') + '</td><td>' + escapeHTML((s.heure_debut || '') + ' – ' + (s.heure_fin || '')) + '</td><td>' + escapeHTML(s.statut || '') + '</td><td><button class="refresh" type="button" onclick="voirPresencesSessionMEDFAH(' + Number(s.id) + ')">Voir</button></td></tr>'
+          '<tr><td>' + escapeHTML(s.nom_service || '') + '</td><td>' + escapeHTML(s.date_service || '') + '</td><td>' + escapeHTML((s.heure_debut || '') + ' – ' + (s.heure_fin || '')) + '</td><td>' + escapeHTML(s.statut || '') + '</td><td><button class="refresh" type="button" onclick="voirPresencesSessionMEDFAH(' + Number(s.id) + ')">Voir</button></td></tr>'
         ).join('') + '</tbody></table></div><div id="detailsPresencesSessionMEDFAH" style="margin-top:14px"></div>';
     } catch (e) {
         console.error('Erreur chargement sessions:', e);
