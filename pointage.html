@@ -212,7 +212,7 @@
 
     try {
       const params = new URLSearchParams({
-        select: "id,nom_services,date_service,heure_debut,heure_fin,statut",
+      select: "id,nom_service,date_service,heure_debut,heure_fin,statut",
         date_service: "eq." + dateHaiti(),
         statut: "eq.ouvert",
         order: "heure_debut.asc"
@@ -232,7 +232,7 @@
         const option = document.createElement("option");
         option.value = s.id;
         option.textContent =
-          s.nom_services + " — " + s.heure_debut + " à " + s.heure_fin;
+        s.nom_service + " — " + s.heure_debut + " à " + s.heure_fin;
         sessionSelect.appendChild(option);
       });
 
