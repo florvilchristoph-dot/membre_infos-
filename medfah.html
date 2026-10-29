@@ -1817,55 +1817,6 @@ async function afficherListeProgrammationMEDFAH() {
 }
 
 
-    await afficherListeProgrammationMEDFAH();
-}
-
-
-async function afficherListeProgrammationMEDFAH() {
-    const liste = document.getElementById("listeProgrammationMEDFAH");
-    if (!liste || !supabaseClient) return;
-
-    liste.textContent = "Chargement des programmes...";
-
-    try {
-        const { data, error } = await supabaseClient
-            .from("programmation_eglise")
-            .select("*")
-            .order("date_debut", { ascending: true });
-
-        if (error) throw error;
-
-        if (!data || data.length === 0) {
-            liste.textContent = "Aucun programme enregistré pour le moment.";
-            return;
-        }
-
-        liste.innerHTML = data.map(prog => {
-            const debut = new Date(prog.date_debut).toLocaleString("fr-FR");
-            const fin = prog.date_fin
-                ? new Date(prog.date_fin).toLocaleString("fr-FR")
-                : "";
-
-            return `
-                <article style="border:1px solid #ccc;border-radius:8px;padding:12px;margin:12px 0">
-                    <h4>${escapeHTML(prog.titre || "")}</h4>
-                    <p><strong>Catégorie :</strong> ${escapeHTML(prog.categorie || "")}</p>
-                    <p><strong>Début :</strong> ${escapeHTML(debut)}</p>
-                    ${fin ? `<p><strong>Fin :</strong> ${escapeHTML(fin)}</p>` : ""}
-                    <p><strong>Lieu :</strong> ${escapeHTML(prog.lieu || "Non précisé")}</p>
-                    <p><strong>Responsable :</strong> ${escapeHTML(prog.responsable || "Non précisé")}</p>
-                    <p><strong>Statut :</strong> ${escapeHTML(prog.statut || "")}</p>
-                    <p><strong>Description :</strong> ${escapeHTML(prog.description || "Aucune")}</p>
-                </article>
-            `;
-        }).join("");
-
-    } catch (erreur) {
-        console.error("Erreur chargement programmation :", erreur);
-        liste.textContent = "Liste indisponible. Vérifiez les autorisations Supabase.";
-    }
-}
-
 
 /* ==========================================
    ACTIVITÉS DE L'ÉGLISE — MEDFAH
