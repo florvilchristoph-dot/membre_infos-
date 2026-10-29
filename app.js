@@ -4,8 +4,6 @@
    Liste publique, dossier membre et présence
    ===================================================== */
 
-const SUPABASE_URL = window.SUPABASE_URL || "";
-const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || "";
 
 let clientMembresMEDFAH = null;
 
