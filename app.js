@@ -509,8 +509,8 @@ function afficherDossier(m, app) {
    ===================================================== */
 
 function initialiserPresenceMEDFAH() {
-  if (
-    !["membre.html", "membre"].includes(pageMEDFAH()) ||
+if (
+    ["membre.html", "membre"].includes(pageMEDFAH()) ||
     new URLSearchParams(location.search).has("id")
   ) {
     return;
@@ -684,7 +684,7 @@ function initialiserPresenceMEDFAH() {
 
     try {
       const params = new URLSearchParams({
-        select: "id,nom_services,date_service,heure_debut,heure_fin,statut",
+      select: "id,nom_service,date_service,heure_debut,heure_fin,statut",
         date_service: `eq.${today()}`,
         statut: "eq.ouvert",
         order: "heure_debut.asc"
@@ -710,7 +710,7 @@ function initialiserPresenceMEDFAH() {
 
         option.value = service.id;
         option.textContent =
-          `${service.nom_services} — ` +
+         `${service.nom_service} — ` +
           `${service.heure_debut} à ${service.heure_fin}`;
 
         session.appendChild(option);
