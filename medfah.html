@@ -3262,7 +3262,72 @@ function fermerFormulaireMembre() {
     if (message) message.textContent = "";
     if (modal) modal.style.display = "none";
 }
+// ======================================================
+// MEDFAH - GESTION DES FICHIERS ARCHIVES ET DOCUMENTS
+// Bucket privé : medfah-archives
+// ======================================================
 
+const BUCKET_ARCHIVES_MEDFAH = "medfah-archives";
+const LIMITE_FICHIER_MEDFAH = 50 * 1024 * 1024;
+
+function nomFichierSecuriseMEDFAH(nom) {
+    return String(nom || "fichier")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
+function validerFichierMEDFAH(fichier, type) {
+    if (!fichier) {
+        throw new Error("Veuillez choisir un fichier.");
+    }
+
+    if (fichier.size > LIMITE_FICHIER_MEDFAH) {
+        throw new Error("Le fichier dépasse la limite de 50 Mo.");
+    }
+
+    if (type === "pdf" && fichier.type !== "application/pdf") {
+        throw new Error("Veuillez sélectionner un document PDF.");
+    }
+
+    if (
+        type === "media" &&
+        !fichier.type.startsWith("image/") &&
+        !fichier.type.startsWith("video/")
+    ) {
+        throw new Error("Choisissez une photo ou une vidéo.");
+    }
+}
+
+async function televerserFichierMEDFAH(fichier, dossier) {
+    const nomSecurise = nomFichierSecuriseMEDFAH(fichier.name);
+    const chemin = dossier + "/" + Date.now() + "_" + nomSecurise;
+
+    const { data, error } = await supabaseClient.storage
+        .from(BUCKET_ARCHIVES_MEDFAH)
+        .upload(chemin, fichier, {
+            upsert: false,
+            contentType: fichier.type
+        });
+
+    if (error) throw error;
+
+    return {
+        chemin: data.path,
+        nom: fichier.name,
+        type: fichier.type
+    };
+}
+
+async function obtenirLienFichierMEDFAH(chemin) {
+    const { data, error } = await supabaseClient.storage
+        .from(BUCKET_ARCHIVES_MEDFAH)
+        .createSignedUrl(chemin, 3600);
+
+    if (error) throw error;
+
+    return data.signedUrl;
+}
 </script>
 </body>
 </html>
