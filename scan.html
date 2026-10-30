@@ -1,123 +1,134 @@
 <!DOCTYPE html>
 <html lang="ht">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eskane QR Code - MEDFAH</title>
-    <!-- Si w gen yon fichye script ki itilize export/import, sèvi ak type="module" -->
-    <script type="module" src="app.js"></script>
-    
-    <!-- Bibliyotèk html5-qrcode nan CDN -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.88)),
-                        url('image.png') no-repeat center center fixed;
-            background-size: contain;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            width: 100%;
-            max-width: 400px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            text-align: center;
-            margin-top: 20px;
-        }
-        h1 {
-            color: #0d47a1;
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-        }
-        #reader {
-            width: 100% !important;
-            border: none !important;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        #result {
-            margin-top: 15px;
-            font-weight: bold;
-        }
-        .btn {
-            display: inline-block;
-            width: 100%;
-            padding: 10px;
-            background-color: #0d47a1;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            margin-top: 20px;
-            box-sizing: border-box;
-        }
-        .btn:hover {
-            background-color: #002171;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eskane QR Code - MEDFAH</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f6fb;
+      margin: 0;
+      padding: 20px;
+      color: #263238;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 100%;
+      max-width: 440px;
+      background: #fff;
+      padding: 22px;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(0,0,0,.09);
+      text-align: center;
+      margin-top: 20px;
+    }
+    h1 { color: #0d47a1; font-size: 1.45rem; }
+    #reader {
+      width: 100%;
+      margin-top: 16px;
+      overflow: hidden;
+      border-radius: 10px;
+    }
+    #result {
+      margin-top: 16px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: #0d47a1;
+      color: #fff;
+      border: 0;
+      border-radius: 7px;
+      font-size: 16px;
+      text-decoration: none;
+      margin-top: 18px;
+    }
+    .note {
+      background: #fff8e1;
+      border-left: 4px solid #f9a825;
+      padding: 10px;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  </style>
 </head>
 <body>
+  <main class="container">
+    <h1>Eskane Kat Manm MEDFAH</h1>
+    <p class="note">
+      Pou anrejistre prezans yon manm, konekte nan
+      <strong>Administration → Présences</strong> epi sèvi ak
+      scanner ki nan seksyon sa a.
+    </p>
 
-    <div class="container">
-        <h1>Eskane Kat Manm nan</h1>
-        <div id="reader"></div>
-        <div id="result"></div>
-        <a href="index.html" class="btn">Retounen nan Akèy la</a>
+    <div id="reader"></div>
+    <div id="result" role="status">
+      Ap prepare kamera a...
     </div>
 
-    <!-- Script pou jere kamera a -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const resultContainer = document.getElementById('result');
-            
-            // Itilize anotasyon JSDoc pou bay TypeScript tip done yo nan yon fichye HTML / JS nòmal
-            /**
-             * @param {string} decodedText
-             */
-            function onScanSuccess(decodedText) {
-                console.log(`Kòd jwenn: ${decodedText}`);
-                alert("QR Code la genyen: " + decodedText);
-                resultContainer.innerHTML = `<p style="color: green;">Manm idantifye! Y ap redirije w...</p>`;
-                
-                html5QrCode.stop().then(() => {
-                    window.location.href = `membres.html?id=${encodeURIComponent(decodedText.trim())}`;
-                }).catch(() => {
-                    window.location.href = `membres.html?id=${encodeURIComponent(decodedText.trim())}`;
-                });
-            }
+    <a href="index.html" class="btn">Retounen nan Akèy la</a>
+  </main>
 
-            function onScanFailure() {
-                // Erè yo nòmal lè kamera a poko wè yon kòd devan l
-            }
+  <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+      const resultContainer = document.getElementById("result");
+      let scanner = null;
+      let alreadyScanned = false;
 
-            const html5QrCode = new Html5Qrcode("reader");
-            
-            html5QrCode.start(
-                { facingMode: "environment" }, 
-                {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 }
-                },
-                onScanSuccess,
-                onScanFailure
-            ).catch((/** @type {any} */ err) => {
-                console.error("Echèk pou louvri kamera a:", err);
-                resultContainer.innerHTML = `<p style="color: red;">Echèk pou limen kamera a. Tcheke pèmisyon yo.</p>`;
-            });
-        });
-    </script>
+      if (!window.Html5Qrcode) {
+        resultContainer.textContent =
+          "Bibliyotèk QR la pa chaje. Verifye koneksyon entènèt la.";
+        return;
+      }
 
+      scanner = new Html5Qrcode("reader");
+
+      async function onScanSuccess() {
+        if (alreadyScanned) return;
+        alreadyScanned = true;
+
+        resultContainer.textContent =
+          "QR Code la li avèk siksè. Pou pwoteje enfòmasyon manm nan, paj sa a pa montre kòd prive a. Konekte nan Administration → Présences pou verifye epi anrejistre prezans lan.";
+
+        try {
+          await scanner.stop();
+          await scanner.clear();
+        } catch (error) {
+          console.warn("Kamera a pa t kapab fèmen otomatikman:", error);
+        }
+      }
+
+      try {
+        await scanner.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 240, height: 240 }
+          },
+          onScanSuccess,
+          function () {
+            /* Pa montre erè nòmal pandan kamera a ap chèche QR la. */
+          }
+        );
+
+        resultContainer.textContent =
+          "Mete QR Code kat manm nan devan kamera a.";
+      } catch (error) {
+        console.error("Erè kamera:", error);
+        resultContainer.textContent =
+          "Kamera a pa kapab louvri. Bay navigatè a pèmisyon kamera epi verifye paj la ap louvri sou HTTPS.";
+      }
+    });
+  </script>
 </body>
 </html>
