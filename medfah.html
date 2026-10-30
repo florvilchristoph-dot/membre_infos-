@@ -1583,12 +1583,21 @@ async function afficherModulePresencesMEDFAH(zone) {
         <hr><h3>Services enregistrés</h3>
         <button type="button" class="refresh" id="actualiserSessionsPresenceMEDFAH">↻ Actualiser</button>
         <div id="listeSessionsPresenceMEDFAH" style="margin-top:12px">Chargement des services...</div>
+        <hr>
+<h3>Pointage des membres</h3>
+<p>Le pointage manuel et le scanner QR sont réservés aux administrateurs connectés.</p>
+
+<div id="presenceZoneMEDFAH"></div>
       </div>`;
     const dateInput = document.getElementById('presenceDate');
     if (dateInput) dateInput.value = new Date().toLocaleDateString('en-CA');
     document.getElementById('formSessionPresenceMEDFAH').addEventListener('submit', enregistrerSessionPresenceMEDFAH);
     document.getElementById('actualiserSessionsPresenceMEDFAH').addEventListener('click', chargerSessionsPresenceMEDFAH);
-    await chargerSessionsPresenceMEDFAH();
+await chargerSessionsPresenceMEDFAH();
+
+if (typeof initialiserPresenceMEDFAH === "function") {
+    initialiserPresenceMEDFAH();
+}
 }
 
 async function enregistrerSessionPresenceMEDFAH(event) {
@@ -1629,15 +1638,68 @@ async function chargerSessionsPresenceMEDFAH() {
           .order('date_service', { ascending: false });
         if (error) throw error;
         if (!data || !data.length) { liste.innerHTML = '<p class="empty">Aucun service enregistré pour le moment.</p>'; return; }
-        liste.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Service</th><th>Date</th><th>Horaire</th><th>Statut</th><th>Présences</th></tr></thead><tbody>' + data.map(s =>
-          '<tr><td>' + escapeHTML(s.nom_service || '') + '</td><td>' + escapeHTML(s.date_service || '') + '</td><td>' + escapeHTML((s.heure_debut || '') + ' – ' + (s.heure_fin || '')) + '</td><td>' + escapeHTML(s.statut || '') + '</td><td><button class="refresh" type="button" onclick="voirPresencesSessionMEDFAH(' + Number(s.id) + ')">Voir</button></td></tr>'
-        ).join('') + '</tbody></table></div><div id="detailsPresencesSessionMEDFAH" style="margin-top:14px"></div>';
+        
+liste.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Service</th><th>Date</th><th>Horaire</th><th>Statut</th><th>Actions</th></tr></thead><tbody>' + data.map(s =>
+    '<tr>' +
+    '<td>' + escapeHTML(s.nom_service || '') + '</td>' +
+    '<td>' + escapeHTML(s.date_service || '') + '</td>' +
+    '<td>' + escapeHTML((s.heure_debut || '') + ' – ' + (s.heure_fin || '')) + '</td>' +
+    '<td>' + escapeHTML(s.statut || '') + '</td>' +
+    '<td>' +
+    '<button class="refresh" type="button" onclick="voirPresencesSessionMEDFAH(' + Number(s.id) + ')">Voir</button> ' +
+    (s.statut === 'planifie'
+        ? '<button class="view-btn" type="button" onclick="changerStatutSessionPresenceMEDFAH(' + Number(s.id) + ', \'ouvert\')">Ouvrir</button>'
+        : s.statut === 'ouvert'
+            ? '<button class="refresh" type="button" onclick="changerStatutSessionPresenceMEDFAH(' + Number(s.id) + ', \'termine\')">Clôturer</button>'
+            : '') +
+    '</td></tr>'
+).join('') + '</tbody></table></div><div id="detailsPresencesSessionMEDFAH" style="margin-top:14px"></div>';
+
     } catch (e) {
         console.error('Erreur chargement sessions:', e);
         liste.textContent = 'Chargement impossible : ' + (e.message || 'erreur Supabase') + '. Vérifiez les autorisations de lecture sur sessions_presence.';
     }
 }
+async function changerStatutSessionPresenceMEDFAH(sessionId, nouveauStatut) {
 
+    if (!supabaseClient || !roleAdminMEDFAH) {
+        alert("Connectez-vous avec un compte administrateur.");
+        return;
+    }
+
+    if (!["ouvert", "termine"].includes(nouveauStatut)) {
+        return;
+    }
+
+    const confirmation = nouveauStatut === "ouvert"
+        ? "Ouvrir ce service pour le pointage ?"
+        : "Clôturer ce service ? Aucun absent ne sera ajouté automatiquement.";
+
+    if (!confirm(confirmation)) return;
+
+    try {
+        const { error } = await supabaseClient
+            .from("sessions_presence")
+            .update({ statut: nouveauStatut })
+            .eq("id", sessionId);
+
+        if (error) throw error;
+
+        await chargerSessionsPresenceMEDFAH();
+
+        const module = document.getElementById("modulePresenceMEDFAH");
+
+        if (module) module.remove();
+
+        if (typeof initialiserPresenceMEDFAH === "function") {
+            initialiserPresenceMEDFAH();
+        }
+
+    } catch (e) {
+        console.error("Erreur changement statut:", e);
+        alert("Impossible de modifier le service : " + e.message);
+    }
+}
 async function voirPresencesSessionMEDFAH(sessionId) {
     const cible = document.getElementById('detailsPresencesSessionMEDFAH');
     if (!cible || !supabaseClient) return;
@@ -3490,5 +3552,6 @@ async function obtenirLienFichierMEDFAH(chemin) {
     return data.signedUrl;
 }
 </script>
+    <script src="app.js?v=20261030"></script>
 </body>
 </html>
