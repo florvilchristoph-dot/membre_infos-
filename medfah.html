@@ -1405,6 +1405,17 @@ if (cle === "programmation") {
                     <textarea id="arcDescription" rows="4"
                         placeholder="Résumé ou informations importantes"></textarea>
 
+                        <div class="form-group">
+    <label for="arcFichiers">Ajouter des photos ou vidéos</label>
+    <input
+        type="file"
+        id="arcFichiers"
+        accept="image/*,video/*"
+        multiple
+    >
+    <small>Formats acceptés : photos et vidéos. Taille maximale : 50 Mo par fichier.</small>
+</div>
+
                     <button type="submit">Enregistrer l’archive</button>
                     <p id="messageArchivesMEDFAH" role="status"></p>
                 </form>
