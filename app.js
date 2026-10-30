@@ -508,28 +508,26 @@ function afficherDossier(m, app) {
    MODULE PRÉSENCE MEDFAH
    ===================================================== */
 
+ /* =====================================================
+   MODULE PRÉSENCE MEDFAH — VERSION CORRIGÉE
+   ===================================================== */
+
 function initialiserPresenceMEDFAH() {
-if (
+  if (
     ["membre.html", "membre"].includes(pageMEDFAH()) ||
     new URLSearchParams(location.search).has("id")
   ) {
     return;
   }
 
-  const zone = document.getElementById(
-    "presenceZoneMEDFAH"
-  );
+  const zone = document.getElementById("presenceZoneMEDFAH");
 
-  if (
-    !zone ||
-    document.getElementById("modulePresenceMEDFAH")
-  ) {
+  if (!zone || document.getElementById("modulePresenceMEDFAH")) {
     return;
   }
 
   const section = document.createElement("section");
   section.id = "modulePresenceMEDFAH";
-
   section.style.cssText =
     "margin-top:24px;padding:20px;background:white;" +
     "border-radius:14px;box-shadow:0 4px 15px #00000012;";
@@ -539,15 +537,18 @@ if (
     <p>Réservé aux administrateurs connectés.</p>
 
     <label for="presenceSessionMEDFAH">Service ouvert</label>
-    <select id="presenceSessionMEDFAH" style="width:100%;padding:12px;margin:8px 0">
+    <select id="presenceSessionMEDFAH"
+      style="width:100%;padding:12px;margin:8px 0">
       <option value="">Chargement...</option>
     </select>
 
-    <button id="presenceReloadMEDFAH" type="button" style="width:100%;padding:12px">
+    <button id="presenceReloadMEDFAH" type="button"
+      style="width:100%;padding:12px">
       Actualiser les services
     </button>
 
-    <label for="presenceCardMEDFAH" style="display:block;margin-top:14px">
+    <label for="presenceCardMEDFAH"
+      style="display:block;margin-top:14px">
       Numéro de carte ou code du membre
     </label>
 
@@ -555,35 +556,46 @@ if (
       placeholder="Ex. MEDFAH0001"
       style="width:100%;padding:12px;margin:8px 0">
 
-    <button id="presenceSearchMEDFAH" type="button" style="width:100%;padding:12px">
+    <button id="presenceSearchMEDFAH" type="button"
+      style="width:100%;padding:12px">
       Rechercher le membre
     </button>
 
-    <button id="presenceStartQRMEDFAH" type="button" style="width:100%;padding:12px;margin-top:8px">
+    <button id="presenceStartQRMEDFAH" type="button"
+      style="width:100%;padding:12px;margin-top:8px">
       Scanner le QR Code
     </button>
 
-    <button id="presenceStopQRMEDFAH" type="button" disabled style="width:100%;padding:12px;margin-top:8px">
+    <button id="presenceStopQRMEDFAH" type="button"
+      disabled style="width:100%;padding:12px;margin-top:8px">
       Arrêter la caméra
     </button>
 
-    <div id="presenceQRReaderMEDFAH" hidden style="margin-top:12px"></div>
-    <div id="presenceMemberMEDFAH" style="margin-top:12px"></div>
+    <div id="presenceQRReaderMEDFAH" hidden
+      style="margin-top:12px"></div>
 
-    <label for="presenceStatusMEDFAH" style="display:block;margin-top:14px">
+    <div id="presenceMemberMEDFAH"
+      style="margin-top:12px"></div>
+
+    <label for="presenceStatusMEDFAH"
+      style="display:block;margin-top:14px">
       Statut
     </label>
 
-    <select id="presenceStatusMEDFAH" style="width:100%;padding:12px">
+    <select id="presenceStatusMEDFAH"
+      style="width:100%;padding:12px">
       <option value="présent">Présent</option>
       <option value="en_retard">En retard</option>
     </select>
 
-    <button id="presenceSaveMEDFAH" type="button" disabled style="width:100%;padding:12px;margin-top:10px">
+    <button id="presenceSaveMEDFAH" type="button"
+      disabled style="width:100%;padding:12px;margin-top:10px">
       Enregistrer la présence
     </button>
 
-    <div id="presenceMessageMEDFAH" role="status" style="margin-top:12px;overflow-wrap:anywhere"></div>
+    <div id="presenceMessageMEDFAH"
+      role="status"
+      style="margin-top:12px;overflow-wrap:anywhere"></div>
   `;
 
   zone.appendChild(section);
@@ -604,33 +616,26 @@ if (
   let scanner = null;
   let running = false;
   let saving = false;
-let pointageMode = "manuel";
-  function tell(text, error = false) {
-    msg.textContent = text;
+  let pointageMode = "manuel";
+
+  function tell(message, error = false) {
+    msg.textContent = message;
     msg.style.cssText =
       "padding:10px;margin-top:12px;overflow-wrap:anywhere;" +
-      (
-        error
-          ? "background:#ffedd5;color:#9a3412"
-          : "background:#dcfce7;color:#166534"
-      );
+      (error
+        ? "background:#ffedd5;color:#9a3412"
+        : "background:#dcfce7;color:#166534");
   }
 
   function updateButton() {
-    save.disabled =
-      saving || !session.value || !chosen;
+    save.disabled = saving || !session.value || !chosen;
   }
 
   async function headers() {
     return await obtenirEntetesAuthentifiees();
   }
 
-  async function req(
-    table,
-    params,
-    method = "GET",
-    body = null
-  ) {
+  async function req(table, params, method = "GET", body = null) {
     const h = await headers();
     const query = params.toString();
 
@@ -645,9 +650,7 @@ let pointageMode = "manuel";
             ? { Prefer: "return=representation" }
             : {})
         },
-        body: body === null
-          ? undefined
-          : JSON.stringify(body)
+        body: body === null ? undefined : JSON.stringify(body)
       }
     );
 
@@ -657,20 +660,17 @@ let pointageMode = "manuel";
       );
     }
 
-    const text = await response.text();
-    return text ? JSON.parse(text) : [];
+    const result = await response.text();
+    return result ? JSON.parse(result) : [];
   }
 
   function today() {
-    const parts = new Intl.DateTimeFormat(
-      "en-CA",
-      {
-        timeZone: "America/Port-au-Prince",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
-      }
-    ).formatToParts(new Date());
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Port-au-Prince",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    }).formatToParts(new Date());
 
     const get = type =>
       parts.find(part => part.type === type).value;
@@ -678,30 +678,19 @@ let pointageMode = "manuel";
     return `${get("year")}-${get("month")}-${get("day")}`;
   }
 
+  /* CHARGER LES SERVICES OUVERTS DU JOUR */
   async function loadSessions() {
-    session.innerHTML =
-      "<option value=''>Chargement...</option>";
+    session.innerHTML = "<option value=''>Chargement...</option>";
 
     try {
-      
       const params = new URLSearchParams({
-    select: "id,nom,prenom,numero_carte,carte_numerique,code",
-    limit: "1"
-});
+        select: "id,nom_service,date_service,heure_debut,heure_fin,statut",
+        date_service: `eq.${today()}`,
+        statut: "eq.ouvert",
+        order: "heure_debut.asc"
+      });
 
-if (pointageMode === "qr") {
-    params.set("qr_token", `eq.${encoded}`);
-} else {
-    params.set(
-        "or",
-        `(carte_numerique.eq.${encoded},numero_carte.eq.${encoded},code.eq.${encoded})`
-    );
-}
-
-      const rows = await req(
-        "sessions_presence",
-        params
-      );
+      const rows = await req("sessions_presence", params);
 
       session.innerHTML = "";
 
@@ -715,11 +704,10 @@ if (pointageMode === "qr") {
 
       rows.forEach(service => {
         const option = document.createElement("option");
-
         option.value = service.id;
         option.textContent =
-         `${service.nom_service} — ` +
-          `${service.heure_debut} à ${service.heure_fin}`;
+          `${service.nom_service} — ` +
+          `${service.heure_debut || ""} à ${service.heure_fin || ""}`;
 
         session.appendChild(option);
       });
@@ -729,12 +717,11 @@ if (pointageMode === "qr") {
     } catch (error) {
       session.innerHTML =
         "<option value=''>Connexion requise</option>";
-
       tell(error.message, true);
     }
   }
 
-  /* Recherche par numéro de carte OU code */
+  /* RECHERCHE D'UN MEMBRE */
   async function searchMember() {
     chosen = null;
     memberBox.replaceChildren();
@@ -743,35 +730,24 @@ if (pointageMode === "qr") {
     const value = card.value.trim();
 
     if (!value) {
-      tell(
-        "Saisissez ou scannez le numéro de carte ou le code.",
-        true
-      );
+      tell("Saisissez ou scannez le numéro de carte ou le code.", true);
       return;
     }
 
     try {
-      const encoded = encodeURIComponent(value);
-
       const params = new URLSearchParams({
-        select: "id,nom,prenom,numero_carte,carte_numerique,code",
-or:
-  `(qr_token.eq.${encoded},` +
-  `carte_numerique.eq.${encoded},` +
-  `numero_carte.eq.${encoded},code.eq.${encoded})`,
+        select: "id,nom,prenom,numero_carte,carte_numerique,code,qr_token",
+        or:
+          `(qr_token.eq.${value},` +
+          `carte_numerique.eq.${value},` +
+          `numero_carte.eq.${value},code.eq.${value})`,
         limit: "1"
       });
 
-      const rows = await req(
-        "membre_infos",
-        params
-      );
+      const rows = await req("membre_infos", params);
 
       if (!rows.length) {
-        tell(
-          "Aucun membre trouvé. Vérifiez le numéro ou le code.",
-          true
-        );
+        tell("Aucun membre trouvé. Vérifiez le numéro ou le code.", true);
         return;
       }
 
@@ -801,17 +777,26 @@ or:
     }
   }
 
+  /* EXTRAIRE LE TOKEN DU QR CODE */
   function extractQR(text) {
-    return String(text || "").trim();
-  }
-}
+    const value = String(text || "").trim();
 
+    try {
+      const url = new URL(value);
+      return (
+        url.searchParams.get("qr_token") ||
+        url.searchParams.get("token") ||
+        value
+      );
+    } catch (_) {
+      return value;
+    }
+  }
+
+  /* DÉMARRER LE SCANNER */
   async function startQR() {
     if (!window.Html5Qrcode) {
-      tell(
-        "Lecteur QR non chargé. Vérifiez la connexion Internet.",
-        true
-      );
+      tell("Lecteur QR non chargé. Vérifiez la bibliothèque QR Code.", true);
       return;
     }
 
@@ -821,9 +806,7 @@ or:
       qrBox.hidden = false;
       start.disabled = true;
 
-      scanner = new Html5Qrcode(
-        "presenceQRReaderMEDFAH"
-      );
+      scanner = new Html5Qrcode("presenceQRReaderMEDFAH");
 
       await scanner.start(
         { facingMode: "environment" },
@@ -832,11 +815,11 @@ or:
           qrbox: { width: 230, height: 230 }
         },
         async text => {
-    pointageMode = "qr";
-    card.value = extractQR(text);
-    await stopQR();
-    await searchMember();
-},
+          pointageMode = "qr";
+          card.value = extractQR(text);
+
+          await stopQR();
+          await searchMember();
         },
         () => {}
       );
@@ -860,6 +843,7 @@ or:
     }
   }
 
+  /* ARRÊTER LE SCANNER */
   async function stopQR() {
     if (scanner && running) {
       try {
@@ -876,12 +860,10 @@ or:
     stop.disabled = true;
   }
 
+  /* ENREGISTRER LA PRÉSENCE SANS DOUBLON */
   async function saveAttendance() {
     if (saving || !session.value || !chosen) {
-      tell(
-        "Choisissez un service et identifiez un membre.",
-        true
-      );
+      tell("Choisissez un service et identifiez un membre.", true);
       return;
     }
 
@@ -896,16 +878,10 @@ or:
         limit: "1"
       });
 
-      const existing = await req(
-        "presences_eglise",
-        params
-      );
+      const existing = await req("presences_eglise", params);
 
       if (existing.length) {
-        tell(
-          "Ce membre est déjà enregistré pour ce service.",
-          true
-        );
+        tell("Ce membre est déjà enregistré pour ce service.", true);
         return;
       }
 
@@ -927,6 +903,7 @@ or:
 
       card.value = "";
       chosen = null;
+      pointageMode = "manuel";
       memberBox.replaceChildren();
 
     } catch (error) {
@@ -938,11 +915,8 @@ or:
     }
   }
 
-  $("presenceReloadMEDFAH")
-    .addEventListener("click", loadSessions);
-
-  $("presenceSearchMEDFAH")
-    .addEventListener("click", searchMember);
+  $("presenceReloadMEDFAH").addEventListener("click", loadSessions);
+  $("presenceSearchMEDFAH").addEventListener("click", searchMember);
 
   start.addEventListener("click", startQR);
   stop.addEventListener("click", stopQR);
@@ -951,6 +925,7 @@ or:
   card.addEventListener("keydown", event => {
     if (event.key === "Enter") {
       event.preventDefault();
+      pointageMode = "manuel";
       searchMember();
     }
   });
@@ -969,3 +944,5 @@ if (document.readyState === "loading") {
 } else {
   initialiserPresenceMEDFAH();
 }
+
+
