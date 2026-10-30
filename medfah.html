@@ -1488,9 +1488,15 @@ if (cle === "documents") {
             <textarea id="docDescription" rows="4"
                 placeholder="Informations complémentaires sur le document"></textarea>
 
-            <label for="docFichierNom">Nom du fichier (si disponible)</label>
-            <input id="docFichierNom" type="text"
-                placeholder="Ex. : reconnaissance_medfah.pdf">
+            <div class="form-group">
+    <label for="docFichierPDF">Télécharger le document PDF</label>
+    <input
+        id="docFichierPDF"
+        type="file"
+        accept="application/pdf,.pdf"
+    >
+    <small>Format accepté : PDF. Taille maximale : 50 Mo.</small>
+</div>
 
             <button type="submit">Enregistrer le document</button>
             <p id="messageDocumentsMEDFAH" role="status"></p>
@@ -2131,8 +2137,8 @@ async function chargerArchivesMEDFAH() {
     if (!form) return;
 
     if (!supabaseClient) {
-        document.getElementById("listeArchivesMEDFAH").textContent =
-            "Connexion Supabase indisponible.";
+        const liste = document.getElementById("listeArchivesMEDFAH");
+        if (liste) liste.textContent = "Connexion Supabase indisponible.";
         return;
     }
 
@@ -2144,34 +2150,65 @@ async function chargerArchivesMEDFAH() {
 
             const bouton = form.querySelector('button[type="submit"]');
             const message = document.getElementById("messageArchivesMEDFAH");
+            const champFichiers = document.getElementById("arcFichiers");
 
             bouton.disabled = true;
-            message.textContent = "Enregistrement en cours...";
+            message.textContent = "Enregistrement de l'archive en cours...";
 
             try {
                 const titre = document.getElementById("arcTitre").value.trim();
 
                 if (!titre) {
-                    throw new Error("Veuillez saisir le titre du document.");
+                    throw new Error("Veuillez saisir le titre de l'archive.");
                 }
+
+                const fichiers = champFichiers
+                    ? Array.from(champFichiers.files)
+                    : [];
+
+                fichiers.forEach(fichier => {
+                    validerFichierMEDFAH(fichier, "media");
+                });
 
                 const donnees = {
                     titre: titre,
                     categorie: document.getElementById("arcCategorie").value,
-                    date_document: document.getElementById("arcDate").value || null,
+                    date_activite: document.getElementById("arcDate").value || null,
                     responsable: document.getElementById("arcResponsable").value.trim(),
-                    reference_document: document.getElementById("arcReference").value.trim(),
                     statut: document.getElementById("arcStatut").value,
                     description: document.getElementById("arcDescription").value.trim()
                 };
 
-                const { error } = await supabaseClient
+                // 1. Enregistrer d'abord l'archive
+                const { data: archive, error: erreurArchive } = await supabaseClient
                     .from("archives_eglise")
-                    .insert([donnees]);
+                    .insert([donnees])
+                    .select("id")
+                    .single();
 
-                if (error) throw error;
+                if (erreurArchive) throw erreurArchive;
 
-                message.textContent = "Archive enregistrée avec succès.";
+                // 2. Téléverser les photos et vidéos sélectionnées
+                for (const fichier of fichiers) {
+                    const fichierEnvoye = await televerserFichierMEDFAH(
+                        fichier,
+                        "archives/" + archive.id
+                    );
+
+                    // 3. Enregistrer les informations du fichier
+                    const { error: erreurFichier } = await supabaseClient
+                        .from("archives_fichiers")
+                        .insert([{
+                            archive_id: archive.id,
+                            fichier_path: fichierEnvoye.chemin,
+                            fichier_nom: fichierEnvoye.nom,
+                            fichier_type: fichierEnvoye.type
+                        }]);
+
+                    if (erreurFichier) throw erreurFichier;
+                }
+
+                message.textContent = "Archive et fichiers enregistrés avec succès.";
                 form.reset();
 
                 await afficherArchivesMEDFAH();
@@ -2189,6 +2226,7 @@ async function chargerArchivesMEDFAH() {
     await afficherArchivesMEDFAH();
 }
 
+
 async function afficherArchivesMEDFAH() {
     const liste = document.getElementById("listeArchivesMEDFAH");
 
@@ -2197,49 +2235,112 @@ async function afficherArchivesMEDFAH() {
     liste.textContent = "Chargement des archives...";
 
     try {
-        const { data, error } = await supabaseClient
+        const { data: archives, error } = await supabaseClient
             .from("archives_eglise")
             .select("*")
             .order("created_at", { ascending: false });
 
         if (error) throw error;
 
-        if (!data || data.length === 0) {
+        if (!archives || archives.length === 0) {
             liste.textContent = "Aucune archive enregistrée pour le moment.";
             return;
         }
 
-        liste.innerHTML = data.map(archive => `
-            <article style="border:1px solid #d8dde6;border-radius:10px;padding:14px;margin:12px 0">
-                <h3>${escapeHTML(archive.titre || "")}</h3>
-                <p><strong>Catégorie :</strong> ${escapeHTML(archive.categorie || "")}</p>
-                <p><strong>Date du document :</strong> ${escapeHTML(archive.date_document || "Non précisée")}</p>
-                <p><strong>Auteur ou responsable :</strong> ${escapeHTML(archive.responsable || "Non précisé")}</p>
-                <p><strong>Référence :</strong> ${escapeHTML(archive.reference_document || "Non précisée")}</p>
-                <p><strong>Statut :</strong> ${escapeHTML(archive.statut || "")}</p>
-                <p><strong>Description :</strong> ${escapeHTML(archive.description || "Aucune description")}</p>
-            </article>
-        `).join("");
+        const cartes = [];
+
+        for (const archive of archives) {
+            const { data: fichiers, error: erreurFichiers } = await supabaseClient
+                .from("archives_fichiers")
+                .select("*")
+                .eq("archive_id", archive.id);
+
+            if (erreurFichiers) throw erreurFichiers;
+
+            let contenuFichiers = "";
+
+            for (const fichier of (fichiers || [])) {
+                try {
+                    const lien = await obtenirLienFichierMEDFAH(
+                        fichier.fichier_path
+                    );
+
+                    const urlSecurisee = escapeHTML(lien);
+                    const nomSecurise = escapeHTML(fichier.fichier_nom || "Fichier");
+
+                    if ((fichier.fichier_type || "").startsWith("image/")) {
+                        contenuFichiers += `
+                            <div style="margin:10px 0">
+                                <a href="${urlSecurisee}" target="_blank" rel="noopener">
+                                    <img src="${urlSecurisee}"
+                                        alt="${nomSecurise}"
+                                        style="max-width:220px;max-height:180px;border-radius:8px">
+                                </a>
+                                <p>${nomSecurise}</p>
+                            </div>
+                        `;
+                    } else if ((fichier.fichier_type || "").startsWith("video/")) {
+                        contenuFichiers += `
+                            <div style="margin:10px 0">
+                                <video controls style="max-width:100%;width:320px">
+                                    <source src="${urlSecurisee}"
+                                        type="${escapeHTML(fichier.fichier_type)}">
+                                </video>
+                                <p>${nomSecurise}</p>
+                            </div>
+                        `;
+                    }
+                } catch (erreurLien) {
+                    console.error("Erreur lien fichier :", erreurLien);
+                    contenuFichiers += `
+                        <p>Fichier indisponible : ${escapeHTML(fichier.fichier_nom || "")}</p>
+                    `;
+                }
+            }
+
+            cartes.push(`
+                <article style="border:1px solid #d8dde6;border-radius:10px;padding:14px;margin:12px 0">
+                    <h3>${escapeHTML(archive.titre || "")}</h3>
+                    <p><strong>Catégorie :</strong>
+                        ${escapeHTML(archive.categorie || "")}</p>
+                    <p><strong>Date :</strong>
+                        ${escapeHTML(archive.date_activite || "Non précisée")}</p>
+                    <p><strong>Responsable :</strong>
+                        ${escapeHTML(archive.responsable || "Non précisé")}</p>
+                    <p><strong>Statut :</strong>
+                        ${escapeHTML(archive.statut || "")}</p>
+                    <p><strong>Description :</strong>
+                        ${escapeHTML(archive.description || "Aucune description")}</p>
+                    ${contenuFichiers
+                        ? `<div><strong>Photos et vidéos :</strong>${contenuFichiers}</div>`
+                        : `<p>Aucun fichier joint.</p>`}
+                </article>
+            `);
+        }
+
+        liste.innerHTML = cartes.join("");
 
     } catch (erreur) {
         console.error("Erreur chargement archives MEDFAH :", erreur);
         liste.textContent =
-            "Chargement impossible : " + erreur.message +
-            ". Vérifiez les autorisations Supabase.";
+            "Chargement impossible : " + erreur.message;
     }
 }
+
 
 /* =====================================================
    SECTION 6 — DOCUMENTS DE L'ÉGLISE MEDFAH
    ===================================================== */
 
+
 async function chargerDocumentsMEDFAH() {
     const form = document.getElementById("formDocumentsMEDFAH");
-    if (!form) return;
+    const liste = document.getElementById("listeDocumentsMEDFAH");
+
+    if (!form || !liste) return;
 
     if (!supabaseClient) {
-        document.getElementById("listeDocumentsMEDFAH").textContent =
-            "Connexion Supabase indisponible.";
+        liste.textContent = "Connexion Supabase indisponible.";
         return;
     }
 
@@ -2251,9 +2352,10 @@ async function chargerDocumentsMEDFAH() {
 
             const bouton = form.querySelector('button[type="submit"]');
             const message = document.getElementById("messageDocumentsMEDFAH");
+            const fichier = document.getElementById("docFichierPDF").files[0];
 
             bouton.disabled = true;
-            message.textContent = "Enregistrement en cours...";
+            message.textContent = "Enregistrement du document en cours...";
 
             try {
                 const dateDocument =
@@ -2272,6 +2374,21 @@ async function chargerDocumentsMEDFAH() {
                     );
                 }
 
+                let fichierPath = null;
+                let fichierNom = null;
+
+                if (fichier) {
+                    validerFichierMEDFAH(fichier, "pdf");
+
+                    const resultat = await televerserFichierMEDFAH(
+                        fichier,
+                        "documents"
+                    );
+
+                    fichierPath = resultat.chemin;
+                    fichierNom = resultat.nom;
+                }
+
                 const donnees = {
                     titre: document.getElementById("docTitre").value.trim(),
                     categorie: document.getElementById("docCategorie").value,
@@ -2288,8 +2405,8 @@ async function chargerDocumentsMEDFAH() {
                     statut: document.getElementById("docStatut").value,
                     description:
                         document.getElementById("docDescription").value.trim() || null,
-                    fichier_nom:
-                        document.getElementById("docFichierNom").value.trim() || null
+                    fichier_path: fichierPath,
+                    fichier_nom: fichierNom
                 };
 
                 const { error } = await supabaseClient
@@ -2346,7 +2463,35 @@ async function afficherDocumentsMEDFAH() {
             return;
         }
 
-        liste.innerHTML = data.map(function(doc) {
+        const documentsHTML = await Promise.all(data.map(async function(doc) {
+            let lienFichier = "";
+
+            if (doc.fichier_path) {
+                try {
+                    const url = await obtenirLienFichierMEDFAH(
+                        doc.fichier_path
+                    );
+
+                    lienFichier = `
+                        <p>
+                            <strong>Fichier PDF :</strong>
+                            <a href="${escapeHTML(url)}"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                               Ouvrir / Télécharger le PDF
+                            </a>
+                        </p>
+                    `;
+                } catch (erreurLien) {
+                    console.error("Erreur lien PDF :", erreurLien);
+                    lienFichier = `
+                        <p>Le lien du fichier est momentanément indisponible.</p>
+                    `;
+                }
+            } else {
+                lienFichier = "<p>Aucun fichier PDF joint.</p>";
+            }
+
             return `
                 <article style="border:1px solid #d8dde6;
                     border-radius:10px;padding:14px;margin:12px 0;">
@@ -2381,11 +2526,15 @@ async function afficherDocumentsMEDFAH() {
                         ${escapeHTML(doc.description || "Aucune")}</p>
 
                     <p><strong>Nom du fichier :</strong>
-                        ${escapeHTML(doc.fichier_nom || "Aucun fichier indiqué")}</p>
+                        ${escapeHTML(doc.fichier_nom || "Aucun fichier")}</p>
+
+                    ${lienFichier}
 
                 </article>
             `;
-        }).join("");
+        }));
+
+        liste.innerHTML = documentsHTML.join("");
 
     } catch (erreur) {
         console.error("Erreur affichage documents :", erreur);
@@ -2394,6 +2543,7 @@ async function afficherDocumentsMEDFAH() {
             ". Vérifiez les autorisations Supabase.";
     }
 }
+
 
 /* ==========================================
    CHARGER LE DOSSIER DE L'ÉGLISE
