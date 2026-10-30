@@ -2580,11 +2580,15 @@ async function sauvegarderDossierMEDFAH(event) {
 /* ==========================================
    RETOUR À L'ACCUEIL
 ========================================== */
-
 function retourAccueilMEDFAH() {
     const accueil = document.getElementById("accueilAdmin");
     const sections = document.getElementById("sixSections");
     const contenu = document.getElementById("contenuSectionMEDFAH");
+
+    if (!roleAdminMEDFAH) {
+        afficherZoneAdminMEDFAH(false);
+        return;
+    }
 
     if (contenu) contenu.style.display = "none";
 
@@ -2593,13 +2597,16 @@ function retourAccueilMEDFAH() {
         accueil.style.display = "block";
     }
 
-    if (sections) sections.style.display = "grid";
-
-afficherContenuPublicMEDFAH(true);
-
-    if (accueil) {
-        accueil.scrollIntoView({ behavior: "smooth" });
+    if (sections) {
+        sections.style.display = "grid";
     }
+
+    afficherContenuPublicMEDFAH(true);
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
 }
 
 
@@ -3109,7 +3116,6 @@ async function deconnecterAdminMEDFAH() {
     if (message) message.textContent = "Vous êtes déconnecté.";
 }
 
-
 function afficherContenuPublicMEDFAH(visible) {
     const elements = document.querySelectorAll(
         "main > section.hero:not(#accueilAdmin), " +
@@ -3121,7 +3127,7 @@ function afficherContenuPublicMEDFAH(visible) {
         element.style.display = visible ? "" : "none";
     });
 }
-
+    
 function afficherZoneAdminMEDFAH(connecte) {
     const connexion = document.getElementById("connexionAdminMEDFAH");
     const accueil = document.getElementById("accueilAdmin");
@@ -3141,10 +3147,12 @@ function afficherZoneAdminMEDFAH(connecte) {
         sections.style.display = connecte ? "grid" : "none";
     }
 
-    if (contenu && !connecte) {
+    if (contenu) {
         contenu.style.display = "none";
-        afficherContenuPublicMEDFAH(connecte);
     }
+
+    // Montre les éléments de la page après connexion
+    afficherContenuPublicMEDFAH(true);
 }
 
 /* ==========================================
