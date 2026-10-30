@@ -2595,7 +2595,7 @@ function retourAccueilMEDFAH() {
 
     if (sections) sections.style.display = "grid";
 
-    afficherContenuPublicMEDFAH(false);
+afficherContenuPublicMEDFAH(true);
 
     if (accueil) {
         accueil.scrollIntoView({ behavior: "smooth" });
@@ -3143,6 +3143,7 @@ function afficherZoneAdminMEDFAH(connecte) {
 
     if (contenu && !connecte) {
         contenu.style.display = "none";
+        afficherContenuPublicMEDFAH(connecte);
     }
 }
 
