@@ -604,7 +604,7 @@ if (
   let scanner = null;
   let running = false;
   let saving = false;
-
+let pointageMode = "manuel";
   function tell(text, error = false) {
     msg.textContent = text;
     msg.style.cssText =
@@ -683,12 +683,20 @@ if (
       "<option value=''>Chargement...</option>";
 
     try {
+      
       const params = new URLSearchParams({
-      select: "id,nom_service,date_service,heure_debut,heure_fin,statut",
-        date_service: `eq.${today()}`,
-        statut: "eq.ouvert",
-        order: "heure_debut.asc"
-      });
+    select: "id,nom,prenom,numero_carte,carte_numerique,code",
+    limit: "1"
+});
+
+if (pointageMode === "qr") {
+    params.set("qr_token", `eq.${encoded}`);
+} else {
+    params.set(
+        "or",
+        `(carte_numerique.eq.${encoded},numero_carte.eq.${encoded},code.eq.${encoded})`
+    );
+}
 
       const rows = await req(
         "sessions_presence",
@@ -747,9 +755,10 @@ if (
 
       const params = new URLSearchParams({
         select: "id,nom,prenom,numero_carte,carte_numerique,code",
-        or:
-          `(carte_numerique.eq.${encoded},` +
-          `numero_carte.eq.${encoded},code.eq.${encoded})`,
+or:
+  `(qr_token.eq.${encoded},` +
+  `carte_numerique.eq.${encoded},` +
+  `numero_carte.eq.${encoded},code.eq.${encoded})`,
         limit: "1"
       });
 
@@ -793,12 +802,9 @@ if (
   }
 
   function extractQR(text) {
-    const value = String(text || "").trim();
-
-    const match = value.match(/medfah[0-9]+/i);
-
-    return match ? match[0] : value;
+    return String(text || "").trim();
   }
+}
 
   async function startQR() {
     if (!window.Html5Qrcode) {
@@ -826,9 +832,11 @@ if (
           qrbox: { width: 230, height: 230 }
         },
         async text => {
-          card.value = extractQR(text);
-          await stopQR();
-          await searchMember();
+    pointageMode = "qr";
+    card.value = extractQR(text);
+    await stopQR();
+    await searchMember();
+},
         },
         () => {}
       );
@@ -910,7 +918,7 @@ if (
           membre_id: Number(chosen.id),
           heure_pointage: new Date().toISOString(),
           statut: status.value,
-          mode_pointage: "qr",
+          mode_pointage: pointageMode,
           observation: null
         }
       );
