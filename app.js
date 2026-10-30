@@ -730,52 +730,47 @@ function initialiserPresenceMEDFAH() {
     const value = card.value.trim();
 
     if (!value) {
-      tell("Saisissez ou scannez le numéro de carte ou le code.", true);
-      return;
+        tell("Saisissez ou scannez le numéro de carte ou le code.", true);
+        return;
     }
 
     try {
-      const params = new URLSearchParams({
-        select: "id,nom,prenom,numero_carte,carte_numerique,code,qr_token",
-        or:
-          `(qr_token.eq.${value},` +
-          `carte_numerique.eq.${value},` +
-          `numero_carte.eq.${value},code.eq.${value})`,
-        limit: "1"
-      });
+        const params = new URLSearchParams({
+            select: "id,nom,prenom,numero_carte,code,qr_token",
+            or:
+                `(qr_token.eq.${value},` +
+                `numero_carte.eq.${value},` +
+                `code.eq.${value})`,
+            limit: "1"
+        });
 
-      const rows = await req("membre_infos", params);
+        const rows = await req("membre_infos", params);
 
-      if (!rows.length) {
-        tell("Aucun membre trouvé. Vérifiez le numéro ou le code.", true);
-        return;
-      }
+        if (!rows.length) {
+            tell("Aucun membre trouvé. Vérifiez le numéro ou le code.", true);
+            return;
+        }
 
-      chosen = rows[0];
+        chosen = rows[0];
 
-      const name = document.createElement("strong");
-      name.textContent =
-        `${chosen.nom || ""} ${chosen.prenom || ""}`.trim();
+        const name = document.createElement("strong");
+        name.textContent =
+            `${chosen.nom || ""} ${chosen.prenom || ""}`.trim();
 
-      const number = document.createElement("p");
-      number.textContent =
-        "Carte / code : " +
-        (
-          chosen.numero_carte ||
-          chosen.carte_numerique ||
-          chosen.code ||
-          "—"
-        );
+        const number = document.createElement("p");
+        number.textContent =
+            "Carte / code : " +
+            (chosen.numero_carte || chosen.code || "—");
 
-      memberBox.append(name, number);
+        memberBox.append(name, number);
 
-      updateButton();
-      tell("Membre identifié. Vérifiez le service.");
+        updateButton();
+        tell("Membre identifié. Vérifiez le service.");
 
     } catch (error) {
-      tell(error.message, true);
+        tell(error.message, true);
     }
-  }
+}
 
   /* EXTRAIRE LE TOKEN DU QR CODE */
   function extractQR(text) {
