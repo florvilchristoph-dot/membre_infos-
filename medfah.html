@@ -3395,7 +3395,14 @@ document.addEventListener("DOMContentLoaded", async function() {
     if (formulaire) {
         formulaire.addEventListener("submit", connecterAdminMEDFAH);
     }
+const formulaireMembre = document.getElementById("formAjoutMembre");
 
+if (formulaireMembre) {
+    formulaireMembre.addEventListener(
+        "submit",
+        enregistrerNouveauMembreMEDFAH
+    );
+}
     afficherZoneAdminMEDFAH(false);
 
     const autorise = await verifierRoleAdminMEDFAH();
@@ -3405,6 +3412,170 @@ document.addEventListener("DOMContentLoaded", async function() {
     }
 });
 
+
+// ======================================================
+// MEDFAH — ENREGISTREMENT AUTOMATIQUE DES MEMBRES
+// Génération automatique du code, numéro de carte et QR
+// ======================================================
+
+function genererCodeUniqueMEDFAH(prefixe) {
+    return prefixe + "-" +
+        Date.now().toString(36).toUpperCase() + "-" +
+        Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
+function genererQRTokenMEDFAH() {
+    if (window.crypto && window.crypto.randomUUID) {
+        return window.crypto.randomUUID();
+    }
+
+    return "MEDFAH-" + Date.now() + "-" +
+        Math.random().toString(36).substring(2, 14);
+}
+
+async function enregistrerNouveauMembreMEDFAH(event) {
+    event.preventDefault();
+
+    const form = document.getElementById("formAjoutMembre");
+    const message = document.getElementById("messageAjoutMembre");
+    const bouton = document.getElementById("btnEnregistrerMembre");
+
+    if (!form || !message || !bouton || !supabaseClient) {
+        alert("Connexion ou formulaire indisponible.");
+        return;
+    }
+
+    bouton.disabled = true;
+    message.textContent = "Enregistrement en cours...";
+
+    try {
+        // Vérifier la session
+        const { data: sessionData, error: sessionError } =
+            await supabaseClient.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        const session = sessionData?.session;
+
+        if (!session) {
+            throw new Error("Veuillez vous reconnecter.");
+        }
+
+        // Vérifier le rôle administrateur
+        const { data: roleData, error: roleError } =
+            await supabaseClient
+                .from("medfah_user_roles")
+                .select("role")
+                .eq("user_id", session.user.id)
+                .maybeSingle();
+
+        if (roleError) throw roleError;
+
+        if (
+            !roleData ||
+            !["admin_principal", "admin_secondaire"].includes(roleData.role)
+        ) {
+            throw new Error("Vous n'êtes pas autorisé à ajouter un membre.");
+        }
+
+        const fd = new FormData(form);
+
+        function champ(nom) {
+            return String(fd.get(nom) || "").trim();
+        }
+
+        // Identifiants automatiques
+        const codeMembre = genererCodeUniqueMEDFAH("MED");
+        const numeroCarte = genererCodeUniqueMEDFAH("CARTE");
+        const qrToken = genererQRTokenMEDFAH();
+
+        // Données correspondant aux colonnes confirmées
+        const membre = {
+            nom: champ("nom"),
+            prenom: champ("prenom"),
+            code: codeMembre,
+            numero_carte: numeroCarte,
+            qr_token: qrToken,
+            qr_code: qrToken
+        };
+
+        const correspondances = {
+            sexe: "sexe",
+            nombre_enfants: "nombre_enfants",
+            photo: "photo",
+            date_naissance: "date_naissance",
+            lieu_naissance: "lieu_naissance",
+            nationaliste: "nationalité",
+            situation_matrimoniale: "situation_matrimoniale",
+            telephone: "telephone",
+            telephone_secondaire: "telephone_secondaire",
+            Whatsapp: "whatsapp",
+            email: "email",
+            adresse: "adresse",
+            commune: "commune",
+            departement: "departement",
+            fonction: "fonction",
+            profession: "profession",
+            statut: "statut",
+            date_adhesion: "date_adhesion",
+            conversion_date: "date_conversion",
+            date_bapteme: "date_bapteme",
+            pasteur_responsable: "pasteur_responsable",
+            formation_biblique: "formation_biblique",
+            groupe_eglise: "groupe_eglise",
+            personne_urgence: "personne_urgence",
+            urgence_telephonique: "telephone_urgence",
+            relation_urgence: "relation_urgence",
+            observation: "observation"
+        };
+
+        Object.entries(correspondances).forEach(([colonne, nomChamp]) => {
+            const valeur = champ(nomChamp);
+
+            if (valeur !== "") {
+                membre[colonne] = valeur;
+            }
+        });
+
+        // Nombre d'enfants doit être numérique
+        if (membre.nombre_enfants !== undefined) {
+            membre.nombre_enfants = Number(membre.nombre_enfants);
+        }
+
+        // Enregistrement Supabase
+        const { error: insertionError } = await supabaseClient
+            .from("membre_infos")
+            .insert([membre]);
+
+        if (insertionError) throw insertionError;
+
+        message.textContent =
+            "Membre enregistré avec succès ! " +
+            "Code : " + codeMembre +
+            " | Carte : " + numeroCarte;
+
+        form.reset();
+
+        await loadMembers();
+
+        // Fermer le formulaire après confirmation
+        setTimeout(() => {
+            const modal = document.getElementById("ajoutMembreModal");
+
+            if (modal) modal.style.display = "none";
+            message.textContent = "";
+        }, 4000);
+
+    } catch (error) {
+        console.error("Erreur ajout membre MEDFAH :", error);
+
+        message.textContent =
+            "Erreur : " + (error.message || "Enregistrement impossible.");
+
+    } finally {
+        bouton.disabled = false;
+    }
+}
 
 
 /* OUVRIR LE FORMULAIRE — ACCÈS ADMINISTRATEUR UNIQUEMENT */
