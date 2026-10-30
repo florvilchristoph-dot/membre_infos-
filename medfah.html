@@ -595,7 +595,7 @@ td{
 </section>
 
 
-    <section class="hero">
+<section class="hero" id="accueilPublicMEDFAH">
 
         <h2>Bienvenue sur MEDFAH</h2>
 
@@ -623,7 +623,7 @@ td{
 
 
     <!-- STATISTIQUES -->
-    <section class="stats">
+<section class="stats" id="statistiquesPubliquesMEDFAH">
 
         <div class="stat">
             <div class="stat-icon">👥</div>
@@ -996,6 +996,10 @@ async function ouvrirSectionMEDFAH(cle) {
 
     const section = sectionsMEDFAH[cle];
     if (!section) return;
+
+document.getElementById("accueilAdmin").style.display = "none";
+document.getElementById("sixSections").style.display = "none";
+afficherContenuPublicMEDFAH(false);
 
     const zone = document.getElementById("detailsSectionMEDFAH");
 
@@ -2578,12 +2582,26 @@ async function sauvegarderDossierMEDFAH(event) {
 ========================================== */
 
 function retourAccueilMEDFAH() {
-    document.getElementById("contenuSectionMEDFAH").style.display =
-        "none";
+    const accueil = document.getElementById("accueilAdmin");
+    const sections = document.getElementById("sixSections");
+    const contenu = document.getElementById("contenuSectionMEDFAH");
 
-    document.getElementById("accueilAdmin")
-        .scrollIntoView({ behavior: "smooth" });
+    if (contenu) contenu.style.display = "none";
+
+    if (accueil) {
+        accueil.hidden = false;
+        accueil.style.display = "block";
+    }
+
+    if (sections) sections.style.display = "grid";
+
+    afficherContenuPublicMEDFAH(false);
+
+    if (accueil) {
+        accueil.scrollIntoView({ behavior: "smooth" });
+    }
 }
+
 
 
 /* ==========================================
@@ -3091,6 +3109,18 @@ async function deconnecterAdminMEDFAH() {
     if (message) message.textContent = "Vous êtes déconnecté.";
 }
 
+
+function afficherContenuPublicMEDFAH(visible) {
+    const elements = document.querySelectorAll(
+        "main > section.hero:not(#accueilAdmin), " +
+        "main > section.stats:not(#sixSections), " +
+        "#membersSection"
+    );
+
+    elements.forEach(function (element) {
+        element.style.display = visible ? "" : "none";
+    });
+}
 
 function afficherZoneAdminMEDFAH(connecte) {
     const connexion = document.getElementById("connexionAdminMEDFAH");
