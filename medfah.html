@@ -3253,7 +3253,15 @@ async function ouvrirFormulaireMembre() {
     }
 }
 
+function fermerFormulaireMembre() {
+    const modal = document.getElementById("ajoutMembreModal");
+    const form = document.getElementById("formAjoutMembre");
+    const message = document.getElementById("messageAjoutMembre");
 
+    if (form) form.reset();
+    if (message) message.textContent = "";
+    if (modal) modal.style.display = "none";
+}
 
 </script>
 </body>
