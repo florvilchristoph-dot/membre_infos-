@@ -736,7 +736,7 @@ function initialiserPresenceMEDFAH() {
 
     try {
         const params = new URLSearchParams({
-            select: "id,nom,prenom,numero_carte,code,qr_token",
+            select: "id,nom,prenom,prénom,numero_carte,code,qr_token",
             or:
                 `(qr_token.eq.${value},` +
                 `numero_carte.eq.${value},` +
@@ -754,8 +754,11 @@ function initialiserPresenceMEDFAH() {
         chosen = rows[0];
 
         const name = document.createElement("strong");
-        name.textContent =
-            `${chosen.nom || ""} ${chosen.prenom || ""}`.trim();
+        const prenomMembre =
+    chosen.prenom || chosen["prénom"] || "";
+
+name.textContent =
+    `${chosen.nom || ""} ${prenomMembre}`.trim();
 
         const number = document.createElement("p");
         number.textContent =
