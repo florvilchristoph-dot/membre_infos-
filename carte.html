@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartes de persévérance - MEDFAH</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:18px;font-family:Arial,sans-serif;background:#eef2f7;color:#172033}
+.container{max-width:950px;margin:auto}
+h1{color:#123c70;text-align:center}
+.panel{background:white;padding:20px;border-radius:12px;margin-bottom:18px}
+input,select,button{width:100%;padding:12px;margin:7px 0;border:1px solid #ccd4df;border-radius:7px;font-size:15px}
+button{background:#123c70;color:white;border:0;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5}
+.message{padding:12px;margin:10px 0;border-radius:7px;background:#fff7ed;color:#92400e}
+.card{
+ width:86mm;height:54mm;max-width:100%;
+ margin:20px auto;background:linear-gradient(125deg,#fff 0%,#f4f7fc 65%,#e8eef7 100%);
+ border:2px solid #c59a3a;border-radius:10px;overflow:hidden;
+ position:relative;color:#172033;
+ box-shadow:0 4px 14px #0002;
+}
+.card-top{height:14mm;background:#123c70;color:white;display:flex;align-items:center;padding:5px 8px;gap:8px}
+.card-top img{width:30px;height:30px;object-fit:contain;background:white;border-radius:50%;padding:2px}
+.church{font-size:8px;line-height:1.3;font-weight:bold}
+.church small{display:block;font-size:6px;font-weight:normal}
+.card-title{text-align:center;color:#a47720;font-size:9px;font-weight:bold;margin:5px 0 3px}
+.card-body{display:flex;gap:6px;padding:3px 7px;align-items:center}
+.photo{width:21mm;height:25mm;border:1px solid #c59a3a;object-fit:cover;background:#e5e7eb}
+.details{flex:1;font-size:7px;line-height:1.65;min-width:0}
+.details strong{color:#123c70}
+.qr-area{width:19mm;text-align:center;font-size:6px}
+#qrCode{width:18mm;height:18mm;margin:auto;background:white;padding:2px}
+#qrCode img,#qrCode canvas{width:100%!important;height:100%!important}
+.valid{color:#16733a;font-weight:bold;text-align:center;font-size:7px;margin-top:3px}
+.card-bottom{position:absolute;bottom:0;left:0;right:0;background:#123c70;color:white;text-align:center;padding:3px;font-size:6px}
+.card-actions{display:flex;gap:10px;max-width:500px;margin:12px auto}
+.card-actions button{flex:1}
+.hidden{display:none!important}
+@media print{
+ body{background:white;padding:0}
+ .no-print{display:none!important}
+ .card{margin:10mm auto;box-shadow:none;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<div class="panel no-print">
+<h1>MEDFAH — Cartes de persévérance</h1>
+<p>Accès réservé aux administrateurs autorisés.</p>
+
+<div id="message" class="message">Vérification de votre accès...</div>
+
+<div id="zoneCartes" class="hidden">
+<label for="recherche">Rechercher un membre</label>
+<input id="recherche" type="search" placeholder="Nom, prénom ou code du membre">
+
+<label for="listeMembres">Sélectionner un membre</label>
+<select id="listeMembres">
+<option value="">Chargement des membres...</option>
+</select>
+
+<button id="btnAfficher" type="button">Afficher la carte</button>
+</div>
+</div>
+
+<div id="zoneCarte" class="hidden">
+<div class="card" id="carteMEDFAH">
+
+ <div class="card-top">
+  <img src="logo-medfah.jpg" alt="Logo MEDFAH"
+       onerror="this.style.display='none'">
+  <div class="church">
+   MISSION ÉGLISE DE DIEU DE LA FOI APOSTOLIQUE D’HAÏTI
+   <small>MEDFAH — Haïti</small>
+  </div>
+ </div>
+
+ <div class="card-title">CARTE DE PERSÉVÉRANCE</div>
+
+ <div class="card-body">
+  <img id="photoMembre" class="photo" alt="Photo du membre">
+
+  <div class="details">
+   <div><strong>Nom :</strong> <span id="nomMembre"></span></div>
+   <div><strong>Prénom :</strong> <span id="prenomMembre"></span></div>
+   <div><strong>Code :</strong> <span id="codeMembre"></span></div>
+   <div><strong>N° carte :</strong> <span id="numeroCarte"></span></div>
+   <div><strong>Pasteur :</strong> Beaulieu Mislet</div>
+   <div><strong>Assemblée :</strong> <span id="assemblee"></span></div>
+  </div>
+
+  <div class="qr-area">
+   <div id="qrCode"></div>
+   QR DE VÉRIFICATION
+   <div class="valid">✓ MEDFAH</div>
+  </div>
+ </div>
+
+ <div class="card-bottom">
+  Maïs-gâté entre 13 et 15 #73 — Tél. 37258549
+ </div>
+</div>
+
+<div class="card-actions no-print">
+ <button type="button" onclick="window.print()">Imprimer la carte</button>
+ <button type="button" onclick="retour()">Retour</button>
+</div>
+</div>
+
+</div>
+
+<script>
+let clientCarte = null;
+let membresCarte = [];
+let membreChoisi = null;
+
+const message = document.getElementById("message");
+const zoneCartes = document.getElementById("zoneCartes");
+const zoneCarte = document.getElementById("zoneCarte");
+
+function afficherMessage(texte){
+ message.textContent = texte;
+}
+
+function valeur(obj, ...cles){
+ for(const cle of cles){
+  const v = obj && obj[cle];
+  if(v !== null && v !== undefined && String(v).trim() !== ""){
+   return v;
+  }
+ }
+ return "";
+}
+
+function creerToken(){
+ if(window.crypto && crypto.randomUUID){
+  return crypto.randomUUID();
+ }
+ return "MEDFAH-" + Date.now().toString(36) + "-" +
+ Math.random().toString(36).slice(2) +
+ Math.random().toString(36).slice(2);
+}
+
+async function verifierAcces(){
+ try{
+  if(!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY || !window.supabase){
+   throw new Error("Configuration Supabase indisponible.");
+  }
+
+  clientCarte = window.supabase.createClient(
+   window.SUPABASE_URL,
+   window.SUPABASE_ANON_KEY
+  );
+
+  const {data:sessionData,error:sessionError} =
+   await clientCarte.auth.getSession();
+
+  if(sessionError) throw sessionError;
+
+  const userId = sessionData?.session?.user?.id;
+  if(!userId){
+   throw new Error("Connectez-vous d'abord dans Administration.");
+  }
+
+  const {data:roleData,error:roleError} = await clientCarte
+   .from("medfah_user_roles")
+   .select("role")
+   .eq("user_id",userId)
+   .maybeSingle();
+
+  if(roleError) throw roleError;
+
+  if(!roleData || !["admin_principal","admin_secondaire"].includes(roleData.role)){
+   throw new Error("Votre compte n'est pas autorisé à créer des cartes.");
+  }
+
+  zoneCartes.classList.remove("hidden");
+  afficherMessage("Accès autorisé. Chargement des membres...");
+  await chargerMembres();
+
+ }catch(e){
+  console.error(e);
+  afficherMessage(e.message || "Impossible de vérifier votre accès.");
+ }
+}
+
+async function chargerMembres(){
+ try{
+  const {data,error} = await clientCarte
+   .from("membre_infos")
+   .select("*")
+   .order("nom",{ascending:true});
+
+  if(error) throw error;
+
+  membresCarte = data || [];
+
+  const select = document.getElementById("listeMembres");
+  select.innerHTML = '<option value="">Choisir un membre</option>';
+
+  membresCarte.forEach(m=>{
+   const option = document.createElement("option");
+   option.value = m.id;
+   option.textContent =
+    `${valeur(m,"nom")} ${valeur(m,"prenom","prénom")} — ${valeur(m,"code")}`;
+   select.appendChild(option);
+  });
+
+  afficherMessage(`${membresCarte.length} membre(s) chargé(s).`);
+
+ }catch(e){
+  console.error(e);
+  afficherMessage("Erreur de chargement : " + e.message);
+ }
+}
+
+async function afficherCarte(){
+ try{
+  const id = document.getElementById("listeMembres").value;
+
+  if(!id){
+   afficherMessage("Sélectionnez d'abord un membre.");
+   return;
+  }
+
+  membreChoisi = membresCarte.find(m=>String(m.id)===String(id));
+
+  if(!membreChoisi){
+   afficherMessage("Membre introuvable.");
+   return;
+  }
+
+  let token = valeur(membreChoisi,"qr_token");
+
+  // Créer un token pour les anciens membres qui n'en ont pas.
+  if(!token){
+   token = creerToken();
+
+   const {data,error} = await clientCarte
+    .from("membre_infos")
+    .update({qr_token:token,qr_code:token})
+    .eq("id",membreChoisi.id)
+    .select()
+    .single();
+
+   if(error) throw error;
+   membreChoisi = data;
+  }
+
+  const nom = valeur(membreChoisi,"nom");
+  const prenom = valeur(membreChoisi,"prenom","prénom");
+  const code = valeur(membreChoisi,"code");
+  const numero = valeur(membreChoisi,"numero_carte");
+  const photo = valeur(membreChoisi,"photo");
+
+  document.getElementById("nomMembre").textContent = nom || "—";
+  document.getElementById("prenomMembre").textContent = prenom || "—";
+  document.getElementById("codeMembre").textContent = code || "—";
+  document.getElementById("numeroCarte").textContent = numero || "—";
+  document.getElementById("assemblee").textContent =
+   valeur(membreChoisi,"assemblee") || "MEDFAH";
+
+  const image = document.getElementById("photoMembre");
+  image.src = photo || "logo-medfah.jpg";
+  image.onerror = function(){
+   this.onerror = null;
+   this.src = "logo-medfah.jpg";
+  };
+
+  const qrZone = document.getElementById("qrCode");
+  qrZone.innerHTML = "";
+
+  const lienVerification = new URL("verify.html",window.location.href);
+  lienVerification.searchParams.set("qr_token",token);
+
+  if(!window.QRCode){
+   throw new Error("Le générateur QR Code n'est pas chargé.");
+  }
+
+  new QRCode(qrZone,{
+   text:lienVerification.href,
+   width:180,
+   height:180,
+   correctLevel:QRCode.CorrectLevel.H
+  });
+
+  zoneCarte.classList.remove("hidden");
+  afficherMessage("Carte prête. Vous pouvez l'imprimer.");
+
+ }catch(e){
+  console.error(e);
+  afficherMessage("Impossible de créer la carte : " + e.message);
+ }
+}
+
+document.getElementById("btnAfficher")
+ .addEventListener("click",afficherCarte);
+
+document.getElementById("recherche")
+ .addEventListener("input",function(){
+  const q = this.value.trim().toLocaleLowerCase("fr");
+  const select = document.getElementById("listeMembres");
+  select.innerHTML = '<option value="">Choisir un membre</option>';
+
+  membresCarte.filter(m=>{
+   const nom = `${valeur(m,"nom")} ${valeur(m,"prenom","prénom")} ${valeur(m,"code")}`;
+   return nom.toLocaleLowerCase("fr").includes(q);
+  }).forEach(m=>{
+   const option = document.createElement("option");
+   option.value = m.id;
+   option.textContent =
+    `${valeur(m,"nom")} ${valeur(m,"prenom","prénom")} — ${valeur(m,"code")}`;
+   select.appendChild(option);
+  });
+ });
+
+function retour(){
+ window.location.href = "medfah.html";
+}
+
+verifierAcces();
+</script>
+</body>
+</html>
