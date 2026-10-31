@@ -4,173 +4,1007 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cartes de persévérance - MEDFAH</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;padding:16px;font-family:Arial,sans-serif;background:#eef2f7;color:#172033}
+
+:root{
+ --navy:#061d50;
+ --blue:#0b397b;
+ --blue2:#1456a0;
+ --gold:#e2b52e;
+ --gold-light:#f8e49a;
+ --white:#fff;
+ --ink:#10264b;
+}
+
+body{
+ margin:0;
+ padding:16px;
+ font-family:Arial,sans-serif;
+ background:#eef2f7;
+ color:#172033;
+}
+
 .container{max-width:1100px;margin:auto}
-.panel{background:#fff;padding:18px;border-radius:12px;margin-bottom:16px}
+
+.panel{
+ background:#fff;
+ padding:18px;
+ border-radius:14px;
+ margin-bottom:18px;
+ box-shadow:0 5px 20px #10264b12;
+}
+
 h1{margin-top:0;color:#123c70}
-input,select,button{width:100%;padding:12px;margin:6px 0;border:1px solid #ccd4df;border-radius:8px;font-size:15px}
-button{background:#123c70;color:#fff;border:0;font-weight:bold;cursor:pointer}
+
+input,select,button{
+ width:100%;
+ padding:12px;
+ margin:6px 0;
+ border:1px solid #ccd4df;
+ border-radius:8px;
+ font-size:15px;
+}
+
+button{
+ background:#123c70;
+ color:white;
+ border:0;
+ font-weight:bold;
+ cursor:pointer;
+}
+
 button.secondary{background:#64748b}
 button.gold{background:#b88620}
-.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.message{padding:11px;background:#fff7ed;color:#92400e;border-radius:8px;margin:10px 0}
-#cardsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px;justify-items:center}
-.member-card{width:340px;height:214px;position:relative;overflow:hidden;border:2px solid #c99a27;border-radius:12px;background:#fff;color:#142b50;box-shadow:0 3px 12px #0002;print-color-adjust:exact;-webkit-print-color-adjust:exact}
-.top{height:54px;background:linear-gradient(110deg,#061e66,#0754a4);color:white;display:flex;align-items:center;padding:5px 8px;gap:7px;position:relative}
-.logo{width:39px;height:39px;object-fit:contain;border-radius:50%;background:white}
-.church-title{font-size:8px;font-weight:800;line-height:1.2;max-width:205px}
-.church-title small{display:block;font-size:7px;font-weight:normal;margin-top:2px}
-.church-photo{position:absolute;right:0;top:0;width:88px;height:42px;object-fit:cover;opacity:.95;border-bottom-left-radius:10px}
-.pastor{position:absolute;right:5px;bottom:3px;background:#ffdc42;color:#082b70;padding:2px 5px;border-radius:9px;font-size:6px;font-weight:bold}
-.card-title{text-align:center;background:#123c70;color:#fff;font-size:12px;font-weight:900;padding:4px;letter-spacing:.5px}
-.body{display:flex;gap:7px;padding:7px 7px 34px;height:126px}
-.photo-wrap{width:83px;flex:none}
-.member-photo{width:83px;height:94px;object-fit:cover;border:2px solid #c99a27;border-radius:7px;background:#e8eef7}
-.photo-caption{text-align:center;color:#123c70;font-size:7px;font-style:italic;font-weight:bold;margin-top:3px}
-.details{flex:1;min-width:0;font-size:8px;line-height:1.55;padding-top:1px}
-.details div{border-bottom:1px solid #d9e5f4;padding:1px 0;overflow-wrap:anywhere}
+
+.controls{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:10px;
+}
+
+.message{
+ padding:11px;
+ background:#fff7ed;
+ color:#92400e;
+ border-radius:8px;
+ margin:10px 0;
+}
+
+#cardsGrid{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+ gap:20px;
+ justify-items:center;
+}
+
+/* ================================
+   CARTE MEDFAH — DESIGN PRINCIPAL
+================================ */
+
+.member-card{
+ width:340px;
+ height:214px;
+ position:relative;
+ overflow:hidden;
+ border:2px solid var(--gold);
+ outline:1px solid var(--gold-light);
+ outline-offset:-5px;
+ border-radius:13px;
+ background:#fff;
+ color:var(--ink);
+ box-shadow:0 5px 18px #0002;
+ print-color-adjust:exact;
+ -webkit-print-color-adjust:exact;
+}
+
+/* EN-TÊTE BLEU ET OR */
+
+.top{
+ height:48px;
+ background:linear-gradient(
+  110deg,
+  #061b4d 0%,
+  #0b3474 48%,
+  #1456a0 100%
+ );
+ color:white;
+ display:flex;
+ align-items:center;
+ padding:5px 8px;
+ gap:7px;
+ position:relative;
+ overflow:hidden;
+ border-bottom:2px solid var(--gold);
+}
+
+.logo{
+ width:38px;
+ height:38px;
+ flex:none;
+ object-fit:contain;
+ border-radius:50%;
+ background:white;
+ border:2px solid var(--gold-light);
+ padding:1px;
+ z-index:2;
+}
+
+.church-title{
+ font-size:7.5px;
+ font-weight:900;
+ line-height:1.2;
+ max-width:205px;
+ position:relative;
+ z-index:3;
+ text-shadow:0 1px 2px #00143b;
+}
+
+.church-title small{
+ display:block;
+ font-size:6.5px;
+ font-weight:normal;
+ margin-top:3px;
+ color:#f8e49a;
+}
+
+/* PHOTO DE L'ÉGLISE AVEC FUSION DOUCE DANS LE BLEU */
+
+.church-photo{
+ position:absolute;
+ right:0;
+ top:0;
+ width:105px;
+ height:46px;
+ object-fit:cover;
+ object-position:center;
+ opacity:.95;
+ border:0;
+ border-radius:0;
+ -webkit-mask-image:linear-gradient(
+  to right,
+  transparent 0%,
+  rgba(0,0,0,.15) 12%,
+  rgba(0,0,0,.8) 42%,
+  black 65%
+ );
+ mask-image:linear-gradient(
+  to right,
+  transparent 0%,
+  rgba(0,0,0,.15) 12%,
+  rgba(0,0,0,.8) 42%,
+  black 65%
+ );
+}
+
+.pastor{
+ position:absolute;
+ right:5px;
+ bottom:3px;
+ z-index:4;
+ background:linear-gradient(90deg,#f8e49a,#e2b52e);
+ color:#08265f;
+ padding:2px 6px;
+ border-radius:10px;
+ font-size:6px;
+ font-weight:900;
+ border:1px solid #fff0b8;
+}
+
+/* TITRE DE LA CARTE */
+
+.card-title{
+ text-align:center;
+ background:linear-gradient(
+  90deg,
+  #08265f,
+  #1456a0,
+  #08265f
+ );
+ color:white;
+ font-size:10px;
+ font-weight:900;
+ padding:4px;
+ letter-spacing:.5px;
+ border-bottom:1.5px solid var(--gold);
+}
+
+/* INFORMATIONS DU MEMBRE */
+
+.body{
+ display:flex;
+ gap:7px;
+ padding:6px 7px 38px;
+ height:119px;
+ background:linear-gradient(135deg,#fff 0%,#f7f9ff 65%,#edf3fc 100%);
+}
+
+.photo-wrap{
+ width:80px;
+ flex:none;
+}
+
+.member-photo{
+ width:80px;
+ height:88px;
+ object-fit:cover;
+ border:2px solid var(--gold);
+ border-radius:7px;
+ background:#e8eef7;
+ box-shadow:0 2px 5px #0002;
+}
+
+.photo-caption{
+ text-align:center;
+ color:#123c70;
+ font-size:6.5px;
+ font-style:italic;
+ font-weight:bold;
+ margin-top:2px;
+}
+
+.details{
+ flex:1;
+ min-width:0;
+ font-size:7.5px;
+ line-height:1.55;
+ padding-top:1px;
+}
+
+.details div{
+ border-bottom:1px solid #d9e5f4;
+ padding:1px 0;
+ overflow-wrap:anywhere;
+}
+
 .details b{color:#0750a0}
-.qr-box{width:64px;flex:none;text-align:center;font-size:6px;font-weight:bold;color:#123c70}
-.qr{width:62px;height:62px;background:#fff;padding:2px;margin:0 auto 3px}
-.qr img,.qr canvas{width:100%!important;height:100%!important}
-.valid{background:#07833c;color:white;border-radius:10px;padding:3px 2px;font-size:7px;margin-top:3px}
-.bottom{position:absolute;bottom:0;left:0;right:0;height:31px;background:#062d78;color:#fff;padding:3px 6px;text-align:center;font-size:6px;line-height:1.35}
-.bottom strong{color:#ffdf3f}
-.card-number{font-size:6px}
+
+.qr-box{
+ width:61px;
+ flex:none;
+ text-align:center;
+ font-size:6px;
+ font-weight:bold;
+ color:#123c70;
+}
+
+.qr{
+ width:59px;
+ height:59px;
+ background:#fff;
+ padding:2px;
+ margin:0 auto 3px;
+ border:1px solid var(--gold);
+ border-radius:4px;
+}
+
+.qr img,.qr canvas{
+ width:100%!important;
+ height:100%!important;
+}
+
+.valid{
+ background:#07833c;
+ color:white;
+ border-radius:10px;
+ padding:3px 2px;
+ font-size:6.5px;
+ margin-top:3px;
+}
+
+.card-number{
+ font-size:6px;
+ margin-top:2px;
+}
+
+/* PIED DE CARTE : ORAI DES SERVICES */
+
+.bottom{
+ position:absolute;
+ bottom:0;
+ left:0;
+ right:0;
+ min-height:35px;
+ background:linear-gradient(
+  105deg,
+  #061b4d 0%,
+  #0b397b 55%,
+  #124b91 100%
+ );
+ color:#fff;
+ padding:3px 6px;
+ text-align:center;
+ font-size:5.7px;
+ line-height:1.35;
+ border-top:2px solid var(--gold);
+}
+
+.bottom .schedule-title{
+ display:block;
+ color:#f8df83;
+ font-size:6px;
+ font-weight:900;
+ letter-spacing:.4px;
+ margin-bottom:1px;
+}
+
+.bottom strong{color:#f8df83}
+
+.bottom .communion{
+ display:inline-block;
+ background:linear-gradient(90deg,#f8e49a,#e2b52e);
+ color:#08265f;
+ border-radius:7px;
+ padding:1px 5px;
+ font-weight:900;
+ margin-top:1px;
+}
+
+.bottom .address{
+ display:block;
+ font-size:5px;
+ color:#e5edff;
+ margin-top:1px;
+}
+
 .hidden{display:none!important}
-@media(max-width:500px){.controls{grid-template-columns:1fr}#cardsGrid{grid-template-columns:1fr}}
-@page{size:A4;margin:8mm}
+
+@media(max-width:500px){
+ .controls{grid-template-columns:1fr}
+ #cardsGrid{grid-template-columns:1fr}
+}
+
+/* ================================
+   IMPRESSION
+================================ */
+
+@page{
+ size:A4;
+ margin:8mm;
+}
+
 @media print{
- body{padding:0;background:#fff}
+
+ body{
+  padding:0;
+  background:#fff;
+ }
+
  .no-print{display:none!important}
- #cardsGrid{display:grid;grid-template-columns:repeat(2,85.6mm);gap:5mm 4mm;justify-content:center;align-items:start}
- .member-card{width:85.6mm;height:54mm;margin:0;border-radius:2mm;box-shadow:none;break-inside:avoid;page-break-inside:avoid}
- .top{height:13.5mm;padding:1.2mm 2mm}
- .logo{width:9mm;height:9mm}
- .church-title{font-size:7pt;max-width:53mm}
- .church-title small{font-size:5.5pt}
- .church-photo{width:23mm;height:10.5mm}
- .pastor{font-size:5pt}
- .card-title{font-size:9pt;padding:1mm}
- .body{height:34mm;padding:1.5mm 2mm;gap:1.5mm}
- .photo-wrap{width:21mm}
- .member-photo{width:21mm;height:25mm}
- .photo-caption{font-size:5pt}
- .details{font-size:6.2pt;line-height:1.5}
- .qr-box{width:17mm;font-size:5pt}
- .qr{width:16mm;height:16mm}
- .valid{font-size:5pt}
- .bottom{height:8mm;font-size:5pt;padding:1mm;line-height:1.25}
+
+ #cardsGrid{
+  display:grid;
+  grid-template-columns:repeat(2,85.6mm);
+  gap:3mm 4mm;
+  justify-content:center;
+  align-items:start;
+ }
+
+ .member-card{
+  width:85.6mm;
+  height:54mm;
+  margin:0;
+  border-radius:2mm;
+  box-shadow:none;
+  break-inside:avoid;
+  page-break-inside:avoid;
+ }
+
+ .top{
+  height:12mm;
+  padding:1mm 2mm;
+ }
+
+ .logo{
+  width:9mm;
+  height:9mm;
+ }
+
+ .church-title{
+  font-size:6.5pt;
+  max-width:53mm;
+ }
+
+ .church-title small{font-size:5pt}
+
+ .church-photo{
+  width:25mm;
+  height:11.5mm;
+ }
+
+ .pastor{
+  font-size:4.8pt;
+  padding:.5mm 1.2mm;
+ }
+
+ .card-title{
+  font-size:8pt;
+  padding:.8mm;
+ }
+
+ .body{
+  height:28.5mm;
+  padding:1mm 2mm 1mm;
+  gap:1.5mm;
+ }
+
+ .photo-wrap{width:20mm}
+
+ .member-photo{
+  width:20mm;
+  height:23mm;
+ }
+
+ .photo-caption{font-size:4.7pt}
+
+ .details{
+  font-size:5.8pt;
+  line-height:1.45;
+ }
+
+ .qr-box{
+  width:16mm;
+  font-size:4.5pt;
+ }
+
+ .qr{
+  width:15mm;
+  height:15mm;
+ }
+
+ .valid{font-size:4.5pt}
+
+ .card-number{font-size:4.5pt}
+
+ .bottom{
+  min-height:10mm;
+  padding:.7mm 1mm;
+  font-size:4.6pt;
+  line-height:1.2;
+ }
+
+ .bottom .schedule-title{font-size:5pt}
+ .bottom .communion{font-size:4.5pt}
+ .bottom .address{font-size:4pt}
 }
 </style>
 </head>
+
 <body>
+
 <div class="container">
+
 <section class="panel no-print">
+
 <h1>MEDFAH — Cartes de persévérance</h1>
-<p>Génération des cartes réservée aux administrateurs autorisés.</p>
-<div id="message" class="message">Vérification de votre accès...</div>
+
+<p>
+Génération des cartes réservée aux administrateurs autorisés.
+</p>
+
+<div id="message" class="message">
+Vérification de votre accès...
+</div>
+
 <div id="controls" class="hidden">
+
 <label for="search">Rechercher un membre</label>
-<input id="search" type="search" placeholder="Nom, prénom ou code">
-<label for="memberSelect">Choisir un membre pour afficher sa carte</label>
-<select id="memberSelect"><option value="">Chargement...</option></select>
+
+<input
+ id="search"
+ type="search"
+ placeholder="Nom, prénom ou code"
+>
+
+<label for="memberSelect">
+Choisir un membre pour afficher sa carte
+</label>
+
+<select id="memberSelect">
+<option value="">Chargement...</option>
+</select>
+
 <div class="controls">
 <button id="showOne">Afficher la carte choisie</button>
 <button class="gold" id="showAll">Afficher toutes les cartes</button>
 </div>
+
 <div class="controls">
 <button id="printOne">Imprimer la carte choisie</button>
 <button class="gold" id="printAll">Imprimer toutes les cartes</button>
 </div>
-<button class="secondary" onclick="location.href='medfah.html'">Retour à l’administration</button>
+
+<button
+ class="secondary"
+ onclick="location.href='medfah.html'"
+>
+Retour à l’administration
+</button>
+
 </div>
 </section>
+
 <div id="cardsGrid"></div>
+
 </div>
+
 <script>
+
 let db=null, members=[], visibleMembers=[];
+
 const $=id=>document.getElementById(id);
-function say(t){$("message").textContent=t}
-function val(o,...keys){for(const k of keys){const x=o?.[k];if(x!==null&&x!==undefined&&String(x).trim()!=="")return String(x)}return ""}
-function token(){return crypto?.randomUUID?crypto.randomUUID():"MEDFAH-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2)}
-function safe(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-async function init(){
- try{
-  if(!window.SUPABASE_URL||!window.SUPABASE_ANON_KEY||!window.supabase)throw Error("Configuration Supabase introuvable.");
-  db=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
-  const {data:s,error:se}=await db.auth.getSession();if(se)throw se;
-  const uid=s?.session?.user?.id;if(!uid)throw Error("Connectez-vous d'abord dans Administration.");
-  const {data:r,error:re}=await db.from("medfah_user_roles").select("role").eq("user_id",uid).maybeSingle();
-  if(re)throw re;if(!r||!["admin_principal","admin_secondaire"].includes(r.role))throw Error("Accès réservé aux administrateurs autorisés.");
-  $("controls").classList.remove("hidden");say("Accès autorisé. Chargement des membres...");
-  const {data,error}=await db.from("membre_infos").select("*").order("nom",{ascending:true});if(error)throw error;
-  members=data||[];visibleMembers=members;fillSelect(members);say(members.length+" membre(s) chargé(s).");
- }catch(e){console.error(e);say("Erreur : "+(e.message||e))}
+
+function say(t){
+ $("message").textContent=t;
 }
-function fillSelect(list){
- const s=$("memberSelect");s.innerHTML='<option value="">Choisir un membre</option>';
- list.forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=val(m,"nom")+" "+val(m,"prenom","prénom")+" — "+val(m,"code");s.appendChild(o)});
-}
-$("search").addEventListener("input",e=>{const q=e.target.value.toLocaleLowerCase("fr");visibleMembers=members.filter(m=>(val(m,"nom")+" "+val(m,"prenom","prénom")+" "+val(m,"code")).toLocaleLowerCase("fr").includes(q));fillSelect(visibleMembers)});
-function cardHTML(m){
- const fullName=(val(m,"nom")+" "+val(m,"prenom","prénom")).trim();
- const photo=val(m,"photo");
- const churchPhoto="20261031_134144.jpg";
- return `<article class="member-card">
- <header class="top">
- <img class="logo" src="logo-medfah.jpg" alt="Logo MEDFAH" onerror="this.style.visibility='hidden'">
- <div class="church-title">MISSION ÉGLISE DE DIEU DE LA FOI APOSTOLIQUE D’HAÏTI<small>MEDFAH — « Une Église, une famille, une même vision. »</small></div>
- <img class="church-photo" src="${churchPhoto}" alt="Église MEDFAH" onerror="this.style.display='none'">
- <div class="pastor">Pasteur : Beaulieu Mislet</div>
- </header>
- <div class="card-title">CARTE DE PERSÉVÉRANCE — MEMBRE OFFICIEL</div>
- <div class="body">
- <div class="photo-wrap"><img class="member-photo" src="${safe(photo||"")}" alt="Photo du membre" onerror="this.onerror=null;this.src='photo-par-defaut.png'"><div class="photo-caption">Servir Dieu avec fidélité</div></div>
- <div class="details">
- <div><b>Nom :</b> ${safe(val(m,"nom")||"—")}</div>
- <div><b>Prénom :</b> ${safe(val(m,"prenom","prénom")||"—")}</div>
- <div><b>Code :</b> ${safe(val(m,"code")||"—")}</div>
- <div><b>N° carte :</b> ${safe(val(m,"numero_carte")||"—")}</div>
- <div><b>Assemblée :</b> ${safe(val(m,"assemblee")||"MEDFAH")}</div>
- <div><b>Téléphone :</b> ${safe(val(m,"telephone")||"—")}</div>
- <div><b>Adhésion :</b> ${safe(val(m,"date_adhesion")||"—")}</div>
- </div>
- <div class="qr-box"><div class="qr" id="qr-${safe(m.id)}"></div>QR VÉRIFICATION<div class="valid">✓ CARTE VALIDE</div><div class="card-number">${safe(val(m,"numero_carte","code"))}</div></div>
- </div>
- <footer class="bottom"><strong>Sainte-Cène :</strong> 1er samedi du mois 16h–19h · <strong>Services :</strong> Dimanche 7h–10h · Jeunesse 15h–17h · Étude biblique 17h–19h · Mardi prière 17h–19h<br>Maïs-gâté entre 13 et 15 #73 · Tél. 37258549 · « Avançons ensemble dans la foi. »</footer>
- </article>`;
-}
-async function ensureToken(m){
- let t=val(m,"qr_token");if(t)return t;
- t=token();
- const {data,error}=await db.from("membre_infos").update({qr_token:t,qr_code:t}).eq("id",m.id).select("*").single();
- if(error)throw error;Object.assign(m,data);return t;
-}
-async function render(list){
- if(!list.length){say("Aucun membre à afficher.");return}
- $("cardsGrid").innerHTML=list.map(cardHTML).join("");
- for(const m of list){
-  const t=await ensureToken(m);
-  const target=new URL("verify.html",location.href);target.searchParams.set("qr_token",t);
-  const node=$("qr-"+m.id);if(node){node.innerHTML="";new QRCode(node,{text:target.href,width:180,height:180,correctLevel:QRCode.CorrectLevel.H})}
+
+function val(o,...keys){
+ for(const k of keys){
+  const x=o?.[k];
+  if(x!==null&&x!==undefined&&String(x).trim()!==""){
+   return String(x);
+  }
  }
- say(list.length+" carte(s) prête(s). Vérifiez les photos avant impression.");
+ return "";
 }
+
+function token(){
+ return crypto?.randomUUID
+  ?crypto.randomUUID()
+  :"MEDFAH-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2);
+}
+
+function safe(s){
+ return String(s??"").replace(/[&<>"']/g,c=>({
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#39;"
+ }[c]));
+}
+
+/* ================================
+   INITIALISATION ET AUTORISATION
+================================ */
+
+async function init(){
+
+ try{
+
+  if(
+   !window.SUPABASE_URL||
+   !window.SUPABASE_ANON_KEY||
+   !window.supabase
+  ){
+   throw Error("Configuration Supabase introuvable.");
+  }
+
+  db=window.supabase.createClient(
+   window.SUPABASE_URL,
+   window.SUPABASE_ANON_KEY
+  );
+
+  const {data:s,error:se}=await db.auth.getSession();
+
+  if(se)throw se;
+
+  const uid=s?.session?.user?.id;
+
+  if(!uid){
+   throw Error("Connectez-vous d'abord dans Administration.");
+  }
+
+  const {data:r,error:re}=await db
+   .from("medfah_user_roles")
+   .select("role")
+   .eq("user_id",uid)
+   .maybeSingle();
+
+  if(re)throw re;
+
+  if(
+   !r||
+   !["admin_principal","admin_secondaire"].includes(r.role)
+  ){
+   throw Error("Accès réservé aux administrateurs autorisés.");
+  }
+
+  $("controls").classList.remove("hidden");
+
+  say("Accès autorisé. Chargement des membres...");
+
+  const {data,error}=await db
+   .from("membre_infos")
+   .select("*")
+   .order("nom",{ascending:true});
+
+  if(error)throw error;
+
+  members=data||[];
+  visibleMembers=members;
+
+  fillSelect(members);
+
+  say(members.length+" membre(s) chargé(s).");
+
+ }catch(e){
+
+  console.error(e);
+
+  say("Erreur : "+(e.message||e));
+
+ }
+
+}
+
+/* ================================
+   LISTE ET RECHERCHE DES MEMBRES
+================================ */
+
+function fillSelect(list){
+
+ const s=$("memberSelect");
+
+ s.innerHTML='<option value="">Choisir un membre</option>';
+
+ list.forEach(m=>{
+
+  const o=document.createElement("option");
+
+  o.value=m.id;
+
+  o.textContent=
+   val(m,"nom")+" "+
+   val(m,"prenom","prénom")+
+   " — "+
+   val(m,"code");
+
+  s.appendChild(o);
+
+ });
+
+}
+
+$("search").addEventListener("input",e=>{
+
+ const q=e.target.value.toLocaleLowerCase("fr");
+
+ visibleMembers=members.filter(m=>
+  (
+   val(m,"nom")+" "+
+   val(m,"prenom","prénom")+" "+
+   val(m,"code")
+  ).toLocaleLowerCase("fr").includes(q)
+ );
+
+ fillSelect(visibleMembers);
+
+});
+
+/* ================================
+   CONSTRUCTION DE LA CARTE
+================================ */
+
+function cardHTML(m){
+
+ const photo=val(m,"photo");
+
+ const churchPhoto="20261031_134144.jpg";
+
+ return `
+ <article class="member-card">
+
+  <header class="top">
+
+   <img
+    class="logo"
+    src="logo-medfah.jpg"
+    alt="Logo MEDFAH"
+    onerror="this.style.visibility='hidden'"
+   >
+
+   <div class="church-title">
+    MISSION ÉGLISE DE DIEU DE LA FOI APOSTOLIQUE D’HAÏTI
+    <small>
+     MEDFAH — « Une Église, une famille, une même vision. »
+    </small>
+   </div>
+
+   <img
+    class="church-photo"
+    src="${churchPhoto}"
+    alt="Église MEDFAH"
+    onerror="this.style.display='none'"
+   >
+
+   <div class="pastor">
+    Pasteur : Beaulieu Mislet
+   </div>
+
+  </header>
+
+  <div class="card-title">
+   CARTE DE PERSÉVÉRANCE — MEMBRE OFFICIEL
+  </div>
+
+  <div class="body">
+
+   <div class="photo-wrap">
+
+    <img
+     class="member-photo"
+     src="${safe(photo||"")}"
+     alt="Photo du membre"
+     onerror="this.onerror=null;this.src='photo-par-defaut.png'"
+    >
+
+    <div class="photo-caption">
+     Servir Dieu avec fidélité
+    </div>
+
+   </div>
+
+   <div class="details">
+
+    <div>
+     <b>Nom :</b>
+     ${safe(val(m,"nom")||"—")}
+    </div>
+
+    <div>
+     <b>Prénom :</b>
+     ${safe(val(m,"prenom","prénom")||"—")}
+    </div>
+
+    <div>
+     <b>Code :</b>
+     ${safe(val(m,"code")||"—")}
+    </div>
+
+    <div>
+     <b>N° carte :</b>
+     ${safe(val(m,"numero_carte")||"—")}
+    </div>
+
+    <div>
+     <b>Assemblée :</b>
+     ${safe(val(m,"assemblee")||"MEDFAH")}
+    </div>
+
+    <div>
+     <b>Téléphone :</b>
+     ${safe(val(m,"telephone")||"—")}
+    </div>
+
+    <div>
+     <b>Adhésion :</b>
+     ${safe(val(m,"date_adhesion")||"—")}
+    </div>
+
+   </div>
+
+   <div class="qr-box">
+
+    <div class="qr" id="qr-${safe(m.id)}"></div>
+
+    QR VÉRIFICATION
+
+    <div class="valid">
+     ✓ CARTE VALIDE
+    </div>
+
+    <div class="card-number">
+     ${safe(val(m,"numero_carte","code"))}
+    </div>
+
+   </div>
+
+  </div>
+
+  <footer class="bottom">
+
+   <span class="schedule-title">
+    HORAIRES DES SERVICES MEDFAH
+   </span>
+
+   <div>
+    <strong>DIMANCHE :</strong>
+    Grand culte 7h–10h · Jeunesse 15h–17h · Étude biblique 17h–19h
+   </div>
+
+   <div>
+    <strong>MARDI :</strong>
+    Service de prière 17h–19h
+   </div>
+
+   <div class="communion">
+    🍷 SAINTE-CÈNE : 1er samedi du mois · 16h–19h
+   </div>
+
+   <span class="address">
+    Maïs-gâté entre 13 et 15 #73 · Tél. 37258549
+    · « Avançons ensemble dans la foi. »
+   </span>
+
+  </footer>
+
+ </article>
+ `;
+
+}
+
+/* ================================
+   CRÉATION DU QR CODE
+================================ */
+
+async function ensureToken(m){
+
+ let t=val(m,"qr_token");
+
+ if(t)return t;
+
+ t=token();
+
+ const {data,error}=await db
+  .from("membre_infos")
+  .update({
+   qr_token:t,
+   qr_code:t
+  })
+  .eq("id",m.id)
+  .select("*")
+  .single();
+
+ if(error)throw error;
+
+ Object.assign(m,data);
+
+ return t;
+
+}
+
+/* ================================
+   AFFICHAGE DES CARTES
+================================ */
+
+async function render(list){
+
+ if(!list.length){
+  say("Aucun membre à afficher.");
+  return;
+ }
+
+ $("cardsGrid").innerHTML=list.map(cardHTML).join("");
+
+ for(const m of list){
+
+  const t=await ensureToken(m);
+
+  const target=new URL("verify.html",location.href);
+
+  target.searchParams.set("qr_token",t);
+
+  const node=$("qr-"+m.id);
+
+  if(node){
+
+   node.innerHTML="";
+
+   new QRCode(node,{
+    text:target.href,
+    width:180,
+    height:180,
+    correctLevel:QRCode.CorrectLevel.H
+   });
+
+  }
+
+ }
+
+ say(
+  list.length+
+  " carte(s) prête(s). Vérifiez les photos avant impression."
+ );
+
+}
+
+/* ================================
+   SÉLECTION D'UN MEMBRE
+================================ */
+
 async function selected(){
- const id=$("memberSelect").value;if(!id)throw Error("Choisissez d'abord un membre.");
- const m=members.find(x=>String(x.id)===String(id));if(!m)throw Error("Membre introuvable.");return m;
+
+ const id=$("memberSelect").value;
+
+ if(!id){
+  throw Error("Choisissez d'abord un membre.");
+ }
+
+ const m=members.find(x=>String(x.id)===String(id));
+
+ if(!m){
+  throw Error("Membre introuvable.");
+ }
+
+ return m;
+
 }
-$("showOne").onclick=async()=>{try{await render([await selected()])}catch(e){say(e.message)}};
-$("showAll").onclick=async()=>{try{await render(members)}catch(e){say("Erreur : "+e.message)}};
-$("printOne").onclick=async()=>{try{await render([await selected()]);setTimeout(()=>window.print(),700)}catch(e){say("Erreur : "+e.message)}};
-$("printAll").onclick=async()=>{try{if(!members.length)throw Error("Aucun membre chargé.");await render(members);setTimeout(()=>window.print(),Math.max(1000,members.length*100))}catch(e){say("Erreur : "+e.message)}};
+
+/* ================================
+   BOUTONS D'ACTION
+================================ */
+
+$("showOne").onclick=async()=>{
+
+ try{
+  await render([await selected()]);
+ }catch(e){
+  say(e.message);
+ }
+
+};
+
+$("showAll").onclick=async()=>{
+
+ try{
+  await render(members);
+ }catch(e){
+  say("Erreur : "+e.message);
+ }
+
+};
+
+$("printOne").onclick=async()=>{
+
+ try{
+
+  await render([await selected()]);
+
+  setTimeout(()=>{
+   window.print();
+  },700);
+
+ }catch(e){
+
+  say("Erreur : "+e.message);
+
+ }
+
+};
+
+$("printAll").onclick=async()=>{
+
+ try{
+
+  if(!members.length){
+   throw Error("Aucun membre chargé.");
+  }
+
+  await render(members);
+
+  setTimeout(()=>{
+   window.print();
+  },Math.max(1000,members.length*100));
+
+ }catch(e){
+
+  say("Erreur : "+e.message);
+
+ }
+
+};
+
+/* DÉMARRAGE */
+
 init();
+
 </script>
+
 </body>
 </html>
