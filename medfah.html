@@ -1403,7 +1403,12 @@ if (cle === "programmation") {
 
                     <label for="arcDescription">Description du document</label>
                     <textarea id="arcDescription" rows="4"
-                        placeholder="Résumé ou informations importantes"></textarea>
+    placeholder="Résumé ou informations importantes"></textarea>
+
+<label for="arcContenu">Contenu complet de l'archive</label>
+<textarea id="arcContenu" rows="18"
+    placeholder="Écrivez ici le contenu complet du document, du rapport ou de l'histoire de l'Église..."
+    style="width:100%;min-height:320px;padding:14px;line-height:1.6;"></textarea>
 
                         <div class="form-group">
     <label for="arcFichiers">Ajouter des photos ou vidéos</label>
@@ -1486,7 +1491,13 @@ if (cle === "documents") {
 
             <label for="docDescription">Description et observations</label>
             <textarea id="docDescription" rows="4"
-                placeholder="Informations complémentaires sur le document"></textarea>
+    placeholder="Informations complémentaires sur le document"></textarea>
+
+<label for="docContenu">Contenu complet du document</label>
+<textarea id="docContenu" rows="18"
+    placeholder="Écrivez ici le contenu complet du document..."
+    style="width:100%;min-height:320px;padding:14px;line-height:1.6;"></textarea>
+                
 
             <div class="form-group">
     <label for="docFichierPDF">Télécharger le document PDF</label>
@@ -2233,13 +2244,15 @@ async function chargerArchivesMEDFAH() {
                 });
 
                 const donnees = {
-                    titre: titre,
-                    categorie: document.getElementById("arcCategorie").value,
-                    date_activite: document.getElementById("arcDate").value || null,
-                    responsable: document.getElementById("arcResponsable").value.trim(),
-                    statut: document.getElementById("arcStatut").value,
-                    description: document.getElementById("arcDescription").value.trim()
-                };
+    titre: titre,
+    gategorie: document.getElementById("arcCategorie").value,
+    date_document: document.getElementById("arcDate").value || null,
+    responsable: document.getElementById("arcResponsable").value.trim() || null,
+    reference_document: document.getElementById("arcReference").value.trim() || null,
+    statut: document.getElementById("arcStatut").value,
+    description: document.getElementById("arcDescription").value.trim() || null,
+    contenu: document.getElementById("arcContenu").value.trim() || null
+};
 
                 // 1. Enregistrer d'abord l'archive
                 const { data: archive, error: erreurArchive } = await supabaseClient
@@ -2361,23 +2374,41 @@ async function afficherArchivesMEDFAH() {
             }
 
             cartes.push(`
-                <article style="border:1px solid #d8dde6;border-radius:10px;padding:14px;margin:12px 0">
-                    <h3>${escapeHTML(archive.titre || "")}</h3>
-                    <p><strong>Catégorie :</strong>
-                        ${escapeHTML(archive.categorie || "")}</p>
-                    <p><strong>Date :</strong>
-                        ${escapeHTML(archive.date_activite || "Non précisée")}</p>
-                    <p><strong>Responsable :</strong>
-                        ${escapeHTML(archive.responsable || "Non précisé")}</p>
-                    <p><strong>Statut :</strong>
-                        ${escapeHTML(archive.statut || "")}</p>
-                    <p><strong>Description :</strong>
-                        ${escapeHTML(archive.description || "Aucune description")}</p>
-                    ${contenuFichiers
-                        ? `<div><strong>Photos et vidéos :</strong>${contenuFichiers}</div>`
-                        : `<p>Aucun fichier joint.</p>`}
-                </article>
-            `);
+    <article style="border:1px solid #d8dde6;border-radius:12px;padding:18px;margin:14px 0;background:#fff;">
+        <h3>${escapeHTML(archive.titre || "")}</h3>
+
+        <p><strong>Catégorie :</strong>
+            ${escapeHTML(archive.gategorie || "")}</p>
+
+        <p><strong>Date :</strong>
+            ${escapeHTML(archive.date_document || "Non précisée")}</p>
+
+        <p><strong>Responsable :</strong>
+            ${escapeHTML(archive.responsable || "Non précisé")}</p>
+
+        <p><strong>Référence :</strong>
+            ${escapeHTML(archive.reference_document || "Non précisée")}</p>
+
+        <p><strong>Statut :</strong>
+            ${escapeHTML(archive.statut || "")}</p>
+
+        <p><strong>Description :</strong>
+            ${escapeHTML(archive.description || "Aucune description")}</p>
+
+        ${archive.contenu ? `
+            <details style="margin:14px 0;">
+                <summary style="cursor:pointer;font-weight:bold;color:#174a7e;">
+                    Lire le contenu complet
+                </summary>
+                <div style="white-space:pre-wrap;line-height:1.7;padding:14px;background:#f5f7fa;border-radius:8px;margin-top:10px;">${escapeHTML(archive.contenu)}</div>
+            </details>
+        ` : ""}
+
+        ${contenuFichiers
+            ? `<div><strong>Photos et vidéos :</strong>${contenuFichiers}</div>`
+            : `<p>Aucun fichier joint.</p>`}
+    </article>
+`);
         }
 
         liste.innerHTML = cartes.join("");
@@ -2451,25 +2482,27 @@ async function chargerDocumentsMEDFAH() {
                     fichierNom = resultat.nom;
                 }
 
-                const donnees = {
-                    titre: document.getElementById("docTitre").value.trim(),
-                    categorie: document.getElementById("docCategorie").value,
-                    sous_categorie:
-                        document.getElementById("docSousCategorie").value.trim() || null,
-                    reference_document:
-                        document.getElementById("docReference").value.trim() || null,
-                    date_document: dateDocument,
-                    date_expiration: dateExpiration,
-                    organisme_emetteur:
-                        document.getElementById("docOrganisme").value.trim() || null,
-                    responsable:
-                        document.getElementById("docResponsable").value.trim() || null,
-                    statut: document.getElementById("docStatut").value,
-                    description:
-                        document.getElementById("docDescription").value.trim() || null,
-                    fichier_path: fichierPath,
-                    fichier_nom: fichierNom
-                };
+    const donnees = {
+    titre: document.getElementById("docTitre").value.trim(),
+    gategorie: document.getElementById("docCategorie").value,
+    sous_categorie:
+        document.getElementById("docSousCategorie").value.trim() || null,
+    reference_document:
+        document.getElementById("docReference").value.trim() || null,
+    date_document: dateDocument,
+    date_expiration: dateExpiration,
+    organisme_emetteur:
+        document.getElementById("docOrganisme").value.trim() || null,
+    responsable:
+        document.getElementById("docResponsable").value.trim() || null,
+    statut: document.getElementById("docStatut").value,
+    description:
+        document.getElementById("docDescription").value.trim() || null,
+    contenu:
+        document.getElementById("docContenu").value.trim() || null,
+    fichier_path: fichierPath,
+    fichier_nom: fichierNom
+};            
 
                 const { error } = await supabaseClient
                     .from("documents_eglise")
@@ -2555,45 +2588,53 @@ async function afficherDocumentsMEDFAH() {
             }
 
             return `
-                <article style="border:1px solid #d8dde6;
-                    border-radius:10px;padding:14px;margin:12px 0;">
+    <article style="border:1px solid #d8dde6;border-radius:12px;padding:18px;margin:14px 0;background:#fff;">
 
-                    <h3>${escapeHTML(doc.titre || "")}</h3>
+        <h3>${escapeHTML(doc.titre || "")}</h3>
 
-                    <p><strong>Catégorie :</strong>
-                        ${escapeHTML(doc.categorie || "")}</p>
+        <p><strong>Catégorie :</strong>
+            ${escapeHTML(doc.gategorie || "")}</p>
 
-                    <p><strong>Sous-catégorie :</strong>
-                        ${escapeHTML(doc.sous_categorie || "Non précisée")}</p>
+        <p><strong>Sous-catégorie :</strong>
+            ${escapeHTML(doc.sous_categorie || "Non précisée")}</p>
 
-                    <p><strong>Référence :</strong>
-                        ${escapeHTML(doc.reference_document || "Non précisée")}</p>
+        <p><strong>Référence :</strong>
+            ${escapeHTML(doc.reference_document || "Non précisée")}</p>
 
-                    <p><strong>Date du document :</strong>
-                        ${escapeHTML(doc.date_document || "Non précisée")}</p>
+        <p><strong>Date du document :</strong>
+            ${escapeHTML(doc.date_document || "Non précisée")}</p>
 
-                    <p><strong>Date d’expiration :</strong>
-                        ${escapeHTML(doc.date_expiration || "Non précisée")}</p>
+        <p><strong>Date d’expiration :</strong>
+            ${escapeHTML(doc.date_expiration || "Non précisée")}</p>
 
-                    <p><strong>Organisme émetteur :</strong>
-                        ${escapeHTML(doc.organisme_emetteur || "Non précisé")}</p>
+        <p><strong>Organisme émetteur :</strong>
+            ${escapeHTML(doc.organisme_emetteur || "Non précisé")}</p>
 
-                    <p><strong>Responsable :</strong>
-                        ${escapeHTML(doc.responsable || "Non précisé")}</p>
+        <p><strong>Responsable :</strong>
+            ${escapeHTML(doc.responsable || "Non précisé")}</p>
 
-                    <p><strong>Statut :</strong>
-                        ${escapeHTML(doc.statut || "")}</p>
+        <p><strong>Statut :</strong>
+            ${escapeHTML(doc.statut || "")}</p>
 
-                    <p><strong>Description :</strong>
-                        ${escapeHTML(doc.description || "Aucune")}</p>
+        <p><strong>Description :</strong>
+            ${escapeHTML(doc.description || "Aucune")}</p>
 
-                    <p><strong>Nom du fichier :</strong>
-                        ${escapeHTML(doc.fichier_nom || "Aucun fichier")}</p>
+        ${doc.contenu ? `
+            <details style="margin:14px 0;">
+                <summary style="cursor:pointer;font-weight:bold;color:#174a7e;">
+                    Lire le contenu complet
+                </summary>
+                <div style="white-space:pre-wrap;line-height:1.7;padding:14px;background:#f5f7fa;border-radius:8px;margin-top:10px;">${escapeHTML(doc.contenu)}</div>
+            </details>
+        ` : ""}
 
-                    ${lienFichier}
+        <p><strong>Nom du fichier :</strong>
+            ${escapeHTML(doc.fichier_nom || "Aucun fichier")}</p>
 
-                </article>
-            `;
+        ${lienFichier}
+
+    </article>
+`;
         }));
 
         liste.innerHTML = documentsHTML.join("");
