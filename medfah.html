@@ -3153,13 +3153,46 @@ function searchMembers(){
 
 
 /* ==========================================
-   MODIFIER UN MEMBRE — MEDFAH
-   Accès : admin_principal et admin_secondaire
+   MEDFAH — GESTION DES PHOTOS DES MEMBRES
 ========================================== */
+
+const BUCKET_PHOTOS_MEDFAH = "medfah-photos";
+const LIMITE_PHOTO_MEDFAH = 5 * 1024 * 1024;
 
 let membreEnCoursModificationId = null;
 
-function modifierMembre(index) {
+function estUrlPhotoMEDFAH(valeur) {
+    return /^https?:\/\//i.test(String(valeur || ""));
+}
+
+async function obtenirUrlPhotoMEDFAH(photo) {
+    if (!photo) return "";
+
+    // Anciennes photos enregistrées directement comme URL
+    if (estUrlPhotoMEDFAH(photo)) return photo;
+
+    const { data, error } = await supabaseClient.storage
+        .from(BUCKET_PHOTOS_MEDFAH)
+        .createSignedUrl(photo, 3600);
+
+    if (error) throw error;
+
+    return data.signedUrl;
+}
+
+function nomPhotoSecuriseMEDFAH(nom) {
+    return String(nom || "photo")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
+
+/* ==========================================
+   MODIFIER UN MEMBRE
+========================================== */
+
+async function modifierMembre(index) {
     const membre = allMembers[index];
 
     if (!membre || !membre.id) {
@@ -3172,16 +3205,17 @@ function modifierMembre(index) {
         return;
     }
 
+    const autorise = await verifierRoleAdminMEDFAH();
+
+    if (!autorise) {
+        alert("Votre session administrateur n'est plus valide.");
+        return;
+    }
+
     const champsProteges = [
-        "id",
-        "code",
-        "numero_carte",
-        "qr_code",
-        "qr_token",
-        "cree_a",
-        "created_at",
-        "mis_a_jour_a",
-        "updated_at"
+        "id", "code", "numero_carte", "qr_code", "qr_token",
+        "cree_a", "created_at", "mis_a_jour_a", "updated_at",
+        "photo"
     ];
 
     const champs = Object.keys(membre).filter(
@@ -3236,6 +3270,14 @@ function modifierMembre(index) {
             </div>`;
     }).join("");
 
+    let photoActuelle = "";
+
+    try {
+        photoActuelle = await obtenirUrlPhotoMEDFAH(membre.photo);
+    } catch (e) {
+        console.warn("Photo actuelle indisponible :", e);
+    }
+
     modal.innerHTML = `
         <div style="max-width:850px;margin:20px auto;background:white;
                     color:#222;padding:20px;border-radius:14px;">
@@ -3246,6 +3288,39 @@ function modifierMembre(index) {
                 Modifiez les informations nécessaires puis enregistrez.
                 Les codes et identifiants de la carte sont protégés.
             </p>
+
+            <div style="margin:18px 0;padding:15px;background:#f1f5f9;
+                        border-radius:12px;">
+
+                <h3 style="margin-top:0;">Photo du membre</h3>
+
+                <img id="apercuPhotoMembreMEDFAH"
+                     src="${escapeHTML(photoActuelle || "photo-par-defaut.png")}"
+                     alt="Photo du membre"
+                     style="width:130px;height:150px;object-fit:cover;
+                            border-radius:10px;border:2px solid #ddd;
+                            display:block;margin-bottom:12px;">
+
+                <input
+                    id="photoMembreMEDFAH"
+                    type="file"
+                    accept="image/*"
+                    style="width:100%;padding:10px;background:white;">
+
+                <p style="font-size:13px;color:#555;">
+                    Formats image acceptés. Taille maximale : 5 Mo.
+                    Choisissez une nouvelle photo pour remplacer l'ancienne.
+                </p>
+
+                ${membre.photo ? `
+                    <button type="button"
+                            class="view-btn"
+                            style="background:#b42318;"
+                            onclick="supprimerPhotoMembreMEDFAH()">
+                        Supprimer la photo actuelle
+                    </button>
+                ` : ""}
+            </div>
 
             <form id="formModifierMembreMEDFAH"
                   onsubmit="enregistrerModificationMembre(event)">
@@ -3274,8 +3349,35 @@ function modifierMembre(index) {
 
     document.body.appendChild(modal);
     membreEnCoursModificationId = membre.id;
+
+    const inputPhoto = document.getElementById("photoMembreMEDFAH");
+    const apercu = document.getElementById("apercuPhotoMembreMEDFAH");
+
+    inputPhoto.addEventListener("change", function () {
+        const fichier = this.files && this.files[0];
+
+        if (!fichier) return;
+
+        if (!fichier.type.startsWith("image/")) {
+            alert("Veuillez choisir une image.");
+            this.value = "";
+            return;
+        }
+
+        if (fichier.size > LIMITE_PHOTO_MEDFAH) {
+            alert("La photo ne doit pas dépasser 5 Mo.");
+            this.value = "";
+            return;
+        }
+
+        apercu.src = URL.createObjectURL(fichier);
+    });
 }
 
+
+/* ==========================================
+   FERMER LE FORMULAIRE
+========================================== */
 
 function fermerModificationMembre() {
     const modal = document.getElementById("modifierMembreModal");
@@ -3285,6 +3387,10 @@ function fermerModificationMembre() {
     membreEnCoursModificationId = null;
 }
 
+
+/* ==========================================
+   ENREGISTRER LES MODIFICATIONS ET LA PHOTO
+========================================== */
 
 async function enregistrerModificationMembre(event) {
     event.preventDefault();
@@ -3306,15 +3412,8 @@ async function enregistrerModificationMembre(event) {
     }
 
     const champsProteges = new Set([
-        "id",
-        "code",
-        "numero_carte",
-        "qr_code",
-        "qr_token",
-        "cree_a",
-        "created_at",
-        "mis_a_jour_a",
-        "updated_at"
+        "id", "code", "numero_carte", "qr_code", "qr_token",
+        "cree_a", "created_at", "mis_a_jour_a", "updated_at", "photo"
     ]);
 
     const payload = {};
@@ -3326,9 +3425,7 @@ async function enregistrerModificationMembre(event) {
 
         let valeur = input.value.trim();
 
-        if (valeur === "") {
-            valeur = null;
-        }
+        if (valeur === "") valeur = null;
 
         if (colonne === "nombre_enfants" && valeur !== null) {
             valeur = Number(valeur);
@@ -3342,32 +3439,171 @@ async function enregistrerModificationMembre(event) {
     });
 
     const bouton = formulaire.querySelector('button[type="submit"]');
+    const inputPhoto = document.getElementById("photoMembreMEDFAH");
+    const fichier = inputPhoto?.files?.[0];
 
     bouton.disabled = true;
     message.textContent = "Enregistrement en cours...";
 
+    let nouveauCheminPhoto = null;
+    let ancienCheminPhoto = null;
+
     try {
-        const { error } = await supabaseClient
+        const membreActuel = allMembers.find(
+            m => String(m.id) === String(membreEnCoursModificationId)
+        );
+
+        ancienCheminPhoto = membreActuel?.photo || null;
+
+        // Téléverser la nouvelle photo si une image a été choisie
+        if (fichier) {
+            if (!fichier.type.startsWith("image/")) {
+                throw new Error("Le fichier choisi n'est pas une image.");
+            }
+
+            if (fichier.size > LIMITE_PHOTO_MEDFAH) {
+                throw new Error("La photo dépasse la limite de 5 Mo.");
+            }
+
+            const extension = nomPhotoSecuriseMEDFAH(fichier.name)
+                .split(".").pop();
+
+            const chemin =
+                "membres/" + membreEnCoursModificationId + "/" +
+                Date.now() + "_" + Math.random().toString(36).slice(2) +
+                "." + extension;
+
+            const { data, error } = await supabaseClient.storage
+                .from(BUCKET_PHOTOS_MEDFAH)
+                .upload(chemin, fichier, {
+                    upsert: false,
+                    contentType: fichier.type
+                });
+
+            if (error) throw error;
+
+            nouveauCheminPhoto = data.path;
+            payload.photo = nouveauCheminPhoto;
+        }
+
+        const { error: erreurUpdate } = await supabaseClient
             .from("membre_infos")
             .update(payload)
             .eq("id", membreEnCoursModificationId);
 
-        if (error) throw error;
+        if (erreurUpdate) throw erreurUpdate;
 
-        message.textContent = "Modifications enregistrées avec succès.";
+        // Après confirmation de la mise à jour, retirer l'ancienne photo
+        if (
+            nouveauCheminPhoto &&
+            ancienCheminPhoto &&
+            !estUrlPhotoMEDFAH(ancienCheminPhoto)
+        ) {
+            const { error: erreurSuppression } = await supabaseClient.storage
+                .from(BUCKET_PHOTOS_MEDFAH)
+                .remove([ancienCheminPhoto]);
+
+            if (erreurSuppression) {
+                console.warn("Ancienne photo non supprimée :", erreurSuppression);
+            }
+        }
+
+        message.textContent = "Dossier et photo enregistrés avec succès.";
 
         await loadMembers();
 
-        setTimeout(fermerModificationMembre, 900);
+        setTimeout(fermerModificationMembre, 1200);
 
     } catch (error) {
         console.error("Erreur modification membre :", error);
 
+        // Si l'enregistrement du dossier échoue, retirer la nouvelle photo
+        if (nouveauCheminPhoto) {
+            await supabaseClient.storage
+                .from(BUCKET_PHOTOS_MEDFAH)
+                .remove([nouveauCheminPhoto]);
+        }
+
         message.textContent =
-            "Échec de la modification : " + error.message;
+            "Échec de l'enregistrement : " + error.message;
 
     } finally {
         bouton.disabled = false;
+    }
+}
+
+
+/* ==========================================
+   SUPPRIMER UNIQUEMENT LA PHOTO
+========================================== */
+
+async function supprimerPhotoMembreMEDFAH() {
+    if (!membreEnCoursModificationId) return;
+
+    const confirmer = confirm(
+        "Voulez-vous vraiment supprimer la photo de ce membre ? " +
+        "Son dossier et ses autres informations resteront intacts."
+    );
+
+    if (!confirmer) return;
+
+    const autorise = await verifierRoleAdminMEDFAH();
+
+    if (!autorise ||
+        !["admin_principal", "admin_secondaire"].includes(roleAdminMEDFAH)) {
+        alert("Accès refusé.");
+        return;
+    }
+
+    const message = document.getElementById("messageModifierMembre");
+
+    try {
+        const membre = allMembers.find(
+            m => String(m.id) === String(membreEnCoursModificationId)
+        );
+
+        const anciennePhoto = membre?.photo;
+
+        if (!anciennePhoto) {
+            alert("Ce membre n'a pas de photo enregistrée.");
+            return;
+        }
+
+        // D'abord vider la référence dans la base de données
+        const { error: erreurDB } = await supabaseClient
+            .from("membre_infos")
+            .update({ photo: null })
+            .eq("id", membreEnCoursModificationId);
+
+        if (erreurDB) throw erreurDB;
+
+        // Puis supprimer le fichier du bucket privé
+        if (!estUrlPhotoMEDFAH(anciennePhoto)) {
+            const { error: erreurStorage } = await supabaseClient.storage
+                .from(BUCKET_PHOTOS_MEDFAH)
+                .remove([anciennePhoto]);
+
+            if (erreurStorage) {
+                console.warn("Photo retirée du dossier, mais fichier non supprimé :",
+                    erreurStorage);
+            }
+        }
+
+        message.textContent = "Photo supprimée du dossier du membre.";
+
+        await loadMembers();
+
+        const apercu = document.getElementById("apercuPhotoMembreMEDFAH");
+        if (apercu) apercu.src = "photo-par-defaut.png";
+
+        const bouton = document.querySelector(
+            '#modifierMembreModal button[onclick="supprimerPhotoMembreMEDFAH()"]'
+        );
+        if (bouton) bouton.remove();
+
+    } catch (error) {
+        console.error("Erreur suppression photo :", error);
+        message.textContent = "Impossible de supprimer la photo : " + error.message;
     }
 }
 
