@@ -4160,7 +4160,29 @@ async function enregistrerNouveauMembreMEDFAH(event) {
     }
 }
 
+function previsualiserPhotoNouveauMembreMEDFAH(event) {
+    const fichier = event.target.files[0];
 
+    const apercu = document.getElementById(
+        "apercuPhotoNouveauMembreMEDFAH"
+    );
+
+    if (!fichier) return;
+
+    if (!fichier.type.startsWith("image/")) {
+        alert("Veuillez choisir une image.");
+        event.target.value = "";
+        return;
+    }
+
+    if (fichier.size > 5 * 1024 * 1024) {
+        alert("La photo ne doit pas dépasser 5 Mo.");
+        event.target.value = "";
+        return;
+    }
+
+    apercu.src = URL.createObjectURL(fichier);
+}
 /* OUVRIR LE FORMULAIRE — ACCÈS ADMINISTRATEUR UNIQUEMENT */
     
 async function ouvrirFormulaireMembre() {
