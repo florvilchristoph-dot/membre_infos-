@@ -749,10 +749,27 @@ td{
            placeholder="Code ou contenu QR">
 </div>
 
-<div class="form-group">
-    <label for="photo">Photo du membre</label>
-    <input type="text" id="photo" name="photo"
-           placeholder="Lien de la photo">
+<div class="form-group" style="margin:15px 0;">
+    <label for="photoNouveauMembreMEDFAH">
+        Photo du membre — Foto manm nan
+    </label>
+
+    <img id="apercuPhotoNouveauMembreMEDFAH"
+         src="photo-par-defaut.png"
+         alt="Aperçu de la photo"
+         style="display:block;width:130px;height:150px;
+                object-fit:cover;border-radius:10px;
+                border:2px solid #ddd;margin:10px 0;">
+
+    <input
+        type="file"
+        id="photoNouveauMembreMEDFAH"
+        name="photoFichier"
+        accept="image/*"
+        onchange="previsualiserPhotoNouveauMembreMEDFAH(event)"
+        style="width:100%;padding:10px;">
+
+    <small>Chwazi yon foto nan telefòn ou. Maksimòm 5 Mo.</small>
 </div>
 
 
@@ -3950,11 +3967,26 @@ async function enregistrerNouveauMembreMEDFAH(event) {
         return;
     }
 
+    const fichierPhoto = document.getElementById(
+        "photoNouveauMembreMEDFAH"
+    )?.files?.[0] || null;
+
+    if (fichierPhoto) {
+        if (!fichierPhoto.type.startsWith("image/")) {
+            message.textContent = "Veuillez choisir une image valide.";
+            return;
+        }
+
+        if (fichierPhoto.size > 5 * 1024 * 1024) {
+            message.textContent = "La photo ne doit pas dépasser 5 Mo.";
+            return;
+        }
+    }
+
     bouton.disabled = true;
     message.textContent = "Enregistrement en cours...";
 
     try {
-        // Vérifier la session
         const { data: sessionData, error: sessionError } =
             await supabaseClient.auth.getSession();
 
@@ -3966,7 +3998,6 @@ async function enregistrerNouveauMembreMEDFAH(event) {
             throw new Error("Veuillez vous reconnecter.");
         }
 
-        // Vérifier le rôle administrateur
         const { data: roleData, error: roleError } =
             await supabaseClient
                 .from("medfah_user_roles")
@@ -3989,12 +4020,10 @@ async function enregistrerNouveauMembreMEDFAH(event) {
             return String(fd.get(nom) || "").trim();
         }
 
-        // Identifiants automatiques
         const codeMembre = genererCodeUniqueMEDFAH("MED");
         const numeroCarte = genererCodeUniqueMEDFAH("CARTE");
         const qrToken = genererQRTokenMEDFAH();
 
-        // Données correspondant aux colonnes confirmées
         const membre = {
             nom: champ("nom"),
             prenom: champ("prenom"),
@@ -4007,7 +4036,6 @@ async function enregistrerNouveauMembreMEDFAH(event) {
         const correspondances = {
             sexe: "sexe",
             nombre_enfants: "nombre_enfants",
-            photo: "photo",
             date_naissance: "date_naissance",
             lieu_naissance: "lieu_naissance",
             nationaliste: "nationalité",
@@ -4042,28 +4070,78 @@ async function enregistrerNouveauMembreMEDFAH(event) {
             }
         });
 
-        // Nombre d'enfants doit être numérique
         if (membre.nombre_enfants !== undefined) {
             membre.nombre_enfants = Number(membre.nombre_enfants);
         }
 
-        // Enregistrement Supabase
-        const { error: insertionError } = await supabaseClient
-            .from("membre_infos")
-            .insert([membre]);
+        // Enregistrer d'abord le membre pour obtenir son ID
+        const { data: nouveauMembre, error: insertionError } =
+            await supabaseClient
+                .from("membre_infos")
+                .insert([membre])
+                .select("id")
+                .single();
 
         if (insertionError) throw insertionError;
 
+        // Ajouter la photo seulement si l'administrateur en a choisi une
+        if (fichierPhoto) {
+            const nomFichier = nomPhotoSecuriseMEDFAH(fichierPhoto.name);
+
+            const cheminPhoto =
+                "membres/" + nouveauMembre.id + "/" +
+                Date.now() + "_" + nomFichier;
+
+            const { error: uploadError } =
+                await supabaseClient.storage
+                    .from(BUCKET_PHOTOS_MEDFAH)
+                    .upload(cheminPhoto, fichierPhoto, {
+                        contentType: fichierPhoto.type,
+                        upsert: false
+                    });
+
+            if (uploadError) {
+                message.textContent =
+                    "Membre ajouté, mais la photo n'a pas été téléversée : " +
+                    uploadError.message;
+
+                await loadMembers();
+                return;
+            }
+
+            const { error: photoUpdateError } =
+                await supabaseClient
+                    .from("membre_infos")
+                    .update({ photo: cheminPhoto })
+                    .eq("id", nouveauMembre.id);
+
+            if (photoUpdateError) {
+                await supabaseClient.storage
+                    .from(BUCKET_PHOTOS_MEDFAH)
+                    .remove([cheminPhoto]);
+
+                message.textContent =
+                    "Membre ajouté, mais impossible d'enregistrer sa photo.";
+
+                await loadMembers();
+                return;
+            }
+        }
+
         message.textContent =
-            "Membre enregistré avec succès ! " +
-            "Code : " + codeMembre +
-            " | Carte : " + numeroCarte;
+            "Membre enregistré avec succès ! Code : " +
+            codeMembre + " | Carte : " + numeroCarte;
 
         form.reset();
 
+        const apercu = document.getElementById(
+            "apercuPhotoNouveauMembreMEDFAH"
+        );
+
+        if (apercu) apercu.src = "photo-par-defaut.png";
+
         await loadMembers();
 
-        // Fermer le formulaire après confirmation
         setTimeout(() => {
             const modal = document.getElementById("ajoutMembreModal");
 
