@@ -3075,10 +3075,19 @@ function displayMembers(members){
 
             <td>
                 <button
-                    class="view-btn"
-                    onclick="viewMember(${index})">
-                    Voir
-                </button>
+    class="view-btn"
+    onclick="viewMember(${index})">
+    Voir
+</button>
+
+${["admin_principal", "admin_secondaire"].includes(roleAdminMEDFAH) ? `
+<button
+    class="view-btn"
+    style="margin-left:6px;background:#1769aa;"
+    onclick="modifierMembre(${index})">
+    Modifier
+</button>
+` : ""}
             </td>
 
         </tr>
@@ -3142,6 +3151,225 @@ function searchMembers(){
     displayMembers(results);
 }
 
+
+/* ==========================================
+   MODIFIER UN MEMBRE — MEDFAH
+   Accès : admin_principal et admin_secondaire
+========================================== */
+
+let membreEnCoursModificationId = null;
+
+function modifierMembre(index) {
+    const membre = allMembers[index];
+
+    if (!membre || !membre.id) {
+        alert("Impossible d'identifier ce membre.");
+        return;
+    }
+
+    if (!["admin_principal", "admin_secondaire"].includes(roleAdminMEDFAH)) {
+        alert("Accès réservé aux administrateurs autorisés.");
+        return;
+    }
+
+    const champsProteges = [
+        "id",
+        "code",
+        "numero_carte",
+        "qr_code",
+        "qr_token",
+        "cree_a",
+        "created_at",
+        "mis_a_jour_a",
+        "updated_at"
+    ];
+
+    const champs = Object.keys(membre).filter(
+        cle => !champsProteges.includes(cle)
+    );
+
+    const modal = document.createElement("div");
+    modal.id = "modifierMembreModal";
+
+    modal.style.cssText =
+        "position:fixed;inset:0;z-index:10020;" +
+        "background:rgba(0,0,0,.72);overflow-y:auto;" +
+        "padding:15px;box-sizing:border-box;";
+
+    const champsHTML = champs.map(cle => {
+        const valeur = membre[cle] == null ? "" : String(membre[cle]);
+
+        const label = cle
+            .replace(/_/g, " ")
+            .replace(/\b\w/g, lettre => lettre.toUpperCase());
+
+        const type = /^(date_|conversion_date|inscription_de_la_date)/.test(cle)
+            ? "date"
+            : (cle === "nombre_enfants" ? "number" : "text");
+
+        const contenu = type === "date" ? valeur.slice(0, 10) : valeur;
+
+        if (cle === "observation" || cle === "adresse") {
+            return `
+                <div style="margin:10px 0;">
+                    <label style="display:block;font-weight:600;">
+                        ${escapeHTML(label)}
+                    </label>
+                    <textarea
+                        data-edit-colonne="${escapeHTML(cle)}"
+                        rows="3"
+                        style="width:100%;padding:10px;box-sizing:border-box;">${escapeHTML(contenu)}</textarea>
+                </div>`;
+        }
+
+        return `
+            <div style="margin:10px 0;">
+                <label style="display:block;font-weight:600;">
+                    ${escapeHTML(label)}
+                </label>
+                <input
+                    data-edit-colonne="${escapeHTML(cle)}"
+                    type="${type}"
+                    value="${escapeHTML(contenu)}"
+                    ${type === "number" ? 'min="0"' : ""}
+                    style="width:100%;padding:10px;box-sizing:border-box;">
+            </div>`;
+    }).join("");
+
+    modal.innerHTML = `
+        <div style="max-width:850px;margin:20px auto;background:white;
+                    color:#222;padding:20px;border-radius:14px;">
+
+            <h2>Modifier le dossier du membre</h2>
+
+            <p>
+                Modifiez les informations nécessaires puis enregistrez.
+                Les codes et identifiants de la carte sont protégés.
+            </p>
+
+            <form id="formModifierMembreMEDFAH"
+                  onsubmit="enregistrerModificationMembre(event)">
+
+                ${champsHTML}
+
+                <p id="messageModifierMembre"
+                   style="font-weight:600;"></p>
+
+                <button type="submit" class="view-btn">
+                    Enregistrer les modifications
+                </button>
+
+                <button type="button"
+                        class="view-btn"
+                        style="background:#666;"
+                        onclick="fermerModificationMembre()">
+                    Annuler
+                </button>
+
+            </form>
+        </div>`;
+
+    const ancienneModal = document.getElementById("modifierMembreModal");
+    if (ancienneModal) ancienneModal.remove();
+
+    document.body.appendChild(modal);
+    membreEnCoursModificationId = membre.id;
+}
+
+
+function fermerModificationMembre() {
+    const modal = document.getElementById("modifierMembreModal");
+
+    if (modal) modal.remove();
+
+    membreEnCoursModificationId = null;
+}
+
+
+async function enregistrerModificationMembre(event) {
+    event.preventDefault();
+
+    const message = document.getElementById("messageModifierMembre");
+    const formulaire = document.getElementById("formModifierMembreMEDFAH");
+
+    if (!membreEnCoursModificationId || !formulaire || !supabaseClient) {
+        message.textContent = "Impossible de préparer la mise à jour.";
+        return;
+    }
+
+    const autorise = await verifierRoleAdminMEDFAH();
+
+    if (!autorise ||
+        !["admin_principal", "admin_secondaire"].includes(roleAdminMEDFAH)) {
+        message.textContent = "Accès refusé. Reconnectez-vous.";
+        return;
+    }
+
+    const champsProteges = new Set([
+        "id",
+        "code",
+        "numero_carte",
+        "qr_code",
+        "qr_token",
+        "cree_a",
+        "created_at",
+        "mis_a_jour_a",
+        "updated_at"
+    ]);
+
+    const payload = {};
+
+    formulaire.querySelectorAll("[data-edit-colonne]").forEach(input => {
+        const colonne = input.getAttribute("data-edit-colonne");
+
+        if (!colonne || champsProteges.has(colonne)) return;
+
+        let valeur = input.value.trim();
+
+        if (valeur === "") {
+            valeur = null;
+        }
+
+        if (colonne === "nombre_enfants" && valeur !== null) {
+            valeur = Number(valeur);
+
+            if (!Number.isFinite(valeur) || valeur < 0) {
+                valeur = null;
+            }
+        }
+
+        payload[colonne] = valeur;
+    });
+
+    const bouton = formulaire.querySelector('button[type="submit"]');
+
+    bouton.disabled = true;
+    message.textContent = "Enregistrement en cours...";
+
+    try {
+        const { error } = await supabaseClient
+            .from("membre_infos")
+            .update(payload)
+            .eq("id", membreEnCoursModificationId);
+
+        if (error) throw error;
+
+        message.textContent = "Modifications enregistrées avec succès.";
+
+        await loadMembers();
+
+        setTimeout(fermerModificationMembre, 900);
+
+    } catch (error) {
+        console.error("Erreur modification membre :", error);
+
+        message.textContent =
+            "Échec de la modification : " + error.message;
+
+    } finally {
+        bouton.disabled = false;
+    }
+}
 
 /* ==========================================
    VOIR UN MEMBRE
