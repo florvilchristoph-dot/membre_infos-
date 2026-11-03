@@ -870,7 +870,7 @@ async function ensureToken(m){
 }
 
 /* ================================
-   AFFICHAGE DES CARTES
+   AFFICHAGE DES CARTES AVEC PHOTOS PRIVÉES
 ================================ */
 
 async function render(list){
@@ -880,21 +880,57 @@ async function render(list){
   return;
  }
 
- $("cardsGrid").innerHTML=list.map(cardHTML).join("");
+ say("Préparation des photos et des cartes...");
+
+ const cartesAvecPhotos = await Promise.all(
+  list.map(async membre => {
+
+   const copie = {...membre};
+   const photo = val(copie,"photo");
+
+   if(photo){
+
+    // Anciennes photos enregistrées comme URL
+    if(/^https?:\/\//i.test(photo)){
+     copie.photo = photo;
+    }else{
+
+     const {data,error} = await db.storage
+      .from("medfah-photos")
+      .createSignedUrl(photo,3600);
+
+     if(error){
+      console.warn("Photo indisponible :",error);
+      copie.photo = "";
+     }else{
+      copie.photo = data.signedUrl;
+     }
+
+    }
+
+   }
+
+   return copie;
+
+  })
+ );
+
+ $("cardsGrid").innerHTML =
+  cartesAvecPhotos.map(cardHTML).join("");
 
  for(const m of list){
 
-  const t=await ensureToken(m);
+  const t = await ensureToken(m);
 
-  const target=new URL("verify.html",location.href);
+  const target = new URL("verify.html",location.href);
 
   target.searchParams.set("qr_token",t);
 
-  const node=$("qr-"+m.id);
+  const node = $("qr-"+m.id);
 
   if(node){
 
-   node.innerHTML="";
+   node.innerHTML = "";
 
    new QRCode(node,{
     text:target.href,
