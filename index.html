@@ -1,758 +1,101 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#082b83">
 <title>MEDFAH — Accueil</title>
-
 <style>
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    font-family:"Segoe UI",Arial,sans-serif;
-}
-
-body{
-    background:#f5f7fb;
-    color:#172033;
-}
-
-/* ===== EN-TETE OFFICIEL MEDFAH ===== */
-
-header{
-    width:100%;
-    background:white;
-    padding:12px 20px;
-}
-
-.letterhead{
-    max-width:1500px;
-    margin:auto;
-    display:grid;
-    grid-template-columns:150px minmax(0,1fr);
-    align-items:center;
-    gap:18px;
-}
-
-.logo{
-    width:145px;
-    height:145px;
-    object-fit:contain;
-}
-
-.letterhead-text{
-    text-align:center;
-    min-width:0;
-}
-
-.header-title{
-    color:#172f79;
-    font-family:Georgia,"Times New Roman",serif;
-    font-size:clamp(20px,2.65vw,38px);
-    font-weight:800;
-    line-height:1.12;
-    text-transform:uppercase;
-}
-
-.header-address{
-    margin-top:6px;
-    color:#d52b32;
-    font-size:clamp(13px,1.75vw,24px);
-    font-weight:800;
-    line-height:1.25;
-    text-transform:uppercase;
-}
-
-.header-contact{
-    margin-top:6px;
-    color:#111;
-    font-family:Georgia,"Times New Roman",serif;
-    font-size:clamp(13px,1.7vw,23px);
-    font-weight:700;
-    overflow-wrap:anywhere;
-}
-
-.header-contact a{
-    color:#172f79;
-    text-decoration:underline;
-}
-
-.letterhead-rules{
-    margin-top:12px;
-    display:flex;
-    flex-direction:column;
-    gap:4px;
-}
-
-.letterhead-rules span:first-child{
-    height:6px;
-    background:#172f79;
-}
-
-.letterhead-rules span:last-child{
-    height:6px;
-    margin:0 2%;
-    background:#d52b32;
-}
-
-/* ===== PRESENTATION MEDFAH ===== */
-
-.container{
-    width:92%;
-    max-width:1050px;
-    margin:20px auto;
-}
-
-.intro{
-    text-align:center;
-    margin:20px auto 24px;
-}
-
-.intro h1{
-    color:#172f79;
-    font-family:Georgia,"Times New Roman",serif;
-    font-size:clamp(27px,3vw,36px);
-    margin-bottom:15px;
-}
-
-.mission-texts{
-    max-width:1000px;
-    margin:auto;
-    display:grid;
-    gap:10px;
-    text-align:left;
-}
-
-.mission-texts p{
-    padding:11px 15px 11px 20px;
-    background:white;
-    border-left:4px solid #172f79;
-    border-radius:7px;
-    box-shadow:0 2px 9px rgba(0,0,0,.045);
-    color:#354052;
-    font-size:15px;
-    line-height:1.6;
-}
-
-.mission-texts p:nth-child(even){
-    border-left-color:#d52b32;
-}
-
-/* ===== MENU PRINCIPAL ===== */
-
-.menu-area{
-    display:flex;
-    justify-content:flex-end;
-    position:relative;
-    margin:15px 0 22px;
-}
-
-.menu-button{
-    width:50px;
-    height:48px;
-    border:none;
-    border-radius:12px;
-    background:#172f79;
-    color:white;
-    font-size:25px;
-    cursor:pointer;
-}
-
-.menu{
-    display:none;
-    position:absolute;
-    right:0;
-    top:55px;
-    width:250px;
-    max-width:calc(100vw - 30px);
-    background:white;
-    border-radius:15px;
-    box-shadow:0 8px 25px rgba(0,0,0,.15);
-    overflow:hidden;
-    z-index:100;
-}
-
-.menu.show{
-    display:block;
-}
-
-.menu a{
-    display:block;
-    padding:15px 18px;
-    text-decoration:none;
-    color:#172033;
-    border-bottom:1px solid #edf0f4;
-    font-size:15px;
-}
-
-.menu a:hover{
-    background:#f5f7fb;
-}
-
-/* ===== RECHERCHE ===== */
-
-.search-box{
-    background:white;
-    border-radius:17px;
-    padding:14px;
-    display:flex;
-    gap:10px;
-    box-shadow:0 3px 15px rgba(0,0,0,.05);
-    margin-bottom:22px;
-}
-
-.search-box input{
-    flex:1;
-    min-width:0;
-    border:1px solid #d7dce4;
-    border-radius:11px;
-    padding:13px;
-    font-size:15px;
-    outline:none;
-}
-
-.search-box input:focus{
-    border-color:#172f79;
-}
-
-.search-box button{
-    border:none;
-    border-radius:11px;
-    background:#172f79;
-    color:white;
-    padding:0 20px;
-    font-size:15px;
-    cursor:pointer;
-}
-
-/* ===== STATISTIQUES ===== */
-
-.stats{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:14px;
-    margin-bottom:22px;
-}
-
-.stat{
-    background:white;
-    border-radius:16px;
-    padding:18px;
-    box-shadow:0 3px 15px rgba(0,0,0,.05);
-}
-
-.stat-icon{
-    font-size:24px;
-    margin-bottom:8px;
-}
-
-.stat-number{
-    font-size:25px;
-    font-weight:800;
-}
-
-.stat-title{
-    color:#697386;
-    font-size:13px;
-    margin-top:3px;
-}
-
-/* ===== SERVICES ===== */
-
-.services-title{
-    font-size:19px;
-    font-weight:700;
-    margin-bottom:12px;
-}
-
-.actions{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:14px;
-}
-
-.action{
-    display:block;
-    background:white;
-    border-radius:16px;
-    padding:20px 15px;
-    text-decoration:none;
-    color:#172033;
-    box-shadow:0 3px 15px rgba(0,0,0,.05);
-    transition:transform .2s,box-shadow .2s;
-}
-
-.action:hover{
-    transform:translateY(-2px);
-    box-shadow:0 7px 20px rgba(0,0,0,.10);
-}
-
-.action-icon{
-    font-size:30px;
-    margin-bottom:10px;
-}
-
-.action-title{
-    font-size:16px;
-    font-weight:700;
-    margin-bottom:5px;
-}
-
-.action-description{
-    color:#697386;
-    font-size:12px;
-    line-height:1.5;
-}
-
-/* ===== FOOTER ===== */
-
-footer{
-    text-align:center;
-    color:#8a93a3;
-    font-size:12px;
-    padding:30px 10px;
-}
-
-/* ===== TELEPHONE ===== */
-
-@media(max-width:700px){
-
-    header{
-        padding:10px 10px 8px;
-    }
-
-    .letterhead{
-        grid-template-columns:78px minmax(0,1fr);
-        gap:8px;
-    }
-
-    .logo{
-        width:76px;
-        height:76px;
-    }
-
-    .header-title{
-        font-size:clamp(14px,3.6vw,19px);
-    }
-
-    .header-address{
-        font-size:clamp(10px,2.7vw,14px);
-    }
-
-    .header-contact{
-        font-size:clamp(10px,2.6vw,14px);
-    }
-
-    .letterhead-rules{
-        margin-top:8px;
-        gap:3px;
-    }
-
-    .letterhead-rules span{
-        height:4px !important;
-    }
-
-    .container{
-        width:92%;
-        margin:17px auto;
-    }
-
-    .intro{
-        margin:17px auto 20px;
-    }
-
-    .intro h1{
-        font-size:26px;
-        margin-bottom:12px;
-    }
-
-    .mission-texts{
-        gap:8px;
-    }
-
-    .mission-texts p{
-        padding:10px 11px 10px 14px;
-        font-size:13px;
-        line-height:1.55;
-    }
-
-    .menu-button{
-        width:46px;
-        height:44px;
-        font-size:23px;
-    }
-
-    .search-box{
-        flex-direction:column;
-    }
-
-    .search-box button{
-        height:48px;
-    }
-
-    .stats{
-        grid-template-columns:repeat(3,minmax(0,1fr));
-        gap:8px;
-    }
-
-    .stat{
-        padding:13px 9px;
-    }
-
-    .stat-icon{
-        font-size:20px;
-    }
-
-    .stat-number{
-        font-size:20px;
-    }
-
-    .stat-title{
-        font-size:11px;
-    }
-
-    .actions{
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        gap:10px;
-    }
-
-    .action{
-        padding:17px 13px;
-    }
-}
-
-@media(max-width:360px){
-
-    .letterhead{
-        grid-template-columns:62px minmax(0,1fr);
-        gap:6px;
-    }
-
-    .logo{
-        width:60px;
-        height:60px;
-    }
-
-    .header-title{
-        font-size:12px;
-    }
-
-    .header-address,
-    .header-contact{
-        font-size:9px;
-    }
-
-    .stats{
-        gap:5px;
-    }
-
-    .stat{
-        padding:11px 6px;
-    }
-
-    .stat-number{
-        font-size:18px;
-    }
-
-    .stat-title{
-        font-size:10px;
-    }
-}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bleu:#082b83;--rouge:#d71935;--texte:#09245f}
+body{font-family:Georgia,"Times New Roman",serif;color:var(--texte);background:linear-gradient(#cdeaff,#f8fbff 55%,#dcecff)}
+.letterhead{display:grid;grid-template-columns:145px 1fr;gap:18px;align-items:center;padding:10px 3%;background:#fff;border-bottom:5px solid var(--bleu)}
+.logo{width:140px;height:140px;object-fit:contain}
+.letterhead-text{text-align:center;min-width:0}
+.header-title{font-size:clamp(18px,2.5vw,35px);font-weight:900;text-transform:uppercase;color:#071f70}
+.header-address{margin-top:6px;color:#b9162d;font-size:clamp(11px,1.6vw,21px);font-weight:900;text-transform:uppercase}
+.header-contact{margin-top:6px;font-size:clamp(11px,1.5vw,20px);font-weight:bold;overflow-wrap:anywhere}
+.header-contact a{color:var(--bleu)}
+.letterhead-rules{display:grid;gap:4px;margin-top:9px}.letterhead-rules span:first-child{height:7px;background:var(--bleu);border-radius:8px}.letterhead-rules span:last-child{height:6px;background:var(--rouge);margin:0 2%;border-radius:8px}
+.main-nav{display:flex;justify-content:center;flex-wrap:wrap;background:linear-gradient(#1646a7,#061d68);box-shadow:0 4px 10px #09245f55}
+.main-nav a{color:white;text-decoration:none;font:bold 14px Arial;padding:14px 13px;border-right:1px solid #ffffff55;white-space:nowrap}.main-nav a:hover{background:#2459bd}
+main{width:96%;max-width:1500px;margin:auto}
+.welcome{text-align:center;padding:22px 10px 16px;background:radial-gradient(ellipse at top,#fff,#d9efff 70%);border-radius:0 0 22px 22px}
+.welcome h1{display:inline-block;color:white;background:linear-gradient(#1646a7,#061d68);border-radius:24px;padding:5px 30px 8px;font-size:clamp(27px,4vw,52px);margin-bottom:13px;box-shadow:0 4px 12px #09245f55}
+.mission-list{width:min(980px,95%);margin:auto;display:grid;gap:7px;text-align:left}
+.mission-row{display:grid;grid-template-columns:60px 1fr;align-items:center;gap:10px;background:white;border:1px solid #d7e4f6;border-radius:28px;padding:7px 15px 7px 8px;box-shadow:0 3px 8px #09245f22}
+.mission-icon{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--bleu);color:white;font: bold 27px Arial}.mission-row:nth-child(even) .mission-icon{background:var(--rouge)}
+.mission-row p{font-size:clamp(12px,1.35vw,18px);line-height:1.3;font-weight:bold}
+.quick-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:13px;padding:16px 6px}
+.action{background:#fff;text-align:center;text-decoration:none;border:1px solid #cbdaf2;border-bottom:8px solid var(--bleu);border-radius:23px;padding:12px 9px 15px;box-shadow:0 5px 10px #09245f33;color:var(--texte)}
+.action:nth-child(even){border-bottom-color:var(--rouge)}.action:hover{transform:translateY(-3px)}
+.action-icon{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;margin:0 auto 8px;background:#0754bd;color:white;font:bold 31px Arial}.action:nth-child(even) .action-icon{background:var(--rouge)}
+.action-title{font-size:clamp(13px,1.4vw,20px);font-weight:900;margin-bottom:5px}.action-description{font-size:clamp(10px,1vw,14px);line-height:1.3;font-weight:bold}
+.support-area{padding:10px 6px 22px}.search-box{display:flex;gap:10px;background:white;padding:13px;border-radius:15px;margin-bottom:14px;box-shadow:0 3px 12px #09245f18}
+.search-box input{flex:1;min-width:0;padding:12px;border:1px solid #cbd7e8;border-radius:9px;font-size:15px}.search-box button{background:var(--bleu);color:white;border:0;border-radius:9px;padding:0 18px;font-weight:bold}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{background:white;border:1px solid #d5e2f5;border-radius:13px;text-align:center;padding:14px}.stat-icon{font-size:22px}.stat-number{font-size:24px;font-weight:bold}.stat-title{font:12px Arial;color:#596780;margin-top:3px}
+footer{text-align:center;color:white;background:linear-gradient(#0a3295,#061b65);border-top:5px solid var(--rouge);padding:17px;font-weight:bold}
+@media(max-width:850px){.quick-actions{grid-template-columns:repeat(3,1fr)}.main-nav a{padding:11px 9px;font-size:12px}}
+@media(max-width:600px){.letterhead{grid-template-columns:68px 1fr;gap:8px;padding:9px}.logo{width:66px;height:66px}.header-title{font-size:clamp(11px,3.4vw,17px)}.header-address,.header-contact{font-size:clamp(9px,2.5vw,12px)}.letterhead-rules span{height:4px!important}.main-nav{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto}.main-nav a{font-size:11px;padding:11px}.welcome{padding:16px 5px}.welcome h1{font-size:25px;padding:6px 16px}.mission-list{width:98%}.mission-row{grid-template-columns:43px 1fr;gap:8px;padding:6px 9px 6px 6px;border-radius:17px}.mission-icon{width:40px;height:40px;font-size:21px}.mission-row p{font-size:11px}.quick-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:12px 3px}.action{padding:11px 7px;border-radius:17px;border-bottom-width:6px}.action-icon{width:52px;height:52px;font-size:25px}.action-title{font-size:13px}.action-description{font-size:10px}.search-box{flex-direction:column}.search-box button{height:43px}.stats{gap:6px}.stat{padding:10px 4px}.stat-number{font-size:19px}.stat-title{font-size:10px}footer{font-size:12px}}
 </style>
 </head>
-
 <body>
-
-<!-- ===== EN-TETE OFFICIEL ===== -->
-
-<header>
-    <div class="letterhead">
-
-        <img
-            src="logo-medfah.jpg"
-            alt="Logo officiel MEDFAH"
-            class="logo"
-        >
-
-        <div class="letterhead-text">
-
-            <div class="header-title">
-                Mission Église de Dieu de la Foi Apostolique d’Haïti
-            </div>
-
-            <div class="header-address">
-                3, Avenue Maïs-Gâté, entre Maïs-Gâté 13 et 15,
-                Tabarre, Port-au-Prince, Haïti
-            </div>
-
-            <div class="header-contact">
-                <a href="mailto:eglisedelafoiapostolique2007@gmail.com">
-                    eglisedelafoiapostolique2007@gmail.com
-                </a>
-                &nbsp; (+509) 37897370 / 31048016
-            </div>
-
-            <div class="letterhead-rules" aria-hidden="true">
-                <span></span>
-                <span></span>
-            </div>
-
-        </div>
-    </div>
+<header class="letterhead">
+<img src="logo-medfah.jpg" alt="Logo officiel MEDFAH" class="logo">
+<div class="letterhead-text">
+<div class="header-title">Mission Église de Dieu de la Foi Apostolique d’Haïti</div>
+<div class="header-address">3, Avenue Maïs-Gâté, entre Maïs-Gâté 13 et 15, Tabarre, Port-au-Prince, Haïti</div>
+<div class="header-contact"><a href="mailto:eglisedelafoiapostolique2007@gmail.com">eglisedelafoiapostolique2007@gmail.com</a> &nbsp; | &nbsp; (+509) 37897370 / 31048016</div>
+<div class="letterhead-rules"><span></span><span></span></div>
+</div>
 </header>
-
-<main class="container">
-
-    <!-- ===== BIENVENUE ET MISSION ===== -->
-
-    <section class="intro">
-
-        <h1>Bienvenue sur MEDFAH</h1>
-
-        <div class="mission-texts">
-
-            <p>
-                La Mission Église de Dieu de la Foi Apostolique d’Haïti
-                (MEDFAH) a pour vocation de proclamer l’Évangile de
-                Jésus-Christ et de conduire les âmes vers le salut.
-            </p>
-
-            <p>
-                Elle s’engage à promouvoir l’amour, la foi, la paix,
-                la solidarité et les valeurs chrétiennes au sein
-                de la communauté.
-            </p>
-
-            <p>
-                Elle œuvre pour l’épanouissement spirituel, moral
-                et social des familles, des jeunes et de toutes
-                les générations.
-            </p>
-
-            <p>
-                Sa vision est de contribuer à la transformation
-                de la société haïtienne par la Parole de Dieu,
-                l’éducation spirituelle et le service communautaire.
-            </p>
-
-            <p>
-                Au-delà des frontières, MEDFAH aspire à participer
-                à l’expansion du Royaume de Dieu et à porter le
-                message de l’Évangile à toutes les nations.
-            </p>
-
-        </div>
-    </section>
-
-    <!-- ===== MENU PRINCIPAL ===== -->
-
-    <div class="menu-area">
-
-        <button
-            type="button"
-            class="menu-button"
-            id="menuButton"
-            aria-label="Ouvrir le menu"
-            aria-expanded="false"
-            aria-controls="menu"
-            onclick="ouvrirMenu()"
-        >
-            ☰
-        </button>
-
-        <nav id="menu" class="menu">
-
-            <a href="index.html">🏠 Accueil</a>
-
-            <a href="membre.html">👥 Liste des Membres</a>
-
-            <a href="programmation.html">
-                📅 Programmation de l’Église
-            </a>
-
-            <a href="scan.html">📷 Scanner QR Code</a>
-
-            <a href="verify.html">✓ Vérifier Carte</a>
-
-            <a href="medfah.html">⚙️ Administration</a>
-
-        </nav>
-
-    </div>
-
-    <!-- ===== RECHERCHE DES MEMBRES ===== -->
-
-    <section class="search-box">
-
-        <input
-            type="search"
-            id="homeSearch"
-            placeholder="Rechercher un membre..."
-            aria-label="Rechercher un membre"
-        >
-
-        <button
-            type="button"
-            onclick="rechercherMembre()"
-        >
-            🔎 Rechercher
-        </button>
-
-    </section>
-
-    <!-- ===== STATISTIQUES ===== -->
-
-    <section class="stats">
-
-        <div class="stat">
-            <div class="stat-icon">👥</div>
-            <div class="stat-number" id="totalMembers">—</div>
-            <div class="stat-title">Membres</div>
-        </div>
-
-        <div class="stat">
-            <div class="stat-icon">⛪</div>
-            <div class="stat-number" id="totalAssemblees">—</div>
-            <div class="stat-title">Assemblées</div>
-        </div>
-
-        <div class="stat">
-            <div class="stat-icon">💳</div>
-            <div class="stat-number" id="totalCartes">—</div>
-            <div class="stat-title">Cartes</div>
-        </div>
-
-    </section>
-
-    <!-- ===== SERVICES MEDFAH ===== -->
-
-    <div class="services-title">
-        Services MEDFAH
-    </div>
-
-    <section class="actions">
-
-        <a href="scan.html" class="action">
-            <div class="action-icon">📷</div>
-            <div class="action-title">Scanner QR Code</div>
-            <div class="action-description">
-                Scanner une carte de persévérance.
-            </div>
-        </a>
-
-        <a href="membre.html" class="action">
-            <div class="action-icon">👥</div>
-            <div class="action-title">Membres</div>
-            <div class="action-description">
-                Consulter les noms et prénoms des membres.
-            </div>
-        </a>
-
-        <a href="programmation.html" class="action">
-            <div class="action-icon">📅</div>
-            <div class="action-title">
-                Programmation de l’Église
-            </div>
-            <div class="action-description">
-                Consulter les activités et le programme de l’Église.
-            </div>
-        </a>
-
-        <a href="verify.html" class="action">
-            <div class="action-icon">✓</div>
-            <div class="action-title">Vérifier Carte</div>
-            <div class="action-description">
-                Vérifier une carte de persévérance.
-            </div>
-        </a>
-
-        <a href="medfah.html" class="action">
-            <div class="action-icon">⚙️</div>
-            <div class="action-title">Administration</div>
-            <div class="action-description">
-                Gestion administrative de MEDFAH.
-            </div>
-        </a>
-
-    </section>
-
+<nav class="main-nav" aria-label="Navigation principale">
+<a href="index.html">⌂ Tableau de bord</a>
+<a href="membre.html">👥 Membres</a>
+<a href="carte.html">▦ Cartes de persévérance</a>
+<a href="scanner.html">▧ Scanner QR Code</a>
+<a href="verify.html">✓ Vérifier une carte</a>
+<a href="programmation.html">▦ Programmation</a>
+<a href="medfah.html">⚙ Administration</a>
+</nav>
+<main>
+<section class="welcome">
+<h1>Bienvenue sur MEDFAH</h1>
+<div class="mission-list">
+<div class="mission-row"><div class="mission-icon">▤</div><p>La Mission Église de Dieu de la Foi Apostolique d’Haïti (MEDFAH) a pour vocation de proclamer l’Évangile de Jésus-Christ et de conduire les âmes vers le salut.</p></div>
+<div class="mission-row"><div class="mission-icon">♥</div><p>Elle s’engage à promouvoir l’amour, la foi, la paix, la solidarité et les valeurs chrétiennes au sein de la communauté.</p></div>
+<div class="mission-row"><div class="mission-icon">♟</div><p>Elle œuvre pour l’épanouissement spirituel, moral et social des familles, des jeunes et de toutes les générations.</p></div>
+<div class="mission-row"><div class="mission-icon">◎</div><p>Sa vision est de contribuer à la transformation de la société haïtienne par la Parole de Dieu, l’éducation spirituelle et le service communautaire.</p></div>
+<div class="mission-row"><div class="mission-icon">➤</div><p>Au-delà des frontières, MEDFAH aspire à participer à l’expansion du Royaume de Dieu et à porter le message de l’Évangile à toutes les nations.</p></div>
+</div>
+</section>
+<section class="quick-actions" aria-label="Accès rapides">
+<a href="scanner.html" class="action"><div class="action-icon">▣</div><div class="action-title">Scanner QR Code</div><div class="action-description">Scanner une carte de persévérance.</div></a>
+<a href="membre.html" class="action"><div class="action-icon">♟</div><div class="action-title">Membres</div><div class="action-description">Consulter les noms et prénoms des membres.</div></a>
+<a href="programmation.html" class="action"><div class="action-icon">▦</div><div class="action-title">Programmation de l’Église</div><div class="action-description">Consulter les activités et le programme de l’Église.</div></a>
+<a href="verify.html" class="action"><div class="action-icon">✓</div><div class="action-title">Vérifier Carte</div><div class="action-description">Vérifier une carte de persévérance.</div></a>
+<a href="medfah.html" class="action"><div class="action-icon">⚙</div><div class="action-title">Administration</div><div class="action-description">Gestion administrative de MEDFAH.</div></a>
+</section>
+<section class="support-area">
+<div class="search-box"><input type="search" id="homeSearch" placeholder="Rechercher un membre..." aria-label="Rechercher un membre"><button type="button" onclick="rechercherMembre()">🔎 Rechercher</button></div>
+<section class="stats" aria-label="Statistiques publiques">
+<div class="stat"><div class="stat-icon">👥</div><div class="stat-number" id="totalMembers">—</div><div class="stat-title">Membres</div></div>
+<div class="stat"><div class="stat-icon">⛪</div><div class="stat-number" id="totalAssemblees">—</div><div class="stat-title">Assemblées</div></div>
+<div class="stat"><div class="stat-icon">💳</div><div class="stat-number" id="totalCartes">—</div><div class="stat-title">Cartes</div></div>
+</section>
+</section>
 </main>
-
-<footer>
-    © 2026 MEDFAH — Tous droits réservés.
-</footer>
-
-<!-- ===== SCRIPTS EXISTANTS ===== -->
-
+<footer>© 2026 MEDFAH — Tous droits réservés.</footer>
 <script src="config.js"></script>
 <script src="app.js"></script>
-
 <script>
-
-function ouvrirMenu(){
-
-    const menu = document.getElementById("menu");
-    const bouton = document.getElementById("menuButton");
-
-    menu.classList.toggle("show");
-
-    bouton.setAttribute(
-        "aria-expanded",
-        menu.classList.contains("show") ? "true" : "false"
-    );
-}
-
 function rechercherMembre(){
-
-    const champ = document.getElementById("homeSearch");
-    const texte = champ.value.trim();
-
-    if(texte){
-
-        window.location.href =
-            "membre.html?q=" + encodeURIComponent(texte);
-
-    }else{
-
-        window.location.href = "membre.html";
-
-    }
+ const texte=document.getElementById("homeSearch").value.trim();
+ window.location.href=texte?"membre.html?q="+encodeURIComponent(texte):"membre.html";
 }
-
-document
-    .getElementById("homeSearch")
-    .addEventListener("keydown", function(event){
-
-        if(event.key === "Enter"){
-            rechercherMembre();
-        }
-
-    });
-
-/* Fermer le menu quand on clique en dehors */
-
-document.addEventListener("click", function(event){
-
-    const menu = document.getElementById("menu");
-    const bouton = document.getElementById("menuButton");
-
-    if(
-        menu &&
-        bouton &&
-        !menu.contains(event.target) &&
-        !bouton.contains(event.target)
-    ){
-
-        menu.classList.remove("show");
-        bouton.setAttribute("aria-expanded", "false");
-
-    }
-
+document.getElementById("homeSearch").addEventListener("keydown",function(e){
+ if(e.key==="Enter") rechercherMembre();
 });
-
 </script>
-
 </body>
 </html>
