@@ -1,101 +1,710 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#082b83">
+<meta name="description" content="Mission Église de Dieu de la Foi Apostolique d’Haïti — MEDFAH">
 <title>MEDFAH — Accueil</title>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bleu:#082b83;--rouge:#d71935;--texte:#09245f}
-body{font-family:Georgia,"Times New Roman",serif;color:var(--texte);background:linear-gradient(#cdeaff,#f8fbff 55%,#dcecff)}
-.letterhead{display:grid;grid-template-columns:145px 1fr;gap:18px;align-items:center;padding:10px 3%;background:#fff;border-bottom:5px solid var(--bleu)}
-.logo{width:140px;height:140px;object-fit:contain}
-.letterhead-text{text-align:center;min-width:0}
-.header-title{font-size:clamp(18px,2.5vw,35px);font-weight:900;text-transform:uppercase;color:#071f70}
-.header-address{margin-top:6px;color:#b9162d;font-size:clamp(11px,1.6vw,21px);font-weight:900;text-transform:uppercase}
-.header-contact{margin-top:6px;font-size:clamp(11px,1.5vw,20px);font-weight:bold;overflow-wrap:anywhere}
+:root{
+ --bleu:#082b83;
+ --bleu-fonce:#061b65;
+ --rouge:#d71935;
+ --texte:#09245f;
+ --or:#d5a536;
+}
+body{
+ font-family:Georgia,"Times New Roman",serif;
+ color:var(--texte);
+ background:linear-gradient(#cdeaff,#f8fbff 55%,#dcecff);
+}
+
+/* ENTÊTE OFFICIEL */
+.letterhead{
+ background:#fff;
+ padding:12px 3% 10px;
+ border-bottom:5px solid var(--bleu);
+}
+.header-title{
+ text-align:center;
+ color:#071f70;
+ font-size:clamp(17px,2.5vw,32px);
+ font-weight:900;
+ text-transform:uppercase;
+ margin-bottom:12px;
+}
+.letterhead-content{
+ display:grid;
+ grid-template-columns:145px 1fr;
+ gap:18px;
+ align-items:center;
+}
+.logo{
+ width:140px;
+ height:140px;
+ object-fit:contain;
+}
+.letterhead-text{
+ text-align:center;
+ min-width:0;
+}
+.header-address{
+ color:#b9162d;
+ font-size:clamp(11px,1.6vw,20px);
+ font-weight:900;
+ text-transform:uppercase;
+ line-height:1.5;
+}
+.header-contact{
+ margin-top:8px;
+ font-size:clamp(11px,1.5vw,18px);
+ font-weight:bold;
+ overflow-wrap:anywhere;
+}
 .header-contact a{color:var(--bleu)}
-.letterhead-rules{display:grid;gap:4px;margin-top:9px}.letterhead-rules span:first-child{height:7px;background:var(--bleu);border-radius:8px}.letterhead-rules span:last-child{height:6px;background:var(--rouge);margin:0 2%;border-radius:8px}
-.main-nav{display:flex;justify-content:center;flex-wrap:wrap;background:linear-gradient(#1646a7,#061d68);box-shadow:0 4px 10px #09245f55}
-.main-nav a{color:white;text-decoration:none;font:bold 14px Arial;padding:14px 13px;border-right:1px solid #ffffff55;white-space:nowrap}.main-nav a:hover{background:#2459bd}
-main{width:96%;max-width:1500px;margin:auto}
-.welcome{text-align:center;padding:22px 10px 16px;background:radial-gradient(ellipse at top,#fff,#d9efff 70%);border-radius:0 0 22px 22px}
-.welcome h1{display:inline-block;color:white;background:linear-gradient(#1646a7,#061d68);border-radius:24px;padding:5px 30px 8px;font-size:clamp(27px,4vw,52px);margin-bottom:13px;box-shadow:0 4px 12px #09245f55}
-.mission-list{width:min(980px,95%);margin:auto;display:grid;gap:7px;text-align:left}
-.mission-row{display:grid;grid-template-columns:60px 1fr;align-items:center;gap:10px;background:white;border:1px solid #d7e4f6;border-radius:28px;padding:7px 15px 7px 8px;box-shadow:0 3px 8px #09245f22}
-.mission-icon{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--bleu);color:white;font: bold 27px Arial}.mission-row:nth-child(even) .mission-icon{background:var(--rouge)}
-.mission-row p{font-size:clamp(12px,1.35vw,18px);line-height:1.3;font-weight:bold}
-.quick-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:13px;padding:16px 6px}
-.action{background:#fff;text-align:center;text-decoration:none;border:1px solid #cbdaf2;border-bottom:8px solid var(--bleu);border-radius:23px;padding:12px 9px 15px;box-shadow:0 5px 10px #09245f33;color:var(--texte)}
-.action:nth-child(even){border-bottom-color:var(--rouge)}.action:hover{transform:translateY(-3px)}
-.action-icon{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;margin:0 auto 8px;background:#0754bd;color:white;font:bold 31px Arial}.action:nth-child(even) .action-icon{background:var(--rouge)}
-.action-title{font-size:clamp(13px,1.4vw,20px);font-weight:900;margin-bottom:5px}.action-description{font-size:clamp(10px,1vw,14px);line-height:1.3;font-weight:bold}
-.support-area{padding:10px 6px 22px}.search-box{display:flex;gap:10px;background:white;padding:13px;border-radius:15px;margin-bottom:14px;box-shadow:0 3px 12px #09245f18}
-.search-box input{flex:1;min-width:0;padding:12px;border:1px solid #cbd7e8;border-radius:9px;font-size:15px}.search-box button{background:var(--bleu);color:white;border:0;border-radius:9px;padding:0 18px;font-weight:bold}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{background:white;border:1px solid #d5e2f5;border-radius:13px;text-align:center;padding:14px}.stat-icon{font-size:22px}.stat-number{font-size:24px;font-weight:bold}.stat-title{font:12px Arial;color:#596780;margin-top:3px}
-footer{text-align:center;color:white;background:linear-gradient(#0a3295,#061b65);border-top:5px solid var(--rouge);padding:17px;font-weight:bold}
-@media(max-width:850px){.quick-actions{grid-template-columns:repeat(3,1fr)}.main-nav a{padding:11px 9px;font-size:12px}}
-@media(max-width:600px){.letterhead{grid-template-columns:68px 1fr;gap:8px;padding:9px}.logo{width:66px;height:66px}.header-title{font-size:clamp(11px,3.4vw,17px)}.header-address,.header-contact{font-size:clamp(9px,2.5vw,12px)}.letterhead-rules span{height:4px!important}.main-nav{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto}.main-nav a{font-size:11px;padding:11px}.welcome{padding:16px 5px}.welcome h1{font-size:25px;padding:6px 16px}.mission-list{width:98%}.mission-row{grid-template-columns:43px 1fr;gap:8px;padding:6px 9px 6px 6px;border-radius:17px}.mission-icon{width:40px;height:40px;font-size:21px}.mission-row p{font-size:11px}.quick-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:12px 3px}.action{padding:11px 7px;border-radius:17px;border-bottom-width:6px}.action-icon{width:52px;height:52px;font-size:25px}.action-title{font-size:13px}.action-description{font-size:10px}.search-box{flex-direction:column}.search-box button{height:43px}.stats{gap:6px}.stat{padding:10px 4px}.stat-number{font-size:19px}.stat-title{font-size:10px}footer{font-size:12px}}
+.letterhead-rules{
+ display:grid;
+ gap:4px;
+ margin-top:12px;
+}
+.letterhead-rules span:first-child{
+ height:7px;
+ background:var(--bleu);
+ border-radius:8px;
+}
+.letterhead-rules span:last-child{
+ height:6px;
+ background:var(--rouge);
+ margin:0 2%;
+ border-radius:8px;
+}
+
+/* NAVIGATION */
+.main-nav{
+ display:flex;
+ justify-content:center;
+ flex-wrap:wrap;
+ background:linear-gradient(#1646a7,#061d68);
+ box-shadow:0 4px 10px #09245f55;
+}
+.main-nav a{
+ color:white;
+ text-decoration:none;
+ font:bold 14px Arial;
+ padding:14px 13px;
+ border-right:1px solid #ffffff55;
+ white-space:nowrap;
+}
+.main-nav a:hover{background:#2459bd}
+
+/* CONTENU */
+main{
+ width:96%;
+ max-width:1500px;
+ margin:auto;
+}
+.welcome{
+ text-align:center;
+ padding:22px 10px 16px;
+ background:radial-gradient(ellipse at top,#fff,#d9efff 70%);
+ border-radius:0 0 22px 22px;
+}
+.welcome h1{
+ display:inline-block;
+ color:white;
+ background:linear-gradient(#1646a7,#061d68);
+ border-radius:24px;
+ padding:7px 30px 9px;
+ font-size:clamp(27px,4vw,48px);
+ margin-bottom:15px;
+ box-shadow:0 4px 12px #09245f55;
+}
+.mission-list{
+ width:min(980px,95%);
+ margin:auto;
+ display:grid;
+ gap:7px;
+ text-align:left;
+}
+.mission-row{
+ display:grid;
+ grid-template-columns:60px 1fr;
+ align-items:center;
+ gap:10px;
+ background:white;
+ border:1px solid #d7e4f6;
+ border-radius:28px;
+ padding:7px 15px 7px 8px;
+ box-shadow:0 3px 8px #09245f22;
+}
+.mission-icon{
+ width:52px;
+ height:52px;
+ border-radius:50%;
+ display:grid;
+ place-items:center;
+ background:var(--bleu);
+ color:white;
+ font:bold 27px Arial;
+}
+.mission-row:nth-child(even) .mission-icon{background:var(--rouge)}
+.mission-row p{
+ font-size:clamp(12px,1.35vw,18px);
+ line-height:1.4;
+ font-weight:bold;
+}
+
+/* IMAGE DE L'EGLISE */
+.church-section{
+ margin:22px 6px;
+ overflow:hidden;
+ border-radius:20px;
+ background:#fff;
+ box-shadow:0 5px 18px #09245f33;
+}
+.church-picture{
+ position:relative;
+ min-height:260px;
+ background:linear-gradient(180deg,#64c8ff,#eaf8ff);
+}
+.church-picture img{
+ display:block;
+ width:100%;
+ max-height:550px;
+ min-height:260px;
+ object-fit:cover;
+ object-position:center;
+}
+.church-caption{
+ background:linear-gradient(120deg,#082b83,#1646a7);
+ color:white;
+ text-align:center;
+ padding:15px 12px;
+}
+.church-caption h2{
+ font-size:clamp(20px,3vw,32px);
+ margin-bottom:5px;
+}
+.church-caption p{
+ font-size:clamp(12px,1.5vw,17px);
+}
+
+/* PASSAGES BIBLIQUES */
+.bible-section{
+ margin:25px 6px;
+ padding:22px 16px;
+ background:linear-gradient(145deg,#eaf6ff,#fff 55%,#dcecff);
+ border:2px solid #c7d9f3;
+ border-radius:20px;
+ box-shadow:0 5px 16px #09245f22;
+}
+.bible-heading{
+ text-align:center;
+ color:var(--bleu);
+ margin-bottom:20px;
+}
+.bible-heading .book-icon{
+ font-size:43px;
+ display:block;
+ margin-bottom:5px;
+}
+.bible-heading h2{
+ font-size:clamp(23px,3vw,36px);
+}
+.bible-heading p{
+ margin-top:7px;
+ font-size:15px;
+}
+.bible-card{
+ background:#fff;
+ border-left:7px solid var(--bleu);
+ border-radius:13px;
+ padding:20px;
+ margin:17px auto;
+ max-width:1050px;
+ box-shadow:0 4px 12px #09245f18;
+}
+.bible-card:nth-of-type(odd){border-left-color:var(--rouge)}
+.bible-reference{
+ color:var(--bleu);
+ font-size:clamp(20px,2.5vw,27px);
+ margin-bottom:13px;
+}
+.bible-text{
+ font-size:clamp(14px,1.5vw,18px);
+ line-height:1.8;
+ color:#263957;
+}
+.bible-text p{margin-bottom:8px}
+.bible-text strong{color:var(--bleu)}
+.meditation{
+ margin-top:16px;
+ padding:15px;
+ background:#edf5ff;
+ border-radius:10px;
+ line-height:1.7;
+ font-size:clamp(13px,1.4vw,16px);
+}
+.meditation h3{
+ color:#a71930;
+ margin-bottom:8px;
+ font-size:18px;
+}
+.bible-conclusion{
+ max-width:1050px;
+ margin:20px auto 0;
+ padding:20px;
+ text-align:center;
+ color:white;
+ background:linear-gradient(120deg,#082b83,#1646a7);
+ border-radius:14px;
+ font-size:clamp(15px,1.7vw,20px);
+ line-height:1.7;
+ font-weight:bold;
+}
+
+/* ACCES RAPIDES */
+.quick-actions{
+ display:grid;
+ grid-template-columns:repeat(5,minmax(0,1fr));
+ gap:13px;
+ padding:16px 6px;
+}
+.action{
+ background:#fff;
+ text-align:center;
+ text-decoration:none;
+ border:1px solid #cbdaf2;
+ border-bottom:8px solid var(--bleu);
+ border-radius:23px;
+ padding:12px 9px 15px;
+ box-shadow:0 5px 10px #09245f33;
+ color:var(--texte);
+}
+.action:nth-child(even){border-bottom-color:var(--rouge)}
+.action:hover{transform:translateY(-3px)}
+.action-icon{
+ width:64px;
+ height:64px;
+ border-radius:50%;
+ display:grid;
+ place-items:center;
+ margin:0 auto 8px;
+ background:#0754bd;
+ color:white;
+ font:bold 31px Arial;
+}
+.action:nth-child(even) .action-icon{background:var(--rouge)}
+.action-title{
+ font-size:clamp(13px,1.4vw,20px);
+ font-weight:900;
+ margin-bottom:5px;
+}
+.action-description{
+ font-size:clamp(10px,1vw,14px);
+ line-height:1.3;
+ font-weight:bold;
+}
+
+/* RECHERCHE ET STATISTIQUES */
+.support-area{padding:10px 6px 22px}
+.search-box{
+ display:flex;
+ gap:10px;
+ background:white;
+ padding:13px;
+ border-radius:15px;
+ margin-bottom:14px;
+ box-shadow:0 3px 12px #09245f18;
+}
+.search-box input{
+ flex:1;
+ min-width:0;
+ padding:12px;
+ border:1px solid #cbd7e8;
+ border-radius:9px;
+ font-size:15px;
+}
+.search-box button{
+ background:var(--bleu);
+ color:white;
+ border:0;
+ border-radius:9px;
+ padding:0 18px;
+ font-weight:bold;
+ cursor:pointer;
+}
+.stats{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:12px;
+}
+.stat{
+ background:white;
+ border:1px solid #d5e2f5;
+ border-radius:13px;
+ text-align:center;
+ padding:14px;
+}
+.stat-icon{font-size:22px}
+.stat-number{font-size:24px;font-weight:bold}
+.stat-title{
+ font:12px Arial;
+ color:#596780;
+ margin-top:3px;
+}
+
+/* PIED DE PAGE */
+footer{
+ text-align:center;
+ color:white;
+ background:linear-gradient(#0a3295,#061b65);
+ border-top:5px solid var(--rouge);
+ padding:17px;
+ font-weight:bold;
+}
+
+/* RESPONSIVE */
+@media(max-width:850px){
+ .quick-actions{grid-template-columns:repeat(3,1fr)}
+ .main-nav a{padding:11px 9px;font-size:12px}
+}
+@media(max-width:600px){
+ .letterhead{padding:9px}
+ .header-title{font-size:clamp(12px,3.5vw,17px);margin-bottom:8px}
+ .letterhead-content{
+  grid-template-columns:68px 1fr;
+  gap:8px;
+ }
+ .logo{width:66px;height:66px}
+ .header-address,.header-contact{font-size:clamp(9px,2.5vw,12px)}
+ .letterhead-rules span{height:4px!important}
+ .main-nav{
+  justify-content:flex-start;
+  flex-wrap:nowrap;
+  overflow-x:auto;
+ }
+ .main-nav a{font-size:11px;padding:11px}
+ .welcome{padding:16px 5px}
+ .welcome h1{font-size:25px;padding:6px 16px}
+ .mission-list{width:98%}
+ .mission-row{
+  grid-template-columns:43px 1fr;
+  gap:8px;
+  padding:6px 9px 6px 6px;
+  border-radius:17px;
+ }
+ .mission-icon{width:40px;height:40px;font-size:21px}
+ .mission-row p{font-size:11px}
+ .church-section{margin:15px 2px}
+ .church-picture,.church-picture img{min-height:190px}
+ .bible-section{margin:18px 2px;padding:14px 9px}
+ .bible-card{padding:14px;margin:12px auto}
+ .bible-text{font-size:14px}
+ .meditation{padding:12px;font-size:13px}
+ .quick-actions{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  padding:12px 3px;
+ }
+ .action{
+  padding:11px 7px;
+  border-radius:17px;
+  border-bottom-width:6px;
+ }
+ .action-icon{width:52px;height:52px;font-size:25px}
+ .action-title{font-size:13px}
+ .action-description{font-size:10px}
+ .search-box{flex-direction:column}
+ .search-box button{height:43px}
+ .stats{gap:6px}
+ .stat{padding:10px 4px}
+ .stat-number{font-size:19px}
+ .stat-title{font-size:10px}
+ footer{font-size:12px}
+}
 </style>
 </head>
+
 <body>
+
+<!-- ENTÊTE OFFICIEL MEDFAH -->
 <header class="letterhead">
-<img src="logo-medfah.jpg" alt="Logo officiel MEDFAH" class="logo">
-<div class="letterhead-text">
-<div class="header-title">Mission Église de Dieu de la Foi Apostolique d’Haïti</div>
-<div class="header-address">3, Avenue Maïs-Gâté, entre Maïs-Gâté 13 et 15, Tabarre, Port-au-Prince, Haïti</div>
-<div class="header-contact"><a href="mailto:eglisedelafoiapostolique2007@gmail.com">eglisedelafoiapostolique2007@gmail.com</a> &nbsp; | &nbsp; (+509) 37897370 / 31048016</div>
-<div class="letterhead-rules"><span></span><span></span></div>
-</div>
+ <div class="header-title">
+  Mission Église de Dieu de la Foi Apostolique d’Haïti
+ </div>
+
+ <div class="letterhead-content">
+  <img src="logo-medfah.jpg" alt="Logo officiel MEDFAH" class="logo">
+
+  <div class="letterhead-text">
+   <div class="header-address">
+    3, AVENUE MAÏS-GÂTÉ, ENTRE MAÏS-GÂTÉ 13 ET 15,
+    TABARRE, PORT-AU-PRINCE, HAÏTI
+   </div>
+
+   <div class="header-contact">
+    <a href="mailto:eglisedelafoiapostolique2007@gmail.com">
+     eglisedelafoiapostolique2007@gmail.com
+    </a>
+    &nbsp; | &nbsp; (+509) 37897370 / 31048016
+   </div>
+  </div>
+ </div>
+
+ <div class="letterhead-rules">
+  <span></span>
+  <span></span>
+ </div>
 </header>
+
+<!-- MENU PRINCIPAL -->
 <nav class="main-nav" aria-label="Navigation principale">
-<a href="index.html">⌂ Tableau de bord</a>
-<a href="membre.html">👥 Membres</a>
-<a href="carte.html">▦ Cartes de persévérance</a>
-<a href="scan.html">▧ Scanner QR Code</a>
-<a href="verify.html">✓ Vérifier une carte</a>
-<a href="programmation.html">▦ Programmation</a>
-<a href="medfah.html">⚙ Administration</a>
+ <a href="index.html">⌂ Tableau de bord</a>
+ <a href="membre.html">👥 Membres</a>
+ <a href="carte.html">▦ Cartes de persévérance</a>
+ <a href="scan.html">▧ Scanner QR Code</a>
+ <a href="verify.html">✓ Vérifier une carte</a>
+ <a href="programmation.html">▦ Programmation</a>
+ <a href="medfah.html">⚙ Administration</a>
 </nav>
+
 <main>
+
+<!-- BIENVENUE ET MISSION -->
 <section class="welcome">
-<h1>Bienvenue sur MEDFAH</h1>
-<div class="mission-list">
-<div class="mission-row"><div class="mission-icon">▤</div><p>La Mission Église de Dieu de la Foi Apostolique d’Haïti (MEDFAH) a pour vocation de proclamer l’Évangile de Jésus-Christ et de conduire les âmes vers le salut.</p></div>
-<div class="mission-row"><div class="mission-icon">♥</div><p>Elle s’engage à promouvoir l’amour, la foi, la paix, la solidarité et les valeurs chrétiennes au sein de la communauté.</p></div>
-<div class="mission-row"><div class="mission-icon">♟</div><p>Elle œuvre pour l’épanouissement spirituel, moral et social des familles, des jeunes et de toutes les générations.</p></div>
-<div class="mission-row"><div class="mission-icon">◎</div><p>Sa vision est de contribuer à la transformation de la société haïtienne par la Parole de Dieu, l’éducation spirituelle et le service communautaire.</p></div>
-<div class="mission-row"><div class="mission-icon">➤</div><p>Au-delà des frontières, MEDFAH aspire à participer à l’expansion du Royaume de Dieu et à porter le message de l’Évangile à toutes les nations.</p></div>
-</div>
+ <h1>Bienvenue sur MEDFAH</h1>
+
+ <div class="mission-list">
+
+  <div class="mission-row">
+   <div class="mission-icon">▤</div>
+   <p>La Mission Église de Dieu de la Foi Apostolique d’Haïti (MEDFAH) a pour vocation de proclamer l’Évangile de Jésus-Christ et de conduire les âmes vers le salut.</p>
+  </div>
+
+  <div class="mission-row">
+   <div class="mission-icon">♥</div>
+   <p>Elle s’engage à promouvoir l’amour, la foi, la paix, la solidarité et les valeurs chrétiennes au sein de la communauté.</p>
+  </div>
+
+  <div class="mission-row">
+   <div class="mission-icon">♟</div>
+   <p>Elle œuvre pour l’épanouissement spirituel, moral et social des familles, des jeunes et de toutes les générations.</p>
+  </div>
+
+  <div class="mission-row">
+   <div class="mission-icon">◎</div>
+   <p>Sa vision est de contribuer à la transformation de la société haïtienne par la Parole de Dieu, l’éducation spirituelle et le service communautaire.</p>
+  </div>
+
+  <div class="mission-row">
+   <div class="mission-icon">➤</div>
+   <p>Au-delà des frontières, MEDFAH aspire à participer à l’expansion du Royaume de Dieu et à porter le message de l’Évangile à toutes les nations.</p>
+  </div>
+
+ </div>
 </section>
+
+<!-- PHOTO DE L'EGLISE -->
+<section class="church-section">
+ <div class="church-picture">
+  <img
+   src="20261031_134144.jpg"
+   alt="Bâtiment de la Mission Église de Dieu de la Foi Apostolique d’Haïti"
+   onerror="this.style.display='none';"
+  >
+ </div>
+
+ <div class="church-caption">
+  <h2>Mission Église de Dieu de la Foi Apostolique d’Haïti</h2>
+  <p>Une mission de foi, d’amour, de service et de persévérance.</p>
+ </div>
+</section>
+
+<!-- MEDITATIONS ET PASSAGES BIBLIQUES -->
+<section class="bible-section">
+
+ <div class="bible-heading">
+  <span class="book-icon">📖</span>
+  <h2>La Parole de Dieu, notre fondement</h2>
+  <p>Des paroles de force, de courage et de confiance pour notre mission.</p>
+ </div>
+
+ <!-- ESAIE -->
+ <article class="bible-card">
+  <h2 class="bible-reference">Ésaïe 40:28-31</h2>
+
+  <div class="bible-text">
+   <p><strong>28.</strong> Ne le sais-tu pas? ne l'as-tu pas appris? C'est le Dieu d'éternité, l'Éternel, qui a créé les extrémités de la terre; il ne se fatigue point, il ne se lasse point; on ne peut sonder son intelligence.</p>
+
+   <p><strong>29.</strong> Il donne de la force à celui qui est fatigué, et il augmente la vigueur de celui qui tombe en défaillance.</p>
+
+   <p><strong>30.</strong> Les adolescents se fatiguent et se lassent, et les jeunes hommes chancellent;</p>
+
+   <p><strong>31.</strong> Mais ceux qui se confient en l'Éternel renouvellent leur force. Ils prennent le vol comme les aigles; ils courent, et ne se lassent point, ils marchent, et ne se fatiguent point.</p>
+  </div>
+
+  <div class="meditation">
+   <h3>Méditation spirituelle</h3>
+   <p>L'être humain possède des limites. Il peut connaître la fatigue, le découragement et les moments difficiles. Mais la Parole nous rappelle que Dieu, lui, ne se fatigue jamais. Sa puissance ne diminue pas et son intelligence est infinie.</p>
+
+   <p>Lorsque nous traversons des épreuves, nous ne devons pas croire que tout est terminé. Celui qui place sa confiance en Dieu reçoit une force nouvelle pour continuer son chemin. Comme l'aigle qui prend son envol, le croyant peut se relever et avancer malgré les difficultés.</p>
+
+   <p>Pour MEDFAH, ce passage est un appel à la persévérance. Continuons à servir Dieu avec patience, courage et fidélité. Même lorsque les forces humaines diminuent, le Seigneur demeure notre source de renouvellement.</p>
+  </div>
+ </article>
+
+ <!-- MATTHIEU 11 -->
+ <article class="bible-card">
+  <h2 class="bible-reference">Matthieu 11:12-15</h2>
+
+  <div class="bible-text">
+   <p><strong>12.</strong> Depuis le temps de Jean-Baptiste jusqu'à présent, le royaume des cieux est forcé, et ce sont les violents qui s'en emparent.</p>
+
+   <p><strong>13.</strong> Car tous les prophètes et la loi ont prophétisé jusqu'à Jean;</p>
+
+   <p><strong>14.</strong> et, si vous voulez le comprendre, c'est lui qui est l'Élie qui devait venir.</p>
+
+   <p><strong>15.</strong> Que celui qui a des oreilles pour entendre entende.</p>
+  </div>
+
+  <div class="meditation">
+   <h3>Méditation spirituelle</h3>
+   <p>Dans ce passage, Jésus nous appelle à prendre au sérieux le Royaume de Dieu. L'expression « les violents » ne signifie pas qu'il faut utiliser la violence physique contre les autres. Elle évoque ici l'ardeur, le courage, la détermination et l'engagement spirituel de ceux qui cherchent le Royaume avec sérieux.</p>
+
+   <p>La foi ne doit pas être seulement une parole prononcée avec les lèvres. Elle doit se manifester dans nos choix, notre comportement, notre fidélité et notre manière de servir Dieu. Il faut parfois lutter contre le découragement, la paresse spirituelle et tout ce qui nous éloigne de notre vocation.</p>
+
+   <p>Que chaque membre de MEDFAH demeure engagé dans l'œuvre du Seigneur. Ne reculons pas devant les difficultés. Avançons avec une foi ferme, un cœur sincère et une détermination renouvelée.</p>
+  </div>
+ </article>
+
+ <!-- MATTHIEU 6 -->
+ <article class="bible-card">
+  <h2 class="bible-reference">Matthieu 6:33-34</h2>
+
+  <div class="bible-text">
+   <p><strong>33.</strong> Cherchez premièrement le royaume et la justice de Dieu; et toutes ces choses vous seront données par-dessus.</p>
+
+   <p><strong>34.</strong> Ne vous inquiétez donc pas du lendemain; car le lendemain aura soin de lui-même. À chaque jour suffit sa peine.</p>
+  </div>
+
+  <div class="meditation">
+   <h3>Méditation spirituelle</h3>
+   <p>Jésus nous enseigne à placer Dieu à la première place dans notre vie. Nos préoccupations quotidiennes, nos responsabilités et nos besoins peuvent parfois occuper toute notre pensée. Pourtant, le Seigneur nous invite à rechercher d'abord son Royaume et sa justice.</p>
+
+   <p>Chercher le Royaume de Dieu, c'est choisir de vivre dans l'amour, la vérité, la paix, la justice et le service. C'est aussi apprendre à faire confiance à Dieu au lieu de laisser l'inquiétude gouverner notre cœur.</p>
+
+   <p>Pour notre mission, ce passage nous rappelle que nos activités, nos projets et nos décisions doivent toujours être guidés par la volonté de Dieu. Construisons l'avenir avec foi, sans oublier de lui confier chaque journée.</p>
+  </div>
+ </article>
+
+ <div class="bible-conclusion">
+  Que le Royaume de Dieu soit notre priorité, que sa justice dirige nos actions et que notre foi demeure ferme jusqu'à la fin. Avançons avec courage, persévérance et détermination dans l'œuvre du Seigneur. Que toute la gloire revienne à Jésus-Christ, notre Seigneur et Sauveur.
+ </div>
+
+</section>
+
+<!-- ACCES RAPIDES -->
 <section class="quick-actions" aria-label="Accès rapides">
-<a href="scanner.html" class="action"><div class="action-icon">▣</div><div class="action-title">Scanner QR Code</div><div class="action-description">Scanner une carte de persévérance.</div></a>
-<a href="membre.html" class="action"><div class="action-icon">♟</div><div class="action-title">Membres</div><div class="action-description">Consulter les noms et prénoms des membres.</div></a>
-<a href="programmation.html" class="action"><div class="action-icon">▦</div><div class="action-title">Programmation de l’Église</div><div class="action-description">Consulter les activités et le programme de l’Église.</div></a>
-<a href="verify.html" class="action"><div class="action-icon">✓</div><div class="action-title">Vérifier Carte</div><div class="action-description">Vérifier une carte de persévérance.</div></a>
-<a href="medfah.html" class="action"><div class="action-icon">⚙</div><div class="action-title">Administration</div><div class="action-description">Gestion administrative de MEDFAH.</div></a>
+
+ <a href="scan.html" class="action">
+  <div class="action-icon">▣</div>
+  <div class="action-title">Scanner QR Code</div>
+  <div class="action-description">Scanner une carte de persévérance.</div>
+ </a>
+
+ <a href="membre.html" class="action">
+  <div class="action-icon">♟</div>
+  <div class="action-title">Membres</div>
+  <div class="action-description">Consulter les noms et prénoms des membres.</div>
+ </a>
+
+ <a href="programmation.html" class="action">
+  <div class="action-icon">▦</div>
+  <div class="action-title">Programmation de l’Église</div>
+  <div class="action-description">Consulter les activités et le programme de l’Église.</div>
+ </a>
+
+ <a href="verify.html" class="action">
+  <div class="action-icon">✓</div>
+  <div class="action-title">Vérifier Carte</div>
+  <div class="action-description">Vérifier une carte de persévérance.</div>
+ </a>
+
+ <a href="medfah.html" class="action">
+  <div class="action-icon">⚙</div>
+  <div class="action-title">Administration</div>
+  <div class="action-description">Gestion administrative de MEDFAH.</div>
+ </a>
+
 </section>
+
+<!-- RECHERCHE ET STATISTIQUES -->
 <section class="support-area">
-<div class="search-box"><input type="search" id="homeSearch" placeholder="Rechercher un membre..." aria-label="Rechercher un membre"><button type="button" onclick="rechercherMembre()">🔎 Rechercher</button></div>
-<section class="stats" aria-label="Statistiques publiques">
-<div class="stat"><div class="stat-icon">👥</div><div class="stat-number" id="totalMembers">—</div><div class="stat-title">Membres</div></div>
-<div class="stat"><div class="stat-icon">⛪</div><div class="stat-number" id="totalAssemblees">—</div><div class="stat-title">Assemblées</div></div>
-<div class="stat"><div class="stat-icon">💳</div><div class="stat-number" id="totalCartes">—</div><div class="stat-title">Cartes</div></div>
+
+ <div class="search-box">
+  <input
+   type="search"
+   id="homeSearch"
+   placeholder="Rechercher un membre..."
+   aria-label="Rechercher un membre"
+  >
+  <button type="button" onclick="rechercherMembre()">🔎 Rechercher</button>
+ </div>
+
+ <section class="stats" aria-label="Statistiques publiques">
+
+  <div class="stat">
+   <div class="stat-icon">👥</div>
+   <div class="stat-number" id="totalMembers">—</div>
+   <div class="stat-title">Membres</div>
+  </div>
+
+  <div class="stat">
+   <div class="stat-icon">⛪</div>
+   <div class="stat-number" id="totalAssemblees">—</div>
+   <div class="stat-title">Assemblées</div>
+  </div>
+
+  <div class="stat">
+   <div class="stat-icon">💳</div>
+   <div class="stat-number" id="totalCartes">—</div>
+   <div class="stat-title">Cartes</div>
+  </div>
+
+ </section>
 </section>
-</section>
+
 </main>
-<footer>© 2026 MEDFAH — Tous droits réservés.</footer>
+
+<footer>
+ © 2026 MEDFAH — Tous droits réservés.
+</footer>
+
+<!-- CONNEXION EXISTANTE A SUPABASE ET AUX FONCTIONS DU SITE -->
 <script src="config.js"></script>
 <script src="app.js"></script>
+
 <script>
 function rechercherMembre(){
- const texte=document.getElementById("homeSearch").value.trim();
- window.location.href=texte?"membre.html?q="+encodeURIComponent(texte):"membre.html";
+ const champ=document.getElementById("homeSearch");
+ const texte=champ.value.trim();
+
+ window.location.href=texte
+  ?"membre.html?q="+encodeURIComponent(texte)
+  :"membre.html";
 }
+
 document.getElementById("homeSearch").addEventListener("keydown",function(e){
- if(e.key==="Enter") rechercherMembre();
+ if(e.key==="Enter"){
+  rechercherMembre();
+ }
 });
 </script>
+
 </body>
 </html>
