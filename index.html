@@ -1,9 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>MEDFAH — Accueil</title>
 
 <style>
@@ -19,55 +19,152 @@ body{
     color:#172033;
 }
 
-/* ================= HEADER ================= */
+/* ===== EN-TETE OFFICIEL MEDFAH ===== */
 
 header{
+    width:100%;
     background:white;
-    border-bottom:1px solid #e5e7eb;
     padding:12px 20px;
-    min-height:82px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
 }
 
-.header-left{
-    display:flex;
+.letterhead{
+    max-width:1500px;
+    margin:auto;
+    display:grid;
+    grid-template-columns:150px minmax(0,1fr);
     align-items:center;
-    gap:12px;
+    gap:18px;
 }
 
 .logo{
-    width:58px;
-    height:58px;
+    width:145px;
+    height:145px;
     object-fit:contain;
 }
 
+.letterhead-text{
+    text-align:center;
+    min-width:0;
+}
+
 .header-title{
-    font-size:18px;
+    color:#172f79;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:clamp(20px,2.65vw,38px);
+    font-weight:800;
+    line-height:1.12;
+    text-transform:uppercase;
+}
+
+.header-address{
+    margin-top:6px;
+    color:#d52b32;
+    font-size:clamp(13px,1.75vw,24px);
+    font-weight:800;
+    line-height:1.25;
+    text-transform:uppercase;
+}
+
+.header-contact{
+    margin-top:6px;
+    color:#111;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:clamp(13px,1.7vw,23px);
     font-weight:700;
-    line-height:1.2;
-    max-width:470px;
+    overflow-wrap:anywhere;
+}
+
+.header-contact a{
+    color:#172f79;
+    text-decoration:underline;
+}
+
+.letterhead-rules{
+    margin-top:12px;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+
+.letterhead-rules span:first-child{
+    height:6px;
+    background:#172f79;
+}
+
+.letterhead-rules span:last-child{
+    height:6px;
+    margin:0 2%;
+    background:#d52b32;
+}
+
+/* ===== PRESENTATION MEDFAH ===== */
+
+.container{
+    width:92%;
+    max-width:1050px;
+    margin:20px auto;
+}
+
+.intro{
+    text-align:center;
+    margin:20px auto 24px;
+}
+
+.intro h1{
+    color:#172f79;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:clamp(27px,3vw,36px);
+    margin-bottom:15px;
+}
+
+.mission-texts{
+    max-width:1000px;
+    margin:auto;
+    display:grid;
+    gap:10px;
+    text-align:left;
+}
+
+.mission-texts p{
+    padding:11px 15px 11px 20px;
+    background:white;
+    border-left:4px solid #172f79;
+    border-radius:7px;
+    box-shadow:0 2px 9px rgba(0,0,0,.045);
+    color:#354052;
+    font-size:15px;
+    line-height:1.6;
+}
+
+.mission-texts p:nth-child(even){
+    border-left-color:#d52b32;
+}
+
+/* ===== MENU PRINCIPAL ===== */
+
+.menu-area{
+    display:flex;
+    justify-content:flex-end;
+    position:relative;
+    margin:15px 0 22px;
 }
 
 .menu-button{
     width:50px;
     height:48px;
     border:none;
-    border-radius:14px;
-    background:#172033;
+    border-radius:12px;
+    background:#172f79;
     color:white;
     font-size:25px;
     cursor:pointer;
 }
 
-/* ================= MENU ================= */
-
 .menu{
     display:none;
     position:absolute;
-    right:18px;
-    top:75px;
+    right:0;
+    top:55px;
     width:250px;
     max-width:calc(100vw - 30px);
     background:white;
@@ -94,33 +191,7 @@ header{
     background:#f5f7fb;
 }
 
-/* ================= MAIN ================= */
-
-.container{
-    width:92%;
-    max-width:1050px;
-    margin:25px auto;
-}
-
-/* ================= INTRO ================= */
-
-.intro{
-    text-align:center;
-    margin-bottom:22px;
-}
-
-.intro h1{
-    font-size:30px;
-    margin-bottom:6px;
-}
-
-.intro p{
-    color:#697386;
-    font-size:15px;
-    line-height:1.5;
-}
-
-/* ================= SEARCH ================= */
+/* ===== RECHERCHE ===== */
 
 .search-box{
     background:white;
@@ -143,20 +214,20 @@ header{
 }
 
 .search-box input:focus{
-    border-color:#172033;
+    border-color:#172f79;
 }
 
 .search-box button{
     border:none;
     border-radius:11px;
-    background:#172033;
+    background:#172f79;
     color:white;
     padding:0 20px;
     font-size:15px;
     cursor:pointer;
 }
 
-/* ================= STATISTICS ================= */
+/* ===== STATISTIQUES ===== */
 
 .stats{
     display:grid;
@@ -188,7 +259,7 @@ header{
     margin-top:3px;
 }
 
-/* ================= SERVICES ================= */
+/* ===== SERVICES ===== */
 
 .services-title{
     font-size:19px;
@@ -210,7 +281,7 @@ header{
     text-decoration:none;
     color:#172033;
     box-shadow:0 3px 15px rgba(0,0,0,.05);
-    transition:transform .2s, box-shadow .2s;
+    transition:transform .2s,box-shadow .2s;
 }
 
 .action:hover{
@@ -235,7 +306,7 @@ header{
     line-height:1.5;
 }
 
-/* ================= FOOTER ================= */
+/* ===== FOOTER ===== */
 
 footer{
     text-align:center;
@@ -244,42 +315,73 @@ footer{
     padding:30px 10px;
 }
 
-/* ================= MOBILE ================= */
+/* ===== TELEPHONE ===== */
 
 @media(max-width:700px){
 
     header{
-        padding:10px 15px;
+        padding:10px 10px 8px;
+    }
+
+    .letterhead{
+        grid-template-columns:78px minmax(0,1fr);
+        gap:8px;
     }
 
     .logo{
-        width:50px;
-        height:50px;
+        width:76px;
+        height:76px;
     }
 
     .header-title{
-        font-size:15px;
-        max-width:230px;
+        font-size:clamp(14px,3.6vw,19px);
+    }
+
+    .header-address{
+        font-size:clamp(10px,2.7vw,14px);
+    }
+
+    .header-contact{
+        font-size:clamp(10px,2.6vw,14px);
+    }
+
+    .letterhead-rules{
+        margin-top:8px;
+        gap:3px;
+    }
+
+    .letterhead-rules span{
+        height:4px !important;
+    }
+
+    .container{
+        width:92%;
+        margin:17px auto;
+    }
+
+    .intro{
+        margin:17px auto 20px;
+    }
+
+    .intro h1{
+        font-size:26px;
+        margin-bottom:12px;
+    }
+
+    .mission-texts{
+        gap:8px;
+    }
+
+    .mission-texts p{
+        padding:10px 11px 10px 14px;
+        font-size:13px;
+        line-height:1.55;
     }
 
     .menu-button{
         width:46px;
         height:44px;
         font-size:23px;
-        flex-shrink:0;
-    }
-
-    .container{
-        width:92%;
-        margin:20px auto;
-    }
-
-    .intro h1{
-        font-size:27px;
-    }
-
-    .intro p{
-        font-size:14px;
     }
 
     .search-box{
@@ -322,9 +424,24 @@ footer{
 }
 
 @media(max-width:360px){
+
+    .letterhead{
+        grid-template-columns:62px minmax(0,1fr);
+        gap:6px;
+    }
+
+    .logo{
+        width:60px;
+        height:60px;
+    }
+
     .header-title{
-        font-size:13px;
-        max-width:175px;
+        font-size:12px;
+    }
+
+    .header-address,
+    .header-contact{
+        font-size:9px;
     }
 
     .stats{
@@ -348,64 +465,124 @@ footer{
 
 <body>
 
+<!-- ===== EN-TETE OFFICIEL ===== -->
+
 <header>
-    <div class="header-left">
+    <div class="letterhead">
+
         <img
             src="logo-medfah.jpg"
-            alt="Logo MEDFAH"
+            alt="Logo officiel MEDFAH"
             class="logo"
         >
 
-        <div class="header-title">
-            Mission Église de Dieu de la Foi
-            Apostolique d’Haïti
+        <div class="letterhead-text">
+
+            <div class="header-title">
+                Mission Église de Dieu de la Foi Apostolique d’Haïti
+            </div>
+
+            <div class="header-address">
+                3, Avenue Maïs-Gâté, entre Maïs-Gâté 13 et 15,
+                Tabarre, Port-au-Prince, Haïti
+            </div>
+
+            <div class="header-contact">
+                <a href="mailto:eglisedelafoiapostolique2007@gmail.com">
+                    eglisedelafoiapostolique2007@gmail.com
+                </a>
+                &nbsp; (+509) 37897370 / 31048016
+            </div>
+
+            <div class="letterhead-rules" aria-hidden="true">
+                <span></span>
+                <span></span>
+            </div>
+
         </div>
     </div>
-
-    <button
-        type="button"
-        class="menu-button"
-        id="menuButton"
-        aria-label="Ouvrir le menu"
-        aria-expanded="false"
-        aria-controls="menu"
-        onclick="ouvrirMenu()"
-    >
-        ☰
-    </button>
 </header>
-
-<!-- MENU PRINCIPAL -->
-
-<nav id="menu" class="menu">
-
-    <a href="index.html">🏠 Accueil</a>
-
-    <a href="membre.html">👥 Liste des Membres</a>
-
-    <a href="programmation.html">📅 Programmation de l’Église</a>
-
-    <a href="scan.html">📷 Scanner QR Code</a>
-
-    <a href="verify.html">✓ Vérifier Carte</a>
-
-    <a href="medfah.html">⚙️ Administration</a>
-
-</nav>
 
 <main class="container">
 
-    <!-- ACCUEIL -->
+    <!-- ===== BIENVENUE ET MISSION ===== -->
 
     <section class="intro">
+
         <h1>Bienvenue sur MEDFAH</h1>
 
-        <p>
-            Plateforme officielle de gestion des membres et des cartes.
-        </p>
+        <div class="mission-texts">
+
+            <p>
+                La Mission Église de Dieu de la Foi Apostolique d’Haïti
+                (MEDFAH) a pour vocation de proclamer l’Évangile de
+                Jésus-Christ et de conduire les âmes vers le salut.
+            </p>
+
+            <p>
+                Elle s’engage à promouvoir l’amour, la foi, la paix,
+                la solidarité et les valeurs chrétiennes au sein
+                de la communauté.
+            </p>
+
+            <p>
+                Elle œuvre pour l’épanouissement spirituel, moral
+                et social des familles, des jeunes et de toutes
+                les générations.
+            </p>
+
+            <p>
+                Sa vision est de contribuer à la transformation
+                de la société haïtienne par la Parole de Dieu,
+                l’éducation spirituelle et le service communautaire.
+            </p>
+
+            <p>
+                Au-delà des frontières, MEDFAH aspire à participer
+                à l’expansion du Royaume de Dieu et à porter le
+                message de l’Évangile à toutes les nations.
+            </p>
+
+        </div>
     </section>
 
-    <!-- RECHERCHE DES MEMBRES -->
+    <!-- ===== MENU PRINCIPAL ===== -->
+
+    <div class="menu-area">
+
+        <button
+            type="button"
+            class="menu-button"
+            id="menuButton"
+            aria-label="Ouvrir le menu"
+            aria-expanded="false"
+            aria-controls="menu"
+            onclick="ouvrirMenu()"
+        >
+            ☰
+        </button>
+
+        <nav id="menu" class="menu">
+
+            <a href="index.html">🏠 Accueil</a>
+
+            <a href="membre.html">👥 Liste des Membres</a>
+
+            <a href="programmation.html">
+                📅 Programmation de l’Église
+            </a>
+
+            <a href="scan.html">📷 Scanner QR Code</a>
+
+            <a href="verify.html">✓ Vérifier Carte</a>
+
+            <a href="medfah.html">⚙️ Administration</a>
+
+        </nav>
+
+    </div>
+
+    <!-- ===== RECHERCHE DES MEMBRES ===== -->
 
     <section class="search-box">
 
@@ -425,37 +602,31 @@ footer{
 
     </section>
 
-    <!-- STATISTIQUES -->
+    <!-- ===== STATISTIQUES ===== -->
 
     <section class="stats">
 
         <div class="stat">
             <div class="stat-icon">👥</div>
-
             <div class="stat-number" id="totalMembers">—</div>
-
             <div class="stat-title">Membres</div>
         </div>
 
         <div class="stat">
             <div class="stat-icon">⛪</div>
-
             <div class="stat-number" id="totalAssemblees">—</div>
-
             <div class="stat-title">Assemblées</div>
         </div>
 
         <div class="stat">
             <div class="stat-icon">💳</div>
-
             <div class="stat-number" id="totalCartes">—</div>
-
             <div class="stat-title">Cartes</div>
         </div>
 
     </section>
 
-    <!-- SERVICES MEDFAH -->
+    <!-- ===== SERVICES MEDFAH ===== -->
 
     <div class="services-title">
         Services MEDFAH
@@ -463,84 +634,46 @@ footer{
 
     <section class="actions">
 
-        <!-- SCANNER QR CODE -->
-
         <a href="scan.html" class="action">
-
             <div class="action-icon">📷</div>
-
-            <div class="action-title">
-                Scanner QR Code
-            </div>
-
+            <div class="action-title">Scanner QR Code</div>
             <div class="action-description">
                 Scanner une carte de persévérance.
             </div>
-
         </a>
 
-        <!-- MEMBRES -->
-
         <a href="membre.html" class="action">
-
             <div class="action-icon">👥</div>
-
-            <div class="action-title">
-                Membres
-            </div>
-
+            <div class="action-title">Membres</div>
             <div class="action-description">
                 Consulter les noms et prénoms des membres.
             </div>
-
         </a>
 
-        <!-- PROGRAMMATION DE L'ÉGLISE -->
-
         <a href="programmation.html" class="action">
-
             <div class="action-icon">📅</div>
-
             <div class="action-title">
                 Programmation de l’Église
             </div>
-
             <div class="action-description">
                 Consulter les activités et le programme de l’Église.
             </div>
-
         </a>
 
-        <!-- VÉRIFICATION DE CARTE -->
-
         <a href="verify.html" class="action">
-
             <div class="action-icon">✓</div>
-
-            <div class="action-title">
-                Vérifier Carte
-            </div>
-
+            <div class="action-title">Vérifier Carte</div>
             <div class="action-description">
                 Vérifier une carte de persévérance.
             </div>
-
         </a>
 
-        <!-- ADMINISTRATION -->
-
         <a href="medfah.html" class="action">
-
             <div class="action-icon">⚙️</div>
-
-            <div class="action-title">
-                Administration
-            </div>
-
+            <div class="action-title">Administration</div>
             <div class="action-description">
                 Gestion administrative de MEDFAH.
             </div>
-
         </a>
 
     </section>
@@ -551,12 +684,13 @@ footer{
     © 2026 MEDFAH — Tous droits réservés.
 </footer>
 
-<!-- CONSERVATION DES SCRIPTS EXISTANTS -->
+<!-- ===== SCRIPTS EXISTANTS ===== -->
 
 <script src="config.js"></script>
 <script src="app.js"></script>
 
 <script>
+
 function ouvrirMenu(){
 
     const menu = document.getElementById("menu");
@@ -617,6 +751,7 @@ document.addEventListener("click", function(event){
     }
 
 });
+
 </script>
 
 </body>
