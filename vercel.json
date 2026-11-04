@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/scanner",
-      "destination": "/scanner.html"
+      "destination": "/scan.html"
     },
     {
       "source": "/membre",
