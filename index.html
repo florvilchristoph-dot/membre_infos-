@@ -22,27 +22,28 @@ body{
  background:linear-gradient(#cdeaff,#f8fbff 55%,#dcecff);
 }
 
-/* ENTÊTE OFFICIEL MEDFAH */
+
+/* ENTÊTE OFFICIEL MEDFAH — ALIGNEMENT CORRIGÉ */
 .letterhead{
  background:#fff;
- padding:8px 5.5% 7px;
+ padding:4px 4% 4px;
  border:0;
- --logo-width:clamp(112px,10.5vw,160px);
- --header-gap:14px;
+ --logo-width:clamp(85px,9vw,125px);
+ --header-gap:9px;
 }
+
 .header-title{
- width:100%;
  text-align:center;
  color:#071f70;
  font-family:Georgia,"Times New Roman",serif;
- font-size:clamp(17px,2.45vw,36px);
+ font-size:clamp(16px,2.1vw,30px);
  font-weight:900;
  text-transform:uppercase;
- line-height:1.08;
- white-space:normal;
- margin:0 0 3px;
+ line-height:1.05;
+ margin:0 0 1px;
  padding:0;
 }
+
 .letterhead-content{
  display:grid;
  grid-template-columns:var(--logo-width) minmax(0,1fr);
@@ -51,68 +52,130 @@ body{
  margin:0;
  padding:0;
 }
+
 .logo{
  display:block;
  width:var(--logo-width);
- height:clamp(112px,10.5vw,160px);
+ height:var(--logo-width);
  object-fit:contain;
  object-position:center;
+ clip-path:inset(0 0 5px 0);
+ border:0;
  margin:0;
  padding:0;
 }
+
 .letterhead-text{
  min-width:0;
  text-align:left;
  margin:0;
  padding:0;
 }
+
 .header-address{
  color:#c51d32;
  font-family:Arial,Helvetica,sans-serif;
- font-size:clamp(11px,1.65vw,23px);
+ font-size:clamp(10px,1.5vw,21px);
  font-weight:900;
  text-transform:uppercase;
- line-height:1.18;
- white-space:normal;
+ line-height:1.12;
  margin:0;
  padding:0;
 }
+
 .header-contact{
  color:#111;
  font-family:Georgia,"Times New Roman",serif;
- font-size:clamp(11px,1.7vw,24px);
+ font-size:clamp(10px,1.5vw,21px);
  font-weight:700;
- line-height:1.25;
- white-space:normal;
- margin:5px 0 0;
+ line-height:1.15;
+ margin:3px 0 0;
  padding:0;
 }
+
 .header-contact a{
  color:#082b83;
  text-decoration:underline;
- text-underline-offset:2px;
 }
+
 .letterhead-rules{
  margin-left:calc(var(--logo-width) + var(--header-gap));
  width:calc(100% - var(--logo-width) - var(--header-gap));
  display:flex;
  flex-direction:column;
- gap:3px;
- margin-top:4px;
+ gap:2px;
+ margin-top:2px;
 }
+
 .letterhead-rules span:first-child{
  display:block;
  width:100%;
- height:5px;
+ height:4px;
  background:#082b83;
 }
+
 .letterhead-rules span:last-child{
  display:block;
- width:76%;
- height:4px;
+ width:96%;
+ height:3px;
  background:#d71935;
  margin-left:2%;
 }
+
+/* ADAPTATION TELEPHONE */
+@media(max-width:600px){
+ .letterhead{
+  padding:3px 6px 4px;
+  --logo-width:48px;
+  --header-gap:5px;
+ }
+
+ .header-title{
+  font-size:clamp(10px,2.7vw,13px);
+  line-height:1.05;
+  margin:0 0 2px;
+ }
+
+ .letterhead-content{
+  grid-template-columns:var(--logo-width) minmax(0,1fr);
+  gap:var(--header-gap);
+  align-items:center;
+ }
+
+ .logo{
+  width:48px;
+  height:48px;
+  clip-path:inset(0 0 4px 0);
+ }
+
+ .header-address{
+  font-size:clamp(7.5px,2vw,9px);
+  line-height:1.12;
+ }
+
+ .header-contact{
+  font-size:clamp(7px,1.85vw,8.5px);
+  line-height:1.15;
+  margin-top:3px;
+  overflow-wrap:anywhere;
+ }
+
+ .letterhead-rules{
+  margin-left:calc(var(--logo-width) + var(--header-gap));
+  width:calc(100% - var(--logo-width) - var(--header-gap));
+  margin-top:2px;
+  gap:2px;
+ }
+
+ .letterhead-rules span:first-child{
+  height:3px;
+ }
+
+ .letterhead-rules span:last-child{
+  height:2px;
+ }
+}
+
 
 /* ADAPTATION TELEPHONE */
 @media(max-width:600px){
@@ -502,7 +565,7 @@ footer{
 <header class="letterhead">
 
  <div class="header-title">
-  Mission de l’Église de Dieu de la Foi Apostolique d’Haïti
+  Mission Église de Dieu de la Foi Apostolique d’Haïti
  </div>
 
  <div class="letterhead-content">
