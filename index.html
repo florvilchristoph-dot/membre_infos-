@@ -24,62 +24,73 @@ body{
 }
 
 
-/* ENTÊTE OFFICIEL MEDFAH — ALIGNEMENT CLASSIQUE */
+
+/* ENTÊTE OFFICIEL MEDFAH — ALIGNEMENT FINAL */
 .letterhead{
  background:#fff;
- padding:7px 2.5% 8px;
- border-bottom:0;
+ padding:4px 12px 6px;
+ border:0;
+ --logo-width:105px;
+ --header-gap:8px;
 }
 
 .header-title{
  text-align:center;
  color:#071f70;
- font-size:clamp(17px,2.2vw,29px);
+ font-size:clamp(13px,2.2vw,27px);
  font-weight:900;
  text-transform:uppercase;
- line-height:1.15;
+ line-height:1.05;
  white-space:nowrap;
- margin:0 0 5px;
+ margin:0;
+ padding:0;
 }
 
 .letterhead-content{
  display:grid;
- grid-template-columns:115px minmax(0,1fr);
- gap:12px;
+ grid-template-columns:var(--logo-width) minmax(0,1fr);
+ gap:var(--header-gap);
  align-items:start;
+ margin:0;
+ padding:0;
 }
 
 .logo{
  display:block;
- width:110px;
- height:100px;
+ width:var(--logo-width);
+ height:88px;
  object-fit:contain;
  object-position:top center;
  margin:0;
+ padding:0;
 }
 
 .letterhead-text{
- text-align:left;
  min-width:0;
- padding:0;
+ text-align:left;
  margin:0;
+ padding:0;
 }
 
 .header-address{
  color:#a71930;
- font-size:clamp(11px,1.35vw,17px);
+ font-size:clamp(9px,1.3vw,16px);
  font-weight:900;
  text-transform:uppercase;
- line-height:1.25;
+ line-height:1.15;
+ white-space:nowrap;
  margin:0;
+ padding:0;
 }
 
 .header-contact{
- margin:5px 0 0;
- font-size:clamp(11px,1.3vw,16px);
+ color:#082b83;
+ font-size:clamp(9px,1.2vw,15px);
  font-weight:bold;
- line-height:1.3;
- overflow-wrap:anywhere;
+ line-height:1.15;
+ white-space:nowrap;
+ margin:2px 0 0;
+ padding:0;
 }
 
 .header-contact a{
@@ -88,78 +99,84 @@ body{
 }
 
 .letterhead-rules{
- display:grid;
- gap:3px;
- margin-top:6px;
+ margin-left:calc(var(--logo-width) + var(--header-gap));
+ width:calc(100% - var(--logo-width) - var(--header-gap));
+ display:flex;
+ flex-direction:column;
+ gap:2px;
+ margin-top:2px;
 }
 
 .letterhead-rules span:first-child{
  display:block;
- height:5px;
+ width:100%;
+ height:4px;
  background:#082b83;
- border-radius:0;
 }
 
 .letterhead-rules span:last-child{
  display:block;
- height:4px;
+ width:76%;
+ height:3px;
  background:#d71935;
  margin:0;
- border-radius:0;
 }
 
-/* TELEPHONE */
+/* ADAPTATION TELEPHONE */
 @media(max-width:600px){
  .letterhead{
-  padding:6px 8px 7px;
+  padding:4px 7px 5px;
+  --logo-width:67px;
+  --header-gap:5px;
  }
 
  .header-title{
-  font-size:clamp(10px,3vw,15px);
-  white-space:normal;
-  line-height:1.15;
-  margin-bottom:5px;
+  font-size:clamp(8px,2.65vw,16px);
+  line-height:1.05;
+  white-space:nowrap;
+  margin:0;
  }
 
  .letterhead-content{
-  grid-template-columns:72px minmax(0,1fr);
-  gap:7px;
+  grid-template-columns:var(--logo-width) minmax(0,1fr);
+  gap:var(--header-gap);
   align-items:start;
  }
 
  .logo{
-  width:70px;
-  height:70px;
- }
-
- .letterhead-text{
-  text-align:left;
+  width:67px;
+  height:67px;
  }
 
  .header-address{
-  font-size:10px;
-  line-height:1.25;
+  font-size:clamp(7px,1.95vw,10px);
+  line-height:1.1;
+  white-space:nowrap;
  }
 
  .header-contact{
-  font-size:9px;
-  line-height:1.3;
-  margin-top:4px;
+  font-size:clamp(6px,1.8vw,9px);
+  line-height:1.1;
+  white-space:nowrap;
+  margin-top:2px;
  }
 
  .letterhead-rules{
-  margin-top:6px;
-  gap:3px;
+  margin-left:calc(var(--logo-width) + var(--header-gap));
+  width:calc(100% - var(--logo-width) - var(--header-gap));
+  margin-top:2px;
+  gap:2px;
  }
 
  .letterhead-rules span:first-child{
-  height:4px;
+  height:3px;
  }
 
  .letterhead-rules span:last-child{
-  height:3px;
+  height:2px;
  }
 }
+
 
 
 /* NAVIGATION */
@@ -506,17 +523,69 @@ footer{
  .stat-title{font-size:10px}
  footer{font-size:12px}
 }
+
+ /* KOREKSYON FINAL ANTÈT MEDFAH */
+@media(max-width:600px){
+ .letterhead{
+  padding:4px 7px 5px !important;
+  --logo-width:67px;
+  --header-gap:5px;
+ }
+
+ .header-title{
+  font-size:clamp(8px,2.65vw,16px) !important;
+  white-space:nowrap !important;
+  line-height:1.05 !important;
+  margin:0 !important;
+ }
+
+ .letterhead-content{
+  grid-template-columns:67px minmax(0,1fr) !important;
+  gap:5px !important;
+ }
+
+ .logo{
+  width:67px !important;
+  height:67px !important;
+ }
+
+ .header-address{
+  font-size:clamp(7px,1.95vw,10px) !important;
+  white-space:nowrap !important;
+ }
+
+ .header-contact{
+  font-size:clamp(6px,1.8vw,9px) !important;
+  white-space:nowrap !important;
+ }
+
+ .letterhead-rules{
+  margin-left:72px !important;
+  width:calc(100% - 72px) !important;
+  margin-top:2px !important;
+  gap:2px !important;
+ }
+
+ .letterhead-rules span:first-child{
+  height:3px !important;
+ }
+
+ .letterhead-rules span:last-child{
+  height:2px !important;
+ }
+}
 </style>
 </head>
 
 <body>
 
 
+
 <!-- ENTÊTE OFFICIEL MEDFAH -->
 <header class="letterhead">
 
  <div class="header-title">
-  Mission Église de Dieu de la Foi Apostolique d’Haïti
+  Mission de l’Église de Dieu de la Foi Apostolique d’Haïti
  </div>
 
  <div class="letterhead-content">
@@ -530,19 +599,17 @@ footer{
   <div class="letterhead-text">
 
    <div class="header-address">
-    3, AVENUE MAÏS-GÂTÉ, ENTRE MAÏS-GÂTÉ 13 ET 15,
-    TABARRE, PORT-AU-PRINCE, HAÏTI
+    3, AVENUE MAÏS-GÂTÉ, ENTRE MAÏS-GÂTÉ 13 ET 15, TABARRE, PORT-AU-PRINCE, HAÏTI
    </div>
 
    <div class="header-contact">
-    <a href="mailto:eglisedelafoiapostolique2007@gmail.com">
-     eglisedelafoiapostolique2007@gmail.com
-    </a>
+    <a href="mailto:eglisedelafoiapostolique2007@gmail.com">eglisedelafoiapostolique2007@gmail.com</a>
     &nbsp; | &nbsp;
     (+509) 37897370 / 31048016
    </div>
 
   </div>
+
  </div>
 
  <div class="letterhead-rules">
@@ -551,6 +618,7 @@ footer{
  </div>
 
 </header>
+
 
 
 <!-- MENU PRINCIPAL -->
