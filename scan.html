@@ -144,7 +144,32 @@ async function onScanSuccess(decodedText) {
   }
 }
 
-      
+            // DEMARE KAMERA A
+      try {
+        resultContainer.textContent = "Ap limen kamera a...";
+
+        await scanner.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 }
+          },
+          onScanSuccess,
+          function (errorMessage) {
+            // Kontinye chèche QR Code la
+          }
+        );
+
+        resultContainer.textContent =
+          "Kamera a limen. Mete QR Code MEDFAH la devan kamera a.";
+
+      } catch (error) {
+        console.error("Erè kamera MEDFAH:", error);
+
+        resultContainer.textContent =
+          "Kamera a pa kapab demare: " +
+          (error.message || error);
+      }
     
   </script>
 </body>
