@@ -93,42 +93,59 @@
 
       scanner = new Html5Qrcode("reader");
 
-      async function onScanSuccess() {
-        if (alreadyScanned) return;
-        alreadyScanned = true;
+      
+async function onScanSuccess(decodedText) {
+  if (alreadyScanned) return;
+  alreadyScanned = true;
 
-        resultContainer.textContent =
-          "QR Code la li avèk siksè. Pou pwoteje enfòmasyon manm nan, paj sa a pa montre kòd prive a. Konekte nan Administration → Présences pou verifye epi anrejistre prezans lan.";
+  try {
+    const scannedUrl = new URL(String(decodedText || "").trim());
 
-        try {
-          await scanner.stop();
-          await scanner.clear();
-        } catch (error) {
-          console.warn("Kamera a pa t kapab fèmen otomatikman:", error);
-        }
-      }
+    // Aksepte sèlman lyen verifikasyon MEDFAH
+    if (
+      scannedUrl.origin !== window.location.origin ||
+      !/\/verify\.html$/i.test(scannedUrl.pathname)
+    ) {
+      throw new Error("QR Code sa a pa yon lyen verifikasyon MEDFAH.");
+    }
 
-      try {
-        await scanner.start(
-          { facingMode: "environment" },
-          {
-            fps: 10,
-            qrbox: { width: 240, height: 240 }
-          },
-          onScanSuccess,
-          function () {
-            /* Pa montre erè nòmal pandan kamera a ap chèche QR la. */
-          }
-        );
+    const token = scannedUrl.searchParams.get("qr_token");
 
-        resultContainer.textContent =
-          "Mete QR Code kat manm nan devan kamera a.";
-      } catch (error) {
-        console.error("Erè kamera:", error);
-        resultContainer.textContent =
-          "Kamera a pa kapab louvri. Bay navigatè a pèmisyon kamera epi verifye paj la ap louvri sou HTTPS.";
-      }
-    });
+    if (!token) {
+      throw new Error("QR Code la pa gen QR Token obligatwa a.");
+    }
+
+    resultContainer.textContent =
+      "QR Code rekonèt. Ouvèti verifikasyon MEDFAH...";
+
+    try {
+      await scanner.stop();
+      await scanner.clear();
+    } catch (e) {
+      console.warn("Kamera a pa t kapab fèmen:", e);
+    }
+
+    const verificationUrl = new URL(
+      "verify.html",
+      window.location.href
+    );
+
+    verificationUrl.searchParams.set("qr_token", token);
+
+    window.location.assign(verificationUrl.href);
+
+  } catch (error) {
+    console.error(error);
+
+    resultContainer.textContent =
+      error.message || "QR Code la pa kapab verifye.";
+
+    alreadyScanned = false;
+  }
+}
+
+      
+    
   </script>
 </body>
 </html>
