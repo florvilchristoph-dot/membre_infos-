@@ -163,14 +163,15 @@ async function onScanSuccess(decodedText) {
         resultContainer.textContent =
           "Kamera a limen. Mete QR Code MEDFAH la devan kamera a.";
 
-      } catch (error) {
+            } catch (error) {
         console.error("Erè kamera MEDFAH:", error);
 
         resultContainer.textContent =
           "Kamera a pa kapab demare: " +
           (error.message || error);
       }
-    
+
+    }); // Fèmen DOMContentLoaded la
   </script>
 </body>
 </html>
