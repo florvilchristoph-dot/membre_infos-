@@ -3260,9 +3260,15 @@ async function modifierMembre(index) {
     const champsHTML = champs.map(cle => {
         const valeur = membre[cle] == null ? "" : String(membre[cle]);
 
-        const label = cle
-            .replace(/_/g, " ")
-            .replace(/\b\w/g, lettre => lettre.toUpperCase());
+        const colonne = cle === "préNom" ? "prénom" : cle;
+
+const label = colonne === "prénom"
+    ? "Prénom"
+    : colonne
+        .replace(/_/g, " ")
+        .replace(/\b\w/g, lettre => lettre.toUpperCase());
+            
+            
 
         const type = /^(date_|conversion_date|inscription_de_la_date)/.test(cle)
             ? "date"
@@ -3277,7 +3283,7 @@ async function modifierMembre(index) {
                         ${escapeHTML(label)}
                     </label>
                     <textarea
-                        data-edit-colonne="${escapeHTML(cle)}"
+                        data-edit-colonne="${escapeHTML(colonne)}"
                         rows="3"
                         style="width:100%;padding:10px;box-sizing:border-box;">${escapeHTML(contenu)}</textarea>
                 </div>`;
