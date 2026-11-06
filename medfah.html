@@ -1738,22 +1738,175 @@ async function changerStatutSessionPresenceMEDFAH(sessionId, nouveauStatut) {
         alert("Impossible de modifier le service : " + e.message);
     }
 }
+
 async function voirPresencesSessionMEDFAH(sessionId) {
     const cible = document.getElementById('detailsPresencesSessionMEDFAH');
     if (!cible || !supabaseClient) return;
-    cible.textContent = 'Chargement des présences...';
+
+    cible.textContent = 'Préparation du rapport de présence...';
+
     try {
-        const { data, error } = await supabaseClient.from('presences_eglise')
-          .select('id,membre_id,heure_pointage,statut,mode_pointage,observation')
-          .eq('session_id', sessionId).order('heure_pointage', { ascending: true });
-        if (error) throw error;
-        if (!data || !data.length) { cible.innerHTML = '<p>Aucun pointage enregistré pour ce service. Le marquage des absents n’est pas automatique.</p>'; return; }
-        cible.innerHTML = '<h4>Présences enregistrées</h4><div class="table-wrap"><table><thead><tr><th>ID membre</th><th>Heure</th><th>Statut</th><th>Mode</th></tr></thead><tbody>' + data.map(p => '<tr><td>' + escapeHTML(p.membre_id ?? '') + '</td><td>' + escapeHTML(p.heure_pointage || '') + '</td><td>' + escapeHTML(p.statut || '') + '</td><td>' + escapeHTML(p.mode_pointage || '') + '</td></tr>').join('') + '</tbody></table></div>';
+        const { data: sessions, error: erreurSession } = await supabaseClient
+            .from('sessions_presence')
+            .select('id,nom_service,date_service,heure_debut,heure_fin,statut')
+            .eq('id', sessionId)
+            .limit(1);
+
+        if (erreurSession) throw erreurSession;
+        if (!sessions || !sessions.length) {
+            cible.textContent = 'Service introuvable.';
+            return;
+        }
+
+        const session = sessions[0];
+
+        const { data: membres, error: erreurMembres } = await supabaseClient
+            .from('membre_infos')
+            .select('id,nom,prenom')
+            .eq('statut', 'actif')
+            .order('nom', { ascending: true });
+
+        if (erreurMembres) throw erreurMembres;
+
+        const { data: pointages, error: erreurPointages } = await supabaseClient
+            .from('presences_eglise')
+            .select('id,membre_id,heure_pointage,statut,mode_pointage,observation')
+            .eq('session_id', sessionId)
+            .order('heure_pointage', { ascending: true });
+
+        if (erreurPointages) throw erreurPointages;
+
+        const listeMembres = membres || [];
+        const listePointages = pointages || [];
+        const pointageParMembre = new Map();
+
+        listePointages.forEach(p => {
+            const cle = String(p.membre_id);
+            if (!pointageParMembre.has(cle)) {
+                pointageParMembre.set(cle, p);
+            }
+        });
+
+        const presents = [];
+        const absents = [];
+
+        listeMembres.forEach(m => {
+            const pointage = pointageParMembre.get(String(m.id));
+            const nomComplet =
+                [m.nom || '', m.prenom || ''].join(' ').trim() ||
+                'Nom non renseigné';
+
+            if (pointage) {
+                presents.push({ membre: m, nom: nomComplet, pointage });
+            } else {
+                absents.push({ membre: m, nom: nomComplet });
+            }
+        });
+
+        const enRetard = presents.filter(x =>
+            String(x.pointage.statut || '').toLowerCase() === 'en_retard'
+        ).length;
+
+        const aLHeure = presents.length - enRetard;
+        const totalActifs = listeMembres.length;
+        const taux = totalActifs
+            ? Math.round((presents.length / totalActifs) * 100)
+            : 0;
+
+        const estCloture =
+            String(session.statut || '').toLowerCase() === 'termine';
+
+        const titreRapport = estCloture
+            ? 'Rapport final'
+            : 'Rapport provisoire';
+
+        const dateAffichee = session.date_service
+            ? new Date(session.date_service + 'T12:00:00')
+                .toLocaleDateString('fr-FR')
+            : '—';
+
+        const lignePresence = presents.map(x => {
+            const heure = x.pointage.heure_pointage
+                ? new Date(x.pointage.heure_pointage)
+                    .toLocaleTimeString('fr-FR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        timeZone: 'America/Port-au-Prince'
+                    })
+                : '—';
+
+            const statut =
+                String(x.pointage.statut || '').toLowerCase() === 'en_retard'
+                    ? 'En retard'
+                    : 'Présent';
+
+            return '<tr><td>' + escapeHTML(x.nom) +
+                '</td><td>' + escapeHTML(statut) +
+                '</td><td>' + escapeHTML(heure) +
+                '</td><td>' + escapeHTML(x.pointage.mode_pointage || '—') +
+                '</td></tr>';
+        }).join('');
+
+        const ligneAbsence = absents.map(x =>
+            '<tr><td>' + escapeHTML(x.nom) +
+            '</td><td><span style="color:#b91c1c;font-weight:700">Absent</span></td>' +
+            '<td>—</td><td>—</td></tr>'
+        ).join('');
+
+        cible.innerHTML =
+            '<section style="border:1px solid #dbe3ee;border-radius:12px;padding:14px;margin-top:12px">' +
+                '<h4 style="margin:0 0 6px;color:#123b68">' +
+                    titreRapport + ' — ' +
+                    escapeHTML(session.nom_service || 'Service') +
+                '</h4>' +
+
+                '<p style="margin:4px 0 12px">Date : ' +
+                    escapeHTML(dateAffichee) +
+                    ' | Horaire : ' +
+                    escapeHTML((session.heure_debut || '—') + ' à ' + (session.heure_fin || '—')) +
+                '</p>' +
+
+                '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:8px;margin:12px 0">' +
+                    '<div style="background:#eff6ff;padding:10px;border-radius:8px"><strong>' +
+                        totalActifs + '</strong><br><small>Membres actifs</small></div>' +
+                    '<div style="background:#ecfdf5;padding:10px;border-radius:8px"><strong>' +
+                        aLHeure + '</strong><br><small>Présents</small></div>' +
+                    '<div style="background:#fff7ed;padding:10px;border-radius:8px"><strong>' +
+                        enRetard + '</strong><br><small>En retard</small></div>' +
+                    '<div style="background:#fef2f2;padding:10px;border-radius:8px"><strong>' +
+                        absents.length + '</strong><br><small>Absents</small></div>' +
+                    '<div style="background:#f8fafc;padding:10px;border-radius:8px"><strong>' +
+                        taux + '%</strong><br><small>Participation</small></div>' +
+                '</div>' +
+
+                '<p style="font-size:13px;color:#475569">' +
+                    (estCloture
+                        ? 'Service clôturé : les membres actifs sans pointage sont comptés comme absents.'
+                        : 'Service non clôturé : les absences affichées sont provisoires et peuvent diminuer pendant le pointage.') +
+                '</p>' +
+
+                '<div class="table-wrap"><table>' +
+                    '<thead><tr><th>Membre</th><th>Statut</th><th>Heure</th><th>Mode</th></tr></thead>' +
+                    '<tbody>' +
+                        (lignePresence + ligneAbsence ||
+                            '<tr><td colspan="4">Aucun membre actif trouvé.</td></tr>') +
+                    '</tbody>' +
+                '</table></div>' +
+
+                '<p style="font-size:12px;color:#64748b;margin-top:10px">' +
+                    'Les membres inactifs ne sont pas inclus. Aucun faux pointage ni ligne d’absence n’est ajouté dans la base de données.' +
+                '</p>' +
+            '</section>';
+
     } catch (e) {
-        console.error('Erreur chargement présences:', e);
-        cible.textContent = 'Impossible de lire les présences : ' + (e.message || 'erreur Supabase') + '. Vérifiez les droits RLS sur presences_eglise.';
+        console.error('Erreur génération rapport de présence:', e);
+        cible.textContent =
+            'Impossible de générer le rapport : ' +
+            (e.message || 'erreur Supabase') +
+            '. Vérifiez les autorisations de lecture sur les tables concernées.';
     }
 }
+
 
 /* ==========================================
    PROGRAMMATION DE L'ÉGLISE
