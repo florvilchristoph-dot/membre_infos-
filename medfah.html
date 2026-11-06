@@ -4033,34 +4033,47 @@ async function enregistrerNouveauMembreMEDFAH(event) {
             qr_code: qrToken
         };
 
-        const correspondances = {
-            sexe: "sexe",
-            nombre_enfants: "nombre_enfants",
-            date_naissance: "date_naissance",
-            lieu_naissance: "lieu_naissance",
-            nationaliste: "nationalité",
-            situation_matrimoniale: "situation_matrimoniale",
-            telephone: "telephone",
-            telephone_secondaire: "telephone_secondaire",
-            whatsapp: "whatsapp",
-            email: "email",
-            adresse: "adresse",
-            commune: "commune",
-            departement: "departement",
-            fonction: "fonction",
-            profession: "profession",
-            statut: "statut",
-            date_adhesion: "date_adhesion",
-            conversion_date: "date_conversion",
-            date_bapteme: "date_bapteme",
-            pasteur_responsable: "pasteur_responsable",
-            formation_biblique: "formation_biblique",
-            groupe_eglise: "groupe_eglise",
-            personne_urgence: "personne_urgence",
-            urgence_telephonique: "telephone_urgence",
-            relation_urgence: "relation_urgence",
-            
-        };
+        
+const correspondances = {
+    sexe: "sexe",
+    cin: "cin",
+    nif: "nif",
+    nombre_enfants: "nombre_enfants",
+
+    date_naissance: "date_naissance",
+    lieu_naissance: "lieu_naissance",
+    nationalite: "nationalité",
+    situation_matrimoniale: "situation_matrimoniale",
+
+    telephone: "telephone",
+    telephone_secondaire: "telephone_secondaire",
+    whatsapp: "whatsapp",
+    email: "email",
+
+    adresse: "adresse",
+    commune: "commune",
+    departement: "departement",
+
+    fonction: "fonction",
+    profession: "profession",
+    assemblee: "assemblee",
+    statut: "statut",
+
+    date_adhesion: "date_adhesion",
+    date_conversion: "date_conversion",
+    date_bapteme: "date_bapteme",
+
+    pasteur_responsable: "pasteur_responsable",
+    formation_biblique: "formation_biblique",
+    groupe_eglise: "groupe_eglise",
+
+    personne_urgence: "personne_urgence",
+    telephone_urgence: "telephone_urgence",
+    relation_urgence: "relation_urgence",
+
+    observation: "observation"
+};
+
 
         Object.entries(correspondances).forEach(([colonne, nomChamp]) => {
             const valeur = champ(nomChamp);
