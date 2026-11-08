@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -101,40 +102,24 @@ button.gold{background:#b88620}
  -webkit-print-color-adjust:exact;
 }
 
-/* EN-TÊTE OFFICIEL MEDFAH */
+/* EN-TÊTE ORIGINAL BLEU ET OR */
 
 .top{
- height:67px;
- padding:3px 6px 4px;
- display:flex;
- flex-direction:column;
- gap:3px;
- position:relative;
- overflow:hidden;
- background:#fff;
- color:#10264b;
- border-bottom:0;
-}
-
-.church-title{
- width:100%;
- text-align:center;
- white-space:nowrap;
- font-size:8px;
- line-height:1.1;
- font-weight:900;
- letter-spacing:.12px;
- color:#123c70;
-}
-
-.church-title small{display:none}
-
-.letterhead-row{
+ height:48px;
+ background:linear-gradient(
+ 110deg,
+ #061b4d 0%,
+ #0b3474 48%,
+ #1456a0 100%
+ );
+ color:white;
  display:flex;
  align-items:center;
- gap:5px;
- min-width:0;
- flex:1;
+ padding:5px 8px;
+ gap:7px;
+ position:relative;
+ overflow:hidden;
+ border-bottom:2px solid var(--gold);
 }
 
 .logo{
@@ -142,79 +127,92 @@ button.gold{background:#b88620}
  height:38px;
  flex:none;
  object-fit:contain;
- border:0;
- border-radius:0;
- background:#fff;
- padding:0;
+ border-radius:50%;
+ background:white;
+ border:2px solid var(--gold-light);
+ padding:1px;
+ z-index:2;
 }
 
-.contact-block{
- flex:1;
- min-width:0;
- display:flex;
- flex-direction:column;
- justify-content:center;
- gap:2px;
+.church-title{
+ font-size:7.5px;
+ font-weight:900;
+ line-height:1.2;
+ max-width:205px;
+ position:relative;
+ z-index:3;
+ text-shadow:0 1px 2px #00143b;
+}
+
+.church-title small{
+ display:block;
+ font-size:6.5px;
+ font-weight:normal;
+ margin-top:2px;
+ color:#f8e49a;
 }
 
 .church-address{
- font-size:5.6px;
- line-height:1.12;
- font-weight:700;
- color:#172b4d;
+ display:block;
+ font-size:4.8px;
+ line-height:1.15;
+ font-weight:normal;
+ color:#fff;
+ margin-top:2px;
+ white-space:nowrap;
 }
 
 .church-contact{
- font-size:4.8px;
- line-height:1.1;
+ display:block;
+ font-size:4.2px;
+ line-height:1.15;
+ font-weight:normal;
+ color:#f8e49a;
+ margin-top:2px;
  white-space:nowrap;
- font-weight:700;
- color:#172b4d;
- letter-spacing:-.12px;
 }
 
-.rule-blue{
- width:100%;
- height:2px;
- background:#174b8a;
- border-radius:0;
-}
-
-.rule-red{
- width:76%;
- height:1.5px;
- background:linear-gradient(
-  90deg,
-  transparent 0%,
-  #c62828 8%,
-  #c62828 92%,
-  transparent 100%
- );
- border-radius:0;
-}
+/* PHOTO DE L'ÉGLISE AVEC FUSION DOUCE DANS LE BLEU */
 
 .church-photo{
- width:35px;
- height:39px;
- flex:none;
+ position:absolute;
+ right:0;
+ top:0;
+ width:105px;
+ height:46px;
  object-fit:cover;
  object-position:center;
- border:1px solid #e2b52e;
- border-radius:2px;
+ opacity:.95;
+ border:0;
+ border-radius:0;
+ -webkit-mask-image:linear-gradient(
+  to right,
+  transparent 0%,
+  rgba(0,0,0,.15) 12%,
+  rgba(0,0,0,.8) 42%,
+  black 65%
+ );
+ mask-image:linear-gradient(
+  to right,
+  transparent 0%,
+  rgba(0,0,0,.15) 12%,
+  rgba(0,0,0,.8) 42%,
+  black 65%
+ );
 }
 
 .pastor{
  position:absolute;
- right:7px;
- bottom:5px;
+ right:5px;
+ bottom:3px;
  z-index:4;
- background:#f8e49a;
+ background:linear-gradient(90deg,#f8e49a,#e2b52e);
  color:#08265f;
- padding:1px 3px;
- border-radius:2px;
- font-size:4.5px;
+ padding:2px 6px;
+ border-radius:10px;
+ font-size:6px;
  font-weight:900;
- border:1px solid #e2b52e;
+ border:1px solid #fff0b8;
 }
 
 /* TITRE DE LA CARTE */
@@ -239,28 +237,23 @@ button.gold{background:#b88620}
 
 .body{
  display:flex;
- gap:5px;
- padding:4px 5px;
- height:86px;
- background:linear-gradient(
-  135deg,
-  #fff 0%,
-  #f7f9ff 65%,
-  #edf3fc 100%
- );
+ gap:7px;
+ padding:6px 7px 38px;
+ height:119px;
+ background:linear-gradient(135deg,#fff 0%,#f7f9ff 65%,#edf3fc 100%);
 }
 
 .photo-wrap{
- width:60px;
+ width:80px;
  flex:none;
 }
 
 .member-photo{
- width:60px;
- height:65px;
+ width:80px;
+ height:88px;
  object-fit:cover;
- border:1.5px solid var(--gold);
- border-radius:5px;
+ border:2px solid var(--gold);
+ border-radius:7px;
  background:#e8eef7;
  box-shadow:0 2px 5px #0002;
 }
@@ -268,18 +261,18 @@ button.gold{background:#b88620}
 .photo-caption{
  text-align:center;
  color:#123c70;
- font-size:5.5px;
+ font-size:6.5px;
  font-style:italic;
  font-weight:bold;
- margin-top:1px;
+ margin-top:2px;
 }
 
 .details{
  flex:1;
  min-width:0;
- font-size:7px;
- line-height:1.12;
- padding-top:0;
+ font-size:7.5px;
+ line-height:1.55;
+ padding-top:1px;
 }
 
 .details div{
@@ -290,29 +283,21 @@ button.gold{background:#b88620}
 
 .details b{color:#0750a0}
 
-.details .phone-row{
- background:#eaf3ff;
- border-left:2px solid #1456a0;
- padding:1px 3px;
- font-weight:900;
- color:#08265f;
-}
-
 .qr-box{
- width:55px;
+ width:61px;
  flex:none;
  text-align:center;
- font-size:5.5px;
+ font-size:6px;
  font-weight:bold;
  color:#123c70;
 }
 
 .qr{
- width:53px;
- height:53px;
+ width:59px;
+ height:59px;
  background:#fff;
  padding:2px;
- margin:0 auto 2px;
+ margin:0 auto 3px;
  border:1px solid var(--gold);
  border-radius:4px;
 }
@@ -326,17 +311,17 @@ button.gold{background:#b88620}
  background:#07833c;
  color:white;
  border-radius:10px;
- padding:2px;
- font-size:5.5px;
- margin-top:2px;
+ padding:3px 2px;
+ font-size:6.5px;
+ margin-top:3px;
 }
 
 .card-number{
- font-size:5.5px;
+ font-size:6px;
  margin-top:2px;
 }
 
-/* PIED DE CARTE */
+/* PIED DE CARTE : HORAIRES DES SERVICES */
 
 .bottom{
  position:absolute;
@@ -428,91 +413,80 @@ button.gold{background:#b88620}
  }
 
  .top{
-  height:17mm;
-  padding:.6mm 1.2mm .7mm;
-  gap:.45mm;
+  height:12mm;
+  padding:1mm 2mm;
  }
-
- .church-title{
-  font-size:6.2pt;
-  line-height:1.05;
- }
-
- .letterhead-row{gap:1mm}
 
  .logo{
   width:9mm;
   height:9mm;
  }
 
- .contact-block{gap:.35mm}
+ .church-title{
+  font-size:6.5pt;
+  max-width:53mm;
+ }
+
+ .church-title small{font-size:5pt}
 
  .church-address{
-  font-size:4.1pt;
-  line-height:1.05;
+  font-size:3.8pt;
+  margin-top:.3mm;
  }
 
  .church-contact{
-  font-size:3.55pt;
-  letter-spacing:-.16px;
+  font-size:3.3pt;
+  margin-top:.3mm;
  }
 
- .rule-blue{height:.45mm}
- .rule-red{height:.35mm}
-
  .church-photo{
-  width:8mm;
-  height:9mm;
+  width:25mm;
+  height:11.5mm;
  }
 
  .pastor{
-  right:1.4mm;
-  bottom:.8mm;
-  font-size:3.5pt;
-  padding:.2mm .5mm;
+  font-size:4.8pt;
+  padding:.5mm 1.2mm;
  }
 
  .card-title{
-  font-size:7pt;
-  padding:.55mm;
+  font-size:8pt;
+  padding:.8mm;
  }
 
  .body{
-  height:22.5mm;
-  padding:.55mm 1.5mm;
-  gap:1.2mm;
+  height:28.5mm;
+  padding:1mm 2mm 1mm;
+  gap:1.5mm;
  }
 
- .photo-wrap{width:17mm}
+ .photo-wrap{width:20mm}
 
  .member-photo{
-  width:17mm;
-  height:18mm;
+  width:20mm;
+  height:23mm;
  }
 
- .photo-caption{font-size:3.8pt}
+ .photo-caption{font-size:4.7pt}
 
  .details{
-  font-size:4.75pt;
-  line-height:1.12;
-  padding-top:0;
+  font-size:5.8pt;
+  line-height:1.45;
  }
 
- .details div{padding:.12mm 0}
-
  .qr-box{
-  width:14mm;
-  font-size:3.8pt;
+  width:16mm;
+  font-size:4.5pt;
  }
 
  .qr{
-  width:13mm;
-  height:13mm;
+  width:15mm;
+  height:15mm;
  }
 
- .valid{font-size:3.8pt}
+ .valid{font-size:4.5pt}
 
- .card-number{font-size:3.8pt}
+ .card-number{font-size:4.5pt}
 
  .bottom{
   min-height:10mm;
@@ -749,43 +723,35 @@ function cardHTML(m){
 
   <header class="top">
 
+   <img
+    class="logo"
+    src="logo-medfah.jpg"
+    alt="Logo MEDFAH"
+    onerror="this.style.visibility='hidden'"
+   >
+
    <div class="church-title">
     MISSION ÉGLISE DE DIEU DE LA FOI APOSTOLIQUE D’HAÏTI
+
+    <small>
+     MEDFAH — « Une Église, une famille, une même vision. »
+    </small>
+
+    <span class="church-address">
+     3, Avenue Maïs-Gâté, entre Maïs-Gâté 13 et 15, Tabarre, Port-au-Prince, Haïti
+    </span>
+
+    <span class="church-contact">
+     eglisedelafoiapostolique2007@gmail.com | (+509) 37897370 / 31048016
+    </span>
    </div>
 
-   <div class="letterhead-row">
-
-    <img
-     class="logo"
-     src="logo-medfah.jpg"
-     alt="Logo MEDFAH"
-     onerror="this.style.visibility='hidden'"
-    >
-
-    <div class="contact-block">
-
-     <div class="church-address">
-      3, Avenue Maïs-Gâté, entre Maïs-Gâté 13 et 15,
-      Tabarre, Port-au-Prince, Haïti
-     </div>
-
-     <div class="church-contact">
-      eglisedelafoiapostolique2007@gmail.com | (+509) 37897370 / 31048016
-     </div>
-
-     <div class="rule-blue"></div>
-     <div class="rule-red"></div>
-
-    </div>
-
-    <img
-     class="church-photo"
-     src="${churchPhoto}"
-     alt="Église MEDFAH"
-     onerror="this.style.display='none'"
-    >
-
-   </div>
+   <img
+    class="church-photo"
+    src="${churchPhoto}"
+    alt="Église MEDFAH"
+    onerror="this.style.display='none'"
+   >
 
    <div class="pastor">
     Pasteur : Beaulieu Mislet
@@ -827,11 +793,6 @@ function cardHTML(m){
     </div>
 
     <div>
-     <b>Fonction :</b>
-     ${safe(val(m,"fonction")||"—")}
-    </div>
-
-    <div class="phone-row">
      <b>Téléphone :</b>
      ${safe(val(m,"telephone")||"—")}
     </div>
@@ -844,6 +805,11 @@ function cardHTML(m){
     <div>
      <b>N° carte :</b>
      ${safe(val(m,"numero_carte")||"—")}
+    </div>
+
+    <div>
+     <b>Fonction :</b>
+     ${safe(val(m,"fonction")||"—")}
     </div>
 
     <div>
@@ -936,7 +902,7 @@ async function ensureToken(m){
 
 }
 
-/* AFFICHAGE DES CARTES ET PHOTOS */
+/* AFFICHAGE DES CARTES AVEC PHOTOS PRIVÉES */
 
 async function render(list){
 
