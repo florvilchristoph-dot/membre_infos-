@@ -157,21 +157,6 @@ button.gold{background:#b88620}
  text-align:center;
 }
 
-.card-slogan{
- display:block;
- color:#ff5555;
- font-size:6px;
- line-height:1.05;
- font-weight:900;
- letter-spacing:.1px;
- margin-bottom:1px;
-}
-
- .card-title-main{
- display:block;
- text-align:center;
- width:100%;
-}
 .church-contact{
  display:block;
  font-size:4.2px;
@@ -181,6 +166,23 @@ button.gold{background:#b88620}
  margin-top:2px;
  white-space:nowrap;
  text-align:center;
+}
+
+.card-slogan{
+ display:block;
+ color:#ff5555;
+ font-size:6px;
+ line-height:1.05;
+ font-weight:900;
+ letter-spacing:.1px;
+ margin-top:2px;
+ text-align:center;
+}
+
+.card-title-main{
+ display:block;
+ text-align:center;
+ width:100%;
 }
 
 /* PHOTO DE L'ÉGLISE AVEC FUSION DOUCE DANS LE BLEU */
@@ -246,14 +248,14 @@ button.gold{background:#b88620}
 
 /* INFORMATIONS DU MEMBRE */
 
+
 .body{
  display:flex;
  gap:7px;
- padding:6px 7px 38px;
+ padding:5px 7px 8px;
  height:119px;
  background:linear-gradient(135deg,#fff 0%,#f7f9ff 65%,#edf3fc 100%);
 }
-
 .photo-wrap{
  width:80px;
  flex:none;
@@ -281,8 +283,8 @@ button.gold{background:#b88620}
 .details{
  flex:1;
  min-width:0;
- font-size:7.5px;
- line-height:1.55;
+ font-size:7.2px;
+ line-height:1.25;
  padding-top:1px;
 }
 
@@ -433,61 +435,52 @@ button.gold{background:#b88620}
   height:9mm;
  }
 
- .church-title{
-  font-size:6.5pt;
-  max-width:53mm;
- }
-
- .card-slogan{
- font-size:4.8pt;
- margin-bottom:.25mm;
+ 
+.church-title{
+ font-size:6.5pt;
+ max-width:53mm;
+ text-align:center;
+ transform:translateY(-1mm);
 }
 
- .church-address{
-  font-size:3.8pt;
-  margin-top:.3mm;
- }
+.church-address{
+ font-size:3.8pt;
+ margin-top:.3mm;
+ text-align:center;
+}
 
- .church-contact{
-  font-size:3.3pt;
-  margin-top:.3mm;
- }
+.church-contact{
+ font-size:3.3pt;
+ margin-top:.3mm;
+ text-align:center;
+}
 
- .church-photo{
-  width:25mm;
-  height:11.5mm;
- }
+.card-slogan{
+ font-size:4.2pt;
+ margin-top:.3mm;
+}
 
- .pastor{
-  font-size:4.8pt;
-  padding:.5mm 1.2mm;
- }
+.card-title{
+ font-size:8pt;
+ padding:.8mm;
+}
 
- .card-title{
-  font-size:8pt;
-  padding:.8mm;
- }
+.card-title-main{
+ display:block;
+ text-align:center;
+ width:100%;
+}
 
- .body{
-  height:28.5mm;
-  padding:1mm 2mm 1mm;
-  gap:1.5mm;
- }
+.body{
+ height:28.5mm;
+ padding:1mm 2mm 1mm;
+ gap:1.5mm;
+}
 
- .photo-wrap{width:20mm}
-
- .member-photo{
-  width:20mm;
-  height:23mm;
- }
-
- .photo-caption{font-size:4.7pt}
-
- .details{
-  font-size:5.8pt;
-  line-height:1.45;
- }
-
+.details{
+ font-size:5.8pt;
+ line-height:1.15;
+}
  .qr-box{
   width:16mm;
   font-size:4.5pt;
@@ -762,9 +755,12 @@ function cardHTML(m){
  </span>
 
  <span class="church-contact">
-  eglisedelafoiapostolique2007@gmail.com | (+509) 37897370 / 31048016
- </span>
-</div>
+ eglisedelafoiapostolique2007@gmail.com | (+509) 37897370 / 31048016
+</span>
+
+<span class="card-slogan">
+ MEDFAH — « Une Église, une famille, une vision. »
+</span>
 
 <img
  class="church-photo"
@@ -779,15 +775,12 @@ function cardHTML(m){
 
 </header>
 
+
 <div class="card-title">
- <span class="card-slogan">
-  MEDFAH — « Une Église, une famille, une vision. »
- </span>
  <span class="card-title-main">
   CARTE DE PERSÉVÉRANCE — MEMBRE OFFICIEL
  </span>
 </div>
-
   <div class="body">
 
    <div class="photo-wrap">
