@@ -144,22 +144,28 @@ button.gold{background:#b88620}
  text-shadow:0 1px 2px #00143b;
 }
 
-.church-title small{
- display:block;
- font-size:6.5px;
- font-weight:normal;
- margin-top:2px;
- color:#f8e49a;
-}
-
 .church-address{
  display:block;
  font-size:4.8px;
  line-height:1.15;
  font-weight:normal;
- color:#fff;
+ color:#ff5555;
  margin-top:2px;
  white-space:nowrap;
+}
+
+.card-slogan{
+ display:block;
+ color:#ff5555;
+ font-size:6px;
+ line-height:1.05;
+ font-weight:900;
+ letter-spacing:.1px;
+ margin-bottom:1px;
+}
+
+.card-title-main{
+ display:block;
 }
 
 .church-contact{
@@ -427,7 +433,10 @@ button.gold{background:#b88620}
   max-width:53mm;
  }
 
- .church-title small{font-size:5pt}
+ .card-slogan{
+ font-size:4.8pt;
+ margin-bottom:.25mm;
+}
 
  .church-address{
   font-size:3.8pt;
@@ -731,37 +740,38 @@ function cardHTML(m){
    >
 
    <div class="church-title">
-    MISSION ÉGLISE DE DIEU DE LA FOI APOSTOLIQUE D’HAÏTI
+ MISSION ÉGLISE DE DIEU DE LA FOI APOSTOLIQUE D’HAÏTI
 
-    <small>
-     MEDFAH — « Une Église, une famille, une même vision. »
-    </small>
+ <span class="church-address">
+  3, Avenue Maïs-Gâté, entre Maïs-Gâté 13 et 15, Tabarre, Port-au-Prince, Haïti
+ </span>
 
-    <span class="church-address">
-     3, Avenue Maïs-Gâté, entre Maïs-Gâté 13 et 15, Tabarre, Port-au-Prince, Haïti
-    </span>
+ <span class="church-contact">
+  eglisedelafoiapostolique2007@gmail.com | (+509) 37897370 / 31048016
+ </span>
+</div>
 
-    <span class="church-contact">
-     eglisedelafoiapostolique2007@gmail.com | (+509) 37897370 / 31048016
-    </span>
-   </div>
+<img
+ class="church-photo"
+ src="${churchPhoto}"
+ alt="Église MEDFAH"
+ onerror="this.style.display='none'"
+>
 
-   <img
-    class="church-photo"
-    src="${churchPhoto}"
-    alt="Église MEDFAH"
-    onerror="this.style.display='none'"
-   >
+<div class="pastor">
+ Pasteur : Beaulieu Mislet
+</div>
 
-   <div class="pastor">
-    Pasteur : Beaulieu Mislet
-   </div>
+</header>
 
-  </header>
-
-  <div class="card-title">
-   CARTE DE PERSÉVÉRANCE — MEMBRE OFFICIEL
-  </div>
+<div class="card-title">
+ <span class="card-slogan">
+  MEDFAH — « Une Église, une famille, une vision. »
+ </span>
+ <span class="card-title-main">
+  CARTE DE PERSÉVÉRANCE — MEMBRE OFFICIEL
+ </span>
+</div>
 
   <div class="body">
 
