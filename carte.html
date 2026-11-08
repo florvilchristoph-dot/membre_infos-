@@ -83,9 +83,7 @@ button.gold{background:#b88620}
  justify-items:center;
 }
 
-/* ================================
-   CARTE MEDFAH — DESIGN PRINCIPAL
-================================ */
+/* CARTE MEDFAH */
 
 .member-card{
  width:340px;
@@ -103,24 +101,40 @@ button.gold{background:#b88620}
  -webkit-print-color-adjust:exact;
 }
 
-/* EN-TÊTE BLEU ET OR */
+/* EN-TÊTE OFFICIEL MEDFAH */
 
 .top{
- height:48px;
- background:linear-gradient(
-  110deg,
-  #061b4d 0%,
-  #0b3474 48%,
-  #1456a0 100%
- );
- color:white;
+ height:67px;
+ padding:3px 6px 4px;
  display:flex;
- align-items:center;
- padding:5px 8px;
- gap:7px;
+ flex-direction:column;
+ gap:3px;
  position:relative;
  overflow:hidden;
- border-bottom:2px solid var(--gold);
+ background:#fff;
+ color:#10264b;
+ border-bottom:0;
+}
+
+.church-title{
+ width:100%;
+ text-align:center;
+ white-space:nowrap;
+ font-size:8px;
+ line-height:1.1;
+ font-weight:900;
+ letter-spacing:.12px;
+ color:#123c70;
+}
+
+.church-title small{display:none}
+
+.letterhead-row{
+ display:flex;
+ align-items:center;
+ gap:5px;
+ min-width:0;
+ flex:1;
 }
 
 .logo{
@@ -128,72 +142,79 @@ button.gold{background:#b88620}
  height:38px;
  flex:none;
  object-fit:contain;
- border-radius:50%;
- background:white;
- border:2px solid var(--gold-light);
- padding:1px;
- z-index:2;
-}
-
-.church-title{
- font-size:7.5px;
- font-weight:900;
- line-height:1.2;
- max-width:205px;
- position:relative;
- z-index:3;
- text-shadow:0 1px 2px #00143b;
-}
-
-.church-title small{
- display:block;
- font-size:6.5px;
- font-weight:normal;
- margin-top:3px;
- color:#f8e49a;
-}
-
-/* PHOTO DE L'ÉGLISE AVEC FUSION DOUCE DANS LE BLEU */
-
-.church-photo{
- position:absolute;
- right:0;
- top:0;
- width:105px;
- height:46px;
- object-fit:cover;
- object-position:center;
- opacity:.95;
  border:0;
  border-radius:0;
- -webkit-mask-image:linear-gradient(
-  to right,
+ background:#fff;
+ padding:0;
+}
+
+.contact-block{
+ flex:1;
+ min-width:0;
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
+ gap:2px;
+}
+
+.church-address{
+ font-size:5.6px;
+ line-height:1.12;
+ font-weight:700;
+ color:#172b4d;
+}
+
+.church-contact{
+ font-size:4.8px;
+ line-height:1.1;
+ white-space:nowrap;
+ font-weight:700;
+ color:#172b4d;
+ letter-spacing:-.12px;
+}
+
+.rule-blue{
+ width:100%;
+ height:2px;
+ background:#174b8a;
+ border-radius:0;
+}
+
+.rule-red{
+ width:76%;
+ height:1.5px;
+ background:linear-gradient(
+  90deg,
   transparent 0%,
-  rgba(0,0,0,.15) 12%,
-  rgba(0,0,0,.8) 42%,
-  black 65%
+  #c62828 8%,
+  #c62828 92%,
+  transparent 100%
  );
- mask-image:linear-gradient(
-  to right,
-  transparent 0%,
-  rgba(0,0,0,.15) 12%,
-  rgba(0,0,0,.8) 42%,
-  black 65%
- );
+ border-radius:0;
+}
+
+.church-photo{
+ width:35px;
+ height:39px;
+ flex:none;
+ object-fit:cover;
+ object-position:center;
+ border:1px solid #e2b52e;
+ border-radius:2px;
 }
 
 .pastor{
  position:absolute;
- right:5px;
- bottom:3px;
+ right:7px;
+ bottom:5px;
  z-index:4;
- background:linear-gradient(90deg,#f8e49a,#e2b52e);
+ background:#f8e49a;
  color:#08265f;
- padding:2px 6px;
- border-radius:10px;
- font-size:6px;
+ padding:1px 3px;
+ border-radius:2px;
+ font-size:4.5px;
  font-weight:900;
- border:1px solid #fff0b8;
+ border:1px solid #e2b52e;
 }
 
 /* TITRE DE LA CARTE */
@@ -218,23 +239,28 @@ button.gold{background:#b88620}
 
 .body{
  display:flex;
- gap:7px;
- padding:6px 7px 38px;
- height:119px;
- background:linear-gradient(135deg,#fff 0%,#f7f9ff 65%,#edf3fc 100%);
+ gap:5px;
+ padding:4px 5px;
+ height:86px;
+ background:linear-gradient(
+  135deg,
+  #fff 0%,
+  #f7f9ff 65%,
+  #edf3fc 100%
+ );
 }
 
 .photo-wrap{
- width:80px;
+ width:60px;
  flex:none;
 }
 
 .member-photo{
- width:80px;
- height:88px;
+ width:60px;
+ height:65px;
  object-fit:cover;
- border:2px solid var(--gold);
- border-radius:7px;
+ border:1.5px solid var(--gold);
+ border-radius:5px;
  background:#e8eef7;
  box-shadow:0 2px 5px #0002;
 }
@@ -242,18 +268,18 @@ button.gold{background:#b88620}
 .photo-caption{
  text-align:center;
  color:#123c70;
- font-size:6.5px;
+ font-size:5.5px;
  font-style:italic;
  font-weight:bold;
- margin-top:2px;
+ margin-top:1px;
 }
 
 .details{
  flex:1;
  min-width:0;
- font-size:7.5px;
- line-height:1.55;
- padding-top:1px;
+ font-size:7px;
+ line-height:1.12;
+ padding-top:0;
 }
 
 .details div{
@@ -264,21 +290,29 @@ button.gold{background:#b88620}
 
 .details b{color:#0750a0}
 
+.details .phone-row{
+ background:#eaf3ff;
+ border-left:2px solid #1456a0;
+ padding:1px 3px;
+ font-weight:900;
+ color:#08265f;
+}
+
 .qr-box{
- width:61px;
+ width:55px;
  flex:none;
  text-align:center;
- font-size:6px;
+ font-size:5.5px;
  font-weight:bold;
  color:#123c70;
 }
 
 .qr{
- width:59px;
- height:59px;
+ width:53px;
+ height:53px;
  background:#fff;
  padding:2px;
- margin:0 auto 3px;
+ margin:0 auto 2px;
  border:1px solid var(--gold);
  border-radius:4px;
 }
@@ -292,17 +326,17 @@ button.gold{background:#b88620}
  background:#07833c;
  color:white;
  border-radius:10px;
- padding:3px 2px;
- font-size:6.5px;
- margin-top:3px;
-}
-
-.card-number{
- font-size:6px;
+ padding:2px;
+ font-size:5.5px;
  margin-top:2px;
 }
 
-/* PIED DE CARTE : ORAI DES SERVICES */
+.card-number{
+ font-size:5.5px;
+ margin-top:2px;
+}
+
+/* PIED DE CARTE */
 
 .bottom{
  position:absolute;
@@ -359,9 +393,7 @@ button.gold{background:#b88620}
  #cardsGrid{grid-template-columns:1fr}
 }
 
-/* ================================
-   IMPRESSION
-================================ */
+/* IMPRESSION */
 
 @page{
  size:A4;
@@ -396,70 +428,91 @@ button.gold{background:#b88620}
  }
 
  .top{
-  height:12mm;
-  padding:1mm 2mm;
+  height:17mm;
+  padding:.6mm 1.2mm .7mm;
+  gap:.45mm;
  }
+
+ .church-title{
+  font-size:6.2pt;
+  line-height:1.05;
+ }
+
+ .letterhead-row{gap:1mm}
 
  .logo{
   width:9mm;
   height:9mm;
  }
 
- .church-title{
-  font-size:6.5pt;
-  max-width:53mm;
+ .contact-block{gap:.35mm}
+
+ .church-address{
+  font-size:4.1pt;
+  line-height:1.05;
  }
 
- .church-title small{font-size:5pt}
+ .church-contact{
+  font-size:3.55pt;
+  letter-spacing:-.16px;
+ }
+
+ .rule-blue{height:.45mm}
+ .rule-red{height:.35mm}
 
  .church-photo{
-  width:25mm;
-  height:11.5mm;
+  width:8mm;
+  height:9mm;
  }
 
  .pastor{
-  font-size:4.8pt;
-  padding:.5mm 1.2mm;
+  right:1.4mm;
+  bottom:.8mm;
+  font-size:3.5pt;
+  padding:.2mm .5mm;
  }
 
  .card-title{
-  font-size:8pt;
-  padding:.8mm;
+  font-size:7pt;
+  padding:.55mm;
  }
 
  .body{
-  height:28.5mm;
-  padding:1mm 2mm 1mm;
-  gap:1.5mm;
+  height:22.5mm;
+  padding:.55mm 1.5mm;
+  gap:1.2mm;
  }
 
- .photo-wrap{width:20mm}
+ .photo-wrap{width:17mm}
 
  .member-photo{
-  width:20mm;
-  height:23mm;
+  width:17mm;
+  height:18mm;
  }
 
- .photo-caption{font-size:4.7pt}
+ .photo-caption{font-size:3.8pt}
 
  .details{
-  font-size:5.8pt;
-  line-height:1.45;
+  font-size:4.75pt;
+  line-height:1.12;
+  padding-top:0;
  }
 
+ .details div{padding:.12mm 0}
+
  .qr-box{
-  width:16mm;
-  font-size:4.5pt;
+  width:14mm;
+  font-size:3.8pt;
  }
 
  .qr{
-  width:15mm;
-  height:15mm;
+  width:13mm;
+  height:13mm;
  }
 
- .valid{font-size:4.5pt}
+ .valid{font-size:3.8pt}
 
- .card-number{font-size:4.5pt}
+ .card-number{font-size:3.8pt}
 
  .bottom{
   min-height:10mm;
@@ -569,9 +622,7 @@ function safe(s){
  }[c]));
 }
 
-/* ================================
-   INITIALISATION ET AUTORISATION
-================================ */
+/* INITIALISATION ET AUTORISATION */
 
 async function init(){
 
@@ -643,9 +694,7 @@ async function init(){
 
 }
 
-/* ================================
-   LISTE ET RECHERCHE DES MEMBRES
-================================ */
+/* LISTE ET RECHERCHE DES MEMBRES */
 
 function fillSelect(list){
 
@@ -687,9 +736,7 @@ $("search").addEventListener("input",e=>{
 
 });
 
-/* ================================
-   CONSTRUCTION DE LA CARTE
-================================ */
+/* CONSTRUCTION DE LA CARTE */
 
 function cardHTML(m){
 
@@ -702,26 +749,43 @@ function cardHTML(m){
 
   <header class="top">
 
-   <img
-    class="logo"
-    src="logo-medfah.jpg"
-    alt="Logo MEDFAH"
-    onerror="this.style.visibility='hidden'"
-   >
-
    <div class="church-title">
     MISSION ÉGLISE DE DIEU DE LA FOI APOSTOLIQUE D’HAÏTI
-    <small>
-     MEDFAH — « Une Église, une famille, une même vision. »
-    </small>
    </div>
 
-   <img
-    class="church-photo"
-    src="${churchPhoto}"
-    alt="Église MEDFAH"
-    onerror="this.style.display='none'"
-   >
+   <div class="letterhead-row">
+
+    <img
+     class="logo"
+     src="logo-medfah.jpg"
+     alt="Logo MEDFAH"
+     onerror="this.style.visibility='hidden'"
+    >
+
+    <div class="contact-block">
+
+     <div class="church-address">
+      3, Avenue Maïs-Gâté, entre Maïs-Gâté 13 et 15,
+      Tabarre, Port-au-Prince, Haïti
+     </div>
+
+     <div class="church-contact">
+      eglisedelafoiapostolique2007@gmail.com | (+509) 37897370 / 31048016
+     </div>
+
+     <div class="rule-blue"></div>
+     <div class="rule-red"></div>
+
+    </div>
+
+    <img
+     class="church-photo"
+     src="${churchPhoto}"
+     alt="Église MEDFAH"
+     onerror="this.style.display='none'"
+    >
+
+   </div>
 
    <div class="pastor">
     Pasteur : Beaulieu Mislet
@@ -763,6 +827,16 @@ function cardHTML(m){
     </div>
 
     <div>
+     <b>Fonction :</b>
+     ${safe(val(m,"fonction")||"—")}
+    </div>
+
+    <div class="phone-row">
+     <b>Téléphone :</b>
+     ${safe(val(m,"telephone")||"—")}
+    </div>
+
+    <div>
      <b>Code :</b>
      ${safe(val(m,"code")||"—")}
     </div>
@@ -771,18 +845,10 @@ function cardHTML(m){
      <b>N° carte :</b>
      ${safe(val(m,"numero_carte")||"—")}
     </div>
-    <div>
-  <b>Fonction :</b>
-  ${safe(val(m,"fonction")||"—")}
-</div>
+
     <div>
      <b>Assemblée :</b>
      ${safe(val(m,"assemblee")||"MEDFAH")}
-    </div>
-
-    <div>
-     <b>Téléphone :</b>
-     ${safe(val(m,"telephone")||"—")}
     </div>
 
     <div>
@@ -842,9 +908,7 @@ function cardHTML(m){
 
 }
 
-/* ================================
-   CRÉATION DU QR CODE
-================================ */
+/* CRÉATION DU QR CODE */
 
 async function ensureToken(m){
 
@@ -872,9 +936,7 @@ async function ensureToken(m){
 
 }
 
-/* ================================
-   AFFICHAGE DES CARTES AVEC PHOTOS PRIVÉES
-================================ */
+/* AFFICHAGE DES CARTES ET PHOTOS */
 
 async function render(list){
 
@@ -893,7 +955,6 @@ async function render(list){
 
    if(photo){
 
-    // Anciennes photos enregistrées comme URL
     if(/^https?:\/\//i.test(photo)){
      copie.photo = photo;
     }else{
@@ -953,9 +1014,7 @@ async function render(list){
 
 }
 
-/* ================================
-   SÉLECTION D'UN MEMBRE
-================================ */
+/* SÉLECTION D'UN MEMBRE */
 
 async function selected(){
 
@@ -975,9 +1034,7 @@ async function selected(){
 
 }
 
-/* ================================
-   BOUTONS D'ACTION
-================================ */
+/* BOUTONS D'ACTION */
 
 $("showOne").onclick=async()=>{
 
