@@ -1866,7 +1866,7 @@ window.voirPresencesSessionMEDFAH = async function(sessionId) {
             await supabaseClient
                 .from('membre_infos')
                 .select('id,nom,prenom')
-                .eq('statut', 'actif')
+                .eq('Statut', 'actif')
                 .order('nom', { ascending: true });
 
         if (erreurMembres) throw erreurMembres;
