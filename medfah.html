@@ -1620,8 +1620,21 @@ async function afficherModulePresencesMEDFAH(zone) {
         </form>
         <hr><h3>Services enregistrés</h3>
         <button type="button" class="refresh" id="actualiserSessionsPresenceMEDFAH">↻ Actualiser</button>
-        <div id="listeSessionsPresenceMEDFAH" style="margin-top:12px">Chargement des services...</div>
-        <hr>
+        <div id="listeSessionsPresenceMEDFAH" style="margin-top:12px">
+ Chargement des services...
+</div>
+
+<!-- ZONE RAPPORT : RESTE INDEPENDANTE DE LA LISTE -->
+<div
+ id="detailsPresencesSessionMEDFAH"
+ style="margin-top:14px"
+>
+ <p style="color:#64748b">
+  Appuyez sur « Voir » pour consulter le rapport d'un service.
+ </p>
+</div>
+
+<hr>
 <h3>Pointage des membres</h3>
 <p>Le pointage manuel et le scanner QR sont réservés aux administrateurs connectés.</p>
 
@@ -1667,35 +1680,108 @@ async function enregistrerSessionPresenceMEDFAH(event) {
 }
 
 async function chargerSessionsPresenceMEDFAH() {
-    const liste = document.getElementById('listeSessionsPresenceMEDFAH');
+
+    const liste = document.getElementById(
+        'listeSessionsPresenceMEDFAH'
+    );
+
     if (!liste || !supabaseClient) return;
+
     liste.textContent = 'Chargement des services...';
+
     try {
-        const { data, error } = await supabaseClient.from('sessions_presence')
-          .select('id,nom_service,date_service,heure_debut,heure_fin,statut')
-          .order('date_service', { ascending: false });
+
+        const { data, error } = await supabaseClient
+            .from('sessions_presence')
+            .select('id,nom_service,date_service,heure_debut,heure_fin,statut')
+            .order('date_service', { ascending: false });
+
         if (error) throw error;
-        if (!data || !data.length) { liste.innerHTML = '<p class="empty">Aucun service enregistré pour le moment.</p>'; return; }
-        
-liste.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Service</th><th>Date</th><th>Horaire</th><th>Statut</th><th>Actions</th></tr></thead><tbody>' + data.map(s =>
-    '<tr>' +
-    '<td>' + escapeHTML(s.nom_service || '') + '</td>' +
-    '<td>' + escapeHTML(s.date_service || '') + '</td>' +
-    '<td>' + escapeHTML((s.heure_debut || '') + ' – ' + (s.heure_fin || '')) + '</td>' +
-    '<td>' + escapeHTML(s.statut || '') + '</td>' +
-    '<td>' +
-    '<button class="refresh" type="button" onclick="voirPresencesSessionMEDFAH(' + Number(s.id) + ')">Voir</button> ' +
-    (s.statut === 'planifie'
-        ? '<button class="view-btn" type="button" onclick="changerStatutSessionPresenceMEDFAH(' + Number(s.id) + ', \'ouvert\')">Ouvrir</button>'
-        : s.statut === 'ouvert'
-            ? '<button class="refresh" type="button" onclick="changerStatutSessionPresenceMEDFAH(' + Number(s.id) + ', \'termine\')">Clôturer</button>'
-            : '') +
-    '</td></tr>'
-).join('') + '</tbody></table></div><div id="detailsPresencesSessionMEDFAH" style="margin-top:14px"></div>';
+
+        if (!data || !data.length) {
+
+            liste.innerHTML =
+                '<p class="empty">Aucun service enregistré pour le moment.</p>';
+
+            return;
+        }
+
+        liste.innerHTML =
+            '<div class="table-wrap">' +
+            '<table>' +
+            '<thead><tr>' +
+            '<th>Service</th>' +
+            '<th>Date</th>' +
+            '<th>Horaire</th>' +
+            '<th>Statut</th>' +
+            '<th>Actions</th>' +
+            '</tr></thead><tbody>' +
+
+            data.map(s => {
+
+                const id = Number(s.id);
+
+                return '<tr>' +
+
+                    '<td>' +
+                    escapeHTML(s.nom_service || '') +
+                    '</td>' +
+
+                    '<td>' +
+                    escapeHTML(s.date_service || '') +
+                    '</td>' +
+
+                    '<td>' +
+                    escapeHTML(
+                        (s.heure_debut || '') +
+                        ' – ' +
+                        (s.heure_fin || '')
+                    ) +
+                    '</td>' +
+
+                    '<td>' +
+                    escapeHTML(s.statut || '') +
+                    '</td>' +
+
+                    '<td>' +
+
+                    '<button class="refresh" type="button" ' +
+                    'onclick="voirPresencesSessionMEDFAH(' + id + ')">' +
+                    'Voir</button> ' +
+
+                    (
+                        s.statut === 'planifie'
+                        ?
+                        '<button class="view-btn" type="button" ' +
+                        'onclick="changerStatutSessionPresenceMEDFAH(' +
+                        id + ', \'ouvert\')">Ouvrir</button>'
+
+                        :
+
+                        s.statut === 'ouvert'
+                        ?
+                        '<button class="refresh" type="button" ' +
+                        'onclick="changerStatutSessionPresenceMEDFAH(' +
+                        id + ', \'termine\')">Clôturer</button>'
+
+                        : ''
+                    ) +
+
+                    '</td></tr>';
+
+            }).join('') +
+
+            '</tbody></table></div>';
 
     } catch (e) {
+
         console.error('Erreur chargement sessions:', e);
-        liste.textContent = 'Chargement impossible : ' + (e.message || 'erreur Supabase') + '. Vérifiez les autorisations de lecture sur sessions_presence.';
+
+        liste.textContent =
+            'Chargement impossible : ' +
+            (e.message || e) +
+            '. Vérifiez les autorisations de lecture sur sessions_presence.';
+
     }
 }
 async function changerStatutSessionPresenceMEDFAH(sessionId, nouveauStatut) {
@@ -1739,93 +1825,138 @@ async function changerStatutSessionPresenceMEDFAH(sessionId, nouveauStatut) {
     }
 }
 
-async function voirPresencesSessionMEDFAH(sessionId) {
-    const cible = document.getElementById('detailsPresencesSessionMEDFAH');
-    if (!cible || !supabaseClient) return;
+window.voirPresencesSessionMEDFAH = async function(sessionId) {
 
-    cible.textContent = 'Préparation du rapport de présence...';
+    const cible = document.getElementById(
+        'detailsPresencesSessionMEDFAH'
+    );
+
+    if (!cible) {
+        alert("La zone du rapport est introuvable.");
+        return;
+    }
+
+    if (!supabaseClient) {
+        cible.textContent =
+            "Connexion Supabase indisponible.";
+        return;
+    }
+
+    cible.innerHTML =
+        '<p style="padding:12px;color:#1d4ed8">' +
+        'Préparation du rapport de présence...' +
+        '</p>';
 
     try {
-        const { data: sessions, error: erreurSession } = await supabaseClient
-            .from('sessions_presence')
-            .select('id,nom_service,date_service,heure_debut,heure_fin,statut')
-            .eq('id', sessionId)
-            .limit(1);
+
+        const { data: session, error: erreurSession } =
+            await supabaseClient
+                .from('sessions_presence')
+                .select('id,nom_service,date_service,heure_debut,heure_fin,statut')
+                .eq('id', sessionId)
+                .maybeSingle();
 
         if (erreurSession) throw erreurSession;
-        if (!sessions || !sessions.length) {
-            cible.textContent = 'Service introuvable.';
-            return;
+
+        if (!session) {
+            throw new Error("Service introuvable.");
         }
 
-        const session = sessions[0];
-
-        const { data: membres, error: erreurMembres } = await supabaseClient
-            .from('membre_infos')
-            .select('id,nom,prenom')
-            .eq('statut', 'actif')
-            .order('nom', { ascending: true });
+        const { data: membres, error: erreurMembres } =
+            await supabaseClient
+                .from('membre_infos')
+                .select('id,nom,prenom')
+                .eq('statut', 'actif')
+                .order('nom', { ascending: true });
 
         if (erreurMembres) throw erreurMembres;
 
-        const { data: pointages, error: erreurPointages } = await supabaseClient
-            .from('presences_eglise')
-            .select('id,membre_id,heure_pointage,statut,mode_pointage,observation')
-            .eq('session_id', sessionId)
-            .order('heure_pointage', { ascending: true });
+        const { data: pointages, error: erreurPointages } =
+            await supabaseClient
+                .from('presences_eglise')
+                .select('id,membre_id,heure_pointage,statut,mode_pointage,observation')
+                .eq('session_id', sessionId)
+                .order('heure_pointage', { ascending: true });
 
         if (erreurPointages) throw erreurPointages;
 
         const listeMembres = membres || [];
         const listePointages = pointages || [];
+
         const pointageParMembre = new Map();
 
         listePointages.forEach(p => {
+
             const cle = String(p.membre_id);
+
             if (!pointageParMembre.has(cle)) {
                 pointageParMembre.set(cle, p);
             }
+
         });
 
         const presents = [];
         const absents = [];
 
         listeMembres.forEach(m => {
-            const pointage = pointageParMembre.get(String(m.id));
+
+            const pointage =
+                pointageParMembre.get(String(m.id));
+
             const nomComplet =
-                [m.nom || '', m.prenom || ''].join(' ').trim() ||
-                'Nom non renseigné';
+                [m.nom || '', m.prenom || '']
+                .join(' ')
+                .trim() || 'Nom non renseigné';
 
             if (pointage) {
-                presents.push({ membre: m, nom: nomComplet, pointage });
+
+                presents.push({
+                    nom: nomComplet,
+                    pointage: pointage
+                });
+
             } else {
-                absents.push({ membre: m, nom: nomComplet });
+
+                absents.push({
+                    nom: nomComplet
+                });
+
             }
+
         });
 
         const enRetard = presents.filter(x =>
-            String(x.pointage.statut || '').toLowerCase() === 'en_retard'
+            String(x.pointage.statut || '').toLowerCase()
+            === 'en_retard'
         ).length;
 
-        const aLHeure = presents.length - enRetard;
+        const presentsHeure =
+            presents.length - enRetard;
+
         const totalActifs = listeMembres.length;
+
         const taux = totalActifs
-            ? Math.round((presents.length / totalActifs) * 100)
+            ? Math.round(
+                (presents.length / totalActifs) * 100
+              )
             : 0;
 
         const estCloture =
-            String(session.statut || '').toLowerCase() === 'termine';
+            String(session.statut || '').toLowerCase()
+            === 'termine';
 
         const titreRapport = estCloture
             ? 'Rapport final'
             : 'Rapport provisoire';
 
         const dateAffichee = session.date_service
-            ? new Date(session.date_service + 'T12:00:00')
-                .toLocaleDateString('fr-FR')
+            ? new Date(
+                session.date_service + 'T12:00:00'
+              ).toLocaleDateString('fr-FR')
             : '—';
 
         const lignePresence = presents.map(x => {
+
             const heure = x.pointage.heure_pointage
                 ? new Date(x.pointage.heure_pointage)
                     .toLocaleTimeString('fr-FR', {
@@ -1836,76 +1967,170 @@ async function voirPresencesSessionMEDFAH(sessionId) {
                 : '—';
 
             const statut =
-                String(x.pointage.statut || '').toLowerCase() === 'en_retard'
-                    ? 'En retard'
-                    : 'Présent';
+                String(x.pointage.statut || '').toLowerCase()
+                === 'en_retard'
+                ? 'En retard'
+                : 'Présent';
 
-            return '<tr><td>' + escapeHTML(x.nom) +
-                '</td><td>' + escapeHTML(statut) +
-                '</td><td>' + escapeHTML(heure) +
-                '</td><td>' + escapeHTML(x.pointage.mode_pointage || '—') +
-                '</td></tr>';
+            return `
+                <tr>
+                    <td>${escapeHTML(x.nom)}</td>
+                    <td>${escapeHTML(statut)}</td>
+                    <td>${escapeHTML(heure)}</td>
+                    <td>${escapeHTML(
+                        x.pointage.mode_pointage || '—'
+                    )}</td>
+                </tr>
+            `;
+
         }).join('');
 
-        const ligneAbsence = absents.map(x =>
-            '<tr><td>' + escapeHTML(x.nom) +
-            '</td><td><span style="color:#b91c1c;font-weight:700">Absent</span></td>' +
-            '<td>—</td><td>—</td></tr>'
-        ).join('');
+        const ligneAbsence = absents.map(x => `
+            <tr>
+                <td>${escapeHTML(x.nom)}</td>
+                <td>
+                    <span style="color:#b91c1c;font-weight:700">
+                        Absent
+                    </span>
+                </td>
+                <td>—</td>
+                <td>—</td>
+            </tr>
+        `).join('');
 
-        cible.innerHTML =
-            '<section style="border:1px solid #dbe3ee;border-radius:12px;padding:14px;margin-top:12px">' +
-                '<h4 style="margin:0 0 6px;color:#123b68">' +
-                    titreRapport + ' — ' +
-                    escapeHTML(session.nom_service || 'Service') +
-                '</h4>' +
+        cible.innerHTML = `
 
-                '<p style="margin:4px 0 12px">Date : ' +
-                    escapeHTML(dateAffichee) +
-                    ' | Horaire : ' +
-                    escapeHTML((session.heure_debut || '—') + ' à ' + (session.heure_fin || '—')) +
-                '</p>' +
+            <section style="
+                border:1px solid #dbe3ee;
+                border-radius:12px;
+                padding:14px;
+                margin-top:12px;
+                background:#fff;
+            ">
 
-                '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:8px;margin:12px 0">' +
-                    '<div style="background:#eff6ff;padding:10px;border-radius:8px"><strong>' +
-                        totalActifs + '</strong><br><small>Membres actifs</small></div>' +
-                    '<div style="background:#ecfdf5;padding:10px;border-radius:8px"><strong>' +
-                        aLHeure + '</strong><br><small>Présents</small></div>' +
-                    '<div style="background:#fff7ed;padding:10px;border-radius:8px"><strong>' +
-                        enRetard + '</strong><br><small>En retard</small></div>' +
-                    '<div style="background:#fef2f2;padding:10px;border-radius:8px"><strong>' +
-                        absents.length + '</strong><br><small>Absents</small></div>' +
-                    '<div style="background:#f8fafc;padding:10px;border-radius:8px"><strong>' +
-                        taux + '%</strong><br><small>Participation</small></div>' +
-                '</div>' +
+                <h3 style="color:#123b68">
+                    ${titreRapport} —
+                    ${escapeHTML(session.nom_service || 'Service')}
+                </h3>
 
-                '<p style="font-size:13px;color:#475569">' +
-                    (estCloture
+                <p>
+                    <strong>Date :</strong>
+                    ${escapeHTML(dateAffichee)}
+                    <br>
+
+                    <strong>Horaire :</strong>
+                    ${escapeHTML(session.heure_debut || '—')}
+                    à
+                    ${escapeHTML(session.heure_fin || '—')}
+                </p>
+
+                <div style="
+                    display:grid;
+                    grid-template-columns:repeat(auto-fit,minmax(115px,1fr));
+                    gap:8px;
+                    margin:12px 0;
+                ">
+
+                    <div style="background:#eff6ff;padding:10px;border-radius:8px">
+                        <strong>${totalActifs}</strong>
+                        <br><small>Membres actifs</small>
+                    </div>
+
+                    <div style="background:#ecfdf5;padding:10px;border-radius:8px">
+                        <strong>${presents.length}</strong>
+                        <br><small>Présents</small>
+                    </div>
+
+                    <div style="background:#f0fdf4;padding:10px;border-radius:8px">
+                        <strong>${presentsHeure}</strong>
+                        <br><small>À l'heure</small>
+                    </div>
+
+                    <div style="background:#fff7ed;padding:10px;border-radius:8px">
+                        <strong>${enRetard}</strong>
+                        <br><small>En retard</small>
+                    </div>
+
+                    <div style="background:#fef2f2;padding:10px;border-radius:8px">
+                        <strong>${absents.length}</strong>
+                        <br><small>Absents</small>
+                    </div>
+
+                    <div style="background:#f8fafc;padding:10px;border-radius:8px">
+                        <strong>${taux}%</strong>
+                        <br><small>Participation</small>
+                    </div>
+
+                </div>
+
+                <p style="font-size:13px;color:#475569">
+                    ${
+                        estCloture
                         ? 'Service clôturé : les membres actifs sans pointage sont comptés comme absents.'
-                        : 'Service non clôturé : les absences affichées sont provisoires et peuvent diminuer pendant le pointage.') +
-                '</p>' +
+                        : 'Rapport provisoire : les absences peuvent diminuer pendant le pointage.'
+                    }
+                </p>
 
-                '<div class="table-wrap"><table>' +
-                    '<thead><tr><th>Membre</th><th>Statut</th><th>Heure</th><th>Mode</th></tr></thead>' +
-                    '<tbody>' +
-                        (lignePresence + ligneAbsence ||
-                            '<tr><td colspan="4">Aucun membre actif trouvé.</td></tr>') +
-                    '</tbody>' +
-                '</table></div>' +
+                <div class="table-wrap">
 
-                '<p style="font-size:12px;color:#64748b;margin-top:10px">' +
-                    'Les membres inactifs ne sont pas inclus. Aucun faux pointage ni ligne d’absence n’est ajouté dans la base de données.' +
-                '</p>' +
-            '</section>';
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>Membre</th>
+                                <th>Statut</th>
+                                <th>Heure</th>
+                                <th>Mode</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            ${
+                                lignePresence + ligneAbsence ||
+                                '<tr><td colspan="4">Aucun membre actif trouvé.</td></tr>'
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <p style="
+                    font-size:12px;
+                    color:#64748b;
+                    margin-top:10px;
+                ">
+                    Aucun faux pointage ni aucune absence
+                    n'est ajouté dans la base de données.
+                </p>
+
+            </section>
+
+        `;
+
+        cible.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
 
     } catch (e) {
-        console.error('Erreur génération rapport de présence:', e);
-        cible.textContent =
+
+        console.error(
+            'Erreur génération rapport de présence:',
+            e
+        );
+
+        cible.innerHTML =
+            '<p style="color:#b91c1c;padding:12px">' +
             'Impossible de générer le rapport : ' +
-            (e.message || 'erreur Supabase') +
-            '. Vérifiez les autorisations de lecture sur les tables concernées.';
+            escapeHTML(e.message || e) +
+            '</p>';
+
     }
-}
+
+};
 
 
 /* ==========================================
