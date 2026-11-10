@@ -9,7 +9,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box}
 
@@ -554,7 +555,15 @@ Choisir un membre pour afficher sa carte
 <button id="printOne">Imprimer la carte choisie</button>
 <button class="gold" id="printAll">Imprimer toutes les cartes</button>
 </div>
+<div class="controls">
+<button class="gold" id="downloadJpg">
+Télécharger la carte en JPG
+</button>
 
+<button class="secondary" id="downloadPdf">
+Télécharger la carte en PDF
+</button>
+</div>
 <button
  class="secondary"
  onclick="location.href='medfah.html'"
@@ -1011,6 +1020,148 @@ async function selected(){
  return m;
 
 }
+
+/* PRÉPARATION POUR TÉLÉCHARGEMENT JPG ET PDF */
+
+function nomFichierCarte(m){
+ return (
+  "MEDFAH_"+val(m,"nom")+"_"+val(m,"prenom")
+ )
+ .normalize("NFD")
+ .replace(/[\u0300-\u036f]/g,"")
+ .replace(/[^a-zA-Z0-9_-]+/g,"_");
+}
+
+async function preparerCarteTelechargement(m){
+
+ if(!window.html2canvas){
+  throw Error("Le module de téléchargement JPG est indisponible.");
+ }
+
+ await render([m]);
+
+ const carte=$("cardsGrid").querySelector(".member-card");
+
+ if(!carte){
+  throw Error("La carte du membre n'a pas été trouvée.");
+ }
+
+ const images=[...carte.querySelectorAll("img")];
+
+ await Promise.all(images.map(img=>{
+
+  if(img.complete){
+   return Promise.resolve();
+  }
+
+  return new Promise(resolve=>{
+
+   img.addEventListener("load",resolve,{once:true});
+   img.addEventListener("error",resolve,{once:true});
+
+   setTimeout(resolve,15000);
+
+  });
+
+ }));
+
+ if(document.fonts&&document.fonts.ready){
+  await document.fonts.ready;
+ }
+
+ return await html2canvas(carte,{
+  scale:4,
+  useCORS:true,
+  allowTaint:false,
+  backgroundColor:"#ffffff",
+  logging:false,
+  imageTimeout:20000
+ });
+
+}
+
+/* TÉLÉCHARGEMENT JPG */
+
+$("downloadJpg").onclick=async()=>{
+
+ try{
+
+  const m=await selected();
+
+  say("Préparation de la carte en image haute qualité...");
+
+  const canvas=await preparerCarteTelechargement(m);
+
+  const lien=document.createElement("a");
+
+  lien.download=nomFichierCarte(m)+".jpg";
+
+  lien.href=canvas.toDataURL("image/jpeg",0.98);
+
+  document.body.appendChild(lien);
+  lien.click();
+  lien.remove();
+
+  say("Carte JPG téléchargée avec succès.");
+
+ }catch(e){
+
+  console.error(e);
+  say("Erreur téléchargement JPG : "+e.message);
+
+ }
+
+};
+
+/* TÉLÉCHARGEMENT PDF */
+
+$("downloadPdf").onclick=async()=>{
+
+ try{
+
+  const m=await selected();
+
+  say("Préparation du document PDF haute qualité...");
+
+  const canvas=await preparerCarteTelechargement(m);
+
+  if(!window.jspdf||!window.jspdf.jsPDF){
+   throw Error("Le module PDF est indisponible.");
+  }
+
+  const image=canvas.toDataURL("image/jpeg",0.98);
+
+  const {jsPDF}=window.jspdf;
+
+  const pdf=new jsPDF({
+   orientation:"landscape",
+   unit:"mm",
+   format:[85.6,54]
+  });
+
+  pdf.addImage(
+   image,
+   "JPEG",
+   0,
+   0,
+   85.6,
+   54,
+   undefined,
+   "FAST"
+  );
+
+  pdf.save(nomFichierCarte(m)+".pdf");
+
+  say("Carte PDF téléchargée avec succès.");
+
+ }catch(e){
+
+  console.error(e);
+  say("Erreur téléchargement PDF : "+e.message);
+
+ }
+
+};
 
 /* BOUTONS D'ACTION */
 
