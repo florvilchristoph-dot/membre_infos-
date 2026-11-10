@@ -10,7 +10,7 @@
 <script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box}
 
@@ -1125,13 +1125,15 @@ $("downloadPdf").onclick=async()=>{
 
   const canvas=await preparerCarteTelechargement(m);
 
-  if(!window.jspdf||!window.jspdf.jsPDF){
-   throw Error("Le module PDF est indisponible.");
-  }
+  const PDF = window.jspdf?.jsPDF || window.jsPDF;
+
+if(!PDF){
+ throw Error("La bibliothèque PDF n'a pas pu être chargée. Rechargez la page.");
+}
 
   const image=canvas.toDataURL("image/jpeg",0.98);
 
-  const {jsPDF}=window.jspdf;
+  const jsPDF = PDF;
 
   const pdf=new jsPDF({
    orientation:"landscape",
