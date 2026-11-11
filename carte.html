@@ -189,6 +189,7 @@ button.gold{background:#b88620}
 
 /* PHOTO DE L'ÉGLISE AVEC FUSION DOUCE DANS LE BLEU */
 
+
 .church-photo{
  position:absolute;
  right:0;
@@ -200,21 +201,28 @@ button.gold{background:#b88620}
  opacity:.95;
  border:0;
  border-radius:0;
- -webkit-mask-image:linear-gradient(
-  to right,
-  transparent 0%,
-  rgba(0,0,0,.15) 12%,
-  rgba(0,0,0,.8) 42%,
-  black 65%
- );
- mask-image:linear-gradient(
-  to right,
-  transparent 0%,
-  rgba(0,0,0,.15) 12%,
-  rgba(0,0,0,.8) 42%,
-  black 65%
+ z-index:1;
+}
+
+/* FUSION DOUCE AVEC LE FOND BLEU */
+.top::after{
+ content:"";
+ position:absolute;
+ top:0;
+ right:0;
+ width:105px;
+ height:46px;
+ z-index:2;
+ pointer-events:none;
+ background:linear-gradient(
+  90deg,
+  #0b3474 0%,
+  rgba(11,52,116,.88) 20%,
+  rgba(11,52,116,.35) 60%,
+  rgba(11,52,116,0) 100%
  );
 }
+
 
 .pastor{
  position:absolute;
