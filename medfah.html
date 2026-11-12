@@ -1305,22 +1305,74 @@ if (cle === "programmation") {
         return;
     }
 
-        Le comité central
-Sigle : Non précisé
+        
+    if (cle === "entites") {
+        zone.innerHTML = `
+            <h2>Entités de l’Église</h2>
+            <p>Gestion officielle des 15 entités de la MEDFAH.</p>
 
-Responsable : Non précisé
+            <form id="formEntitesMEDFAH">
+                <label for="entNom">Nom de l’entité *</label>
+                <select id="entNom" required>
+                    <option value="">Chargement des entités...</option>
+                </select>
 
-Date de création : Non précisée
+                <label for="entSigle">Sigle ou nom du groupe</label>
+                <input id="entSigle" type="text">
 
-Nombre de membres : 0
+                <label for="entResponsable">Responsable principal</label>
+                <input id="entResponsable" type="text">
 
-Statut : Active
+                <label for="entDate">Date de création</label>
+                <input id="entDate" type="date">
 
-Description : Aucune
+                <label for="entMembres">Nombre de membres</label>
+                <input id="entMembres" type="number" min="0" value="0">
 
-Modifier
-Télécharger PDF
-Imprimer
+                <label for="entStatut">Statut</label>
+                <select id="entStatut">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+
+                <label for="entDescription">Description</label>
+                <textarea id="entDescription" rows="4"></textarea>
+
+                <button type="submit" class="view-btn">
+                    Enregistrer les modifications
+                </button>
+                <p id="messageEntitesMEDFAH"></p>
+            </form>
+
+            <div id="gestionBureauEntiteMEDFAH" hidden></div>
+
+            <hr>
+            <h3>Liste des entités enregistrées</h3>
+
+            <label for="filtreEntitesMEDFAH">Filtrer par entité</label>
+            <select id="filtreEntitesMEDFAH">
+                <option value="">Toutes les entités</option>
+            </select>
+
+            <div id="listeEntitesMEDFAH">
+                Chargement des entités...
+            </div>
+
+            <div id="zonePDFEntiteMEDFAH"
+                style="position:absolute;left:-10000px;top:0;width:750px;">
+            </div>
+        `;
+
+        document.getElementById("filtreEntitesMEDFAH")
+            .addEventListener("change", afficherEntitesMEDFAH);
+
+        document.getElementById("entNom")
+            .addEventListener("change", chargerDetailsEntiteMEDFAH);
+
+        await chargerEntitesMEDFAH();
+        return;
+    }
+
 
         if (cle === "archives") {
             zone.innerHTML = `
