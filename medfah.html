@@ -1305,72 +1305,22 @@ if (cle === "programmation") {
         return;
     }
 
-        if (cle === "entites") {
-    zone.innerHTML = `
-        <h2>Entités de l’Église</h2>
-        <p>Gestion officielle des 15 entités de la MEDFAH.</p>
+        Le comité central
+Sigle : Non précisé
 
-        <form id="formEntitesMEDFAH">
-            <label for="entNom">Nom de l’entité *</label>
-            <select id="entNom" required>
-                <option value="">Chargement des entités...</option>
-            </select>
+Responsable : Non précisé
 
-            <label for="entSigle">Sigle ou nom du groupe</label>
-            <input id="entSigle" type="text">
+Date de création : Non précisée
 
-            <label for="entResponsable">Responsable principal</label>
-            <input id="entResponsable" type="text">
+Nombre de membres : 0
 
-            <label for="entDate">Date de création</label>
-            <input id="entDate" type="date">
+Statut : Active
 
-            <label for="entMembres">Nombre de membres</label>
-            <input id="entMembres" type="number" min="0" value="0" required>
+Description : Aucune
 
-            <label for="entStatut">Statut</label>
-            <select id="entStatut">
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-            </select>
-
-            <label for="entDescription">Description et informations complémentaires</label>
-            <textarea id="entDescription" rows="4"></textarea>
-
-            <button type="submit" class="view-btn">
-                Enregistrer les modifications
-            </button>
-
-            <p id="messageEntitesMEDFAH" role="status"></p>
-        </form>
-
-        <hr>
-
-        <h3>Liste des entités enregistrées</h3>
-
-        <label for="filtreEntitesMEDFAH">Filtrer par entité</label>
-        <select id="filtreEntitesMEDFAH">
-            <option value="">Toutes les entités</option>
-        </select>
-
-        <div id="listeEntitesMEDFAH">
-            Chargement des entités...
-        </div>
-
-        <div id="zonePDFEntiteMEDFAH"
-             style="position:absolute;left:-10000px;top:0;width:750px;">
-        </div>
-    `;
-
-    document.getElementById("filtreEntitesMEDFAH")
-        .addEventListener("change", afficherEntitesMEDFAH);
-
-    document.getElementById("entNom")
-        .addEventListener("change", chargerDetailsEntiteMEDFAH);
-
-    await chargerEntitesMEDFAH();
-    return;
-}
+Modifier
+Télécharger PDF
+Imprimer
 
         if (cle === "archives") {
             zone.innerHTML = `
@@ -2441,9 +2391,10 @@ async function afficherActivitesMEDFAH() {
     }
 }
 
+
 /* =====================================================
    ENTITÉS DE L'ÉGLISE — MEDFAH
-   15 entités + mise à jour + PDF + impression
+   Gestion des bureaux, historique, PDF et impression
 ===================================================== */
 
 const LISTE_ENTITES_MEDFAH = [
@@ -2464,7 +2415,43 @@ const LISTE_ENTITES_MEDFAH = [
     "Le département des services publics et sociaux"
 ];
 
+const POSTES_COMITE_CENTRAL_MEDFAH = [
+    "Président",
+    "Secrétaire",
+    "Secrétaire adjoint",
+    "Conseiller",
+    "Trésorier",
+    "Porte-parole",
+    "Délégué"
+];
+
+const POSTES_AUTRES_ENTITES_MEDFAH = [
+    "Présidente",
+    "Secrétaire",
+    "Secrétaire adjointe",
+    "Trésorière",
+    "Conseillère",
+    "Délégué",
+    "Préfet de discipline"
+];
+
 let entitesMEDFAHCache = [];
+let membresEntitesMEDFAHCache = [];
+let responsablesEntiteMEDFAHCache = [];
+
+
+/* VÉRIFIER L'ACCÈS ADMINISTRATEUR */
+
+function verifierAccesEntitesMEDFAH() {
+    if (
+        !roleAdminMEDFAH ||
+        !["admin_principal", "admin_secondaire"].includes(roleAdminMEDFAH)
+    ) {
+        alert("Accès réservé aux administrateurs MEDFAH.");
+        return false;
+    }
+    return true;
+}
 
 
 /* CHARGER LES ENTITÉS */
@@ -2506,8 +2493,10 @@ async function chargerEntitesMEDFAH() {
 
         if (form.dataset.connecte !== "oui") {
             form.dataset.connecte = "oui";
-
-            form.addEventListener("submit", enregistrerModificationEntiteMEDFAH);
+            form.addEventListener(
+                "submit",
+                enregistrerModificationEntiteMEDFAH
+            );
         }
 
         await afficherEntitesMEDFAH();
@@ -2548,15 +2537,16 @@ function chargerDetailsEntiteMEDFAH() {
 }
 
 
-/* ENREGISTRER LES MODIFICATIONS */
+/* ENREGISTRER LES INFORMATIONS GÉNÉRALES */
 
 async function enregistrerModificationEntiteMEDFAH(event) {
     event.preventDefault();
 
+    if (!verifierAccesEntitesMEDFAH()) return;
+
     const form = document.getElementById("formEntitesMEDFAH");
     const message = document.getElementById("messageEntitesMEDFAH");
     const bouton = form.querySelector('button[type="submit"]');
-
     const nom = document.getElementById("entNom").value;
 
     if (!nom) {
@@ -2612,6 +2602,492 @@ async function enregistrerModificationEntiteMEDFAH(event) {
 }
 
 
+/* CHARGER LES MEMBRES POUR LES LISTES DE CHOIX */
+
+async function chargerMembresPourBureauMEDFAH() {
+    if (membresEntitesMEDFAHCache.length) {
+        return membresEntitesMEDFAHCache;
+    }
+
+    const { data, error } = await supabaseClient
+        .from("membre_infos")
+        .select("id, nom, prenom, status")
+        .order("nom", { ascending: true });
+
+    if (error) throw error;
+
+    membresEntitesMEDFAHCache = data || [];
+
+    return membresEntitesMEDFAHCache;
+}
+
+
+/* CHOISIR LES POSTES SELON L'ENTITÉ */
+
+function obtenirPostesEntiteMEDFAH(entite) {
+    if (
+        String(entite.nom || "").toLowerCase().includes("comité central")
+    ) {
+        return POSTES_COMITE_CENTRAL_MEDFAH;
+    }
+
+    return POSTES_AUTRES_ENTITES_MEDFAH;
+}
+
+
+/* OUVRIR LA GESTION DU BUREAU */
+
+async function ouvrirGestionBureauEntiteMEDFAH(id) {
+    if (!verifierAccesEntitesMEDFAH()) return;
+
+    const entite = entitesMEDFAHCache.find(
+        e => Number(e.id) === Number(id)
+    );
+
+    if (!entite) {
+        alert("Entité introuvable.");
+        return;
+    }
+
+    const zone = document.getElementById(
+        "gestionBureauEntiteMEDFAH"
+    );
+
+    if (!zone) {
+        alert("La zone de gestion du bureau est introuvable.");
+        return;
+    }
+
+    zone.hidden = false;
+    zone.innerHTML = "<p>Chargement des membres et des responsables...</p>";
+
+    try {
+        const membres = await chargerMembresPourBureauMEDFAH();
+
+        const { data: responsables, error } = await supabaseClient
+            .from("entites_responsables")
+            .select("*")
+            .eq("entite_id", entite.id)
+            .is("date_fin", null)
+            .order("ordre", { ascending: true });
+
+        if (error) throw error;
+
+        responsablesEntiteMEDFAHCache = responsables || [];
+
+        const postes = obtenirPostesEntiteMEDFAH(entite);
+
+        const optionsMembres = `
+            <option value="">Choisir un membre</option>
+            ${membres.map(membre => `
+                <option value="${Number(membre.id)}">
+                    ${escapeHTML(
+                        (membre.nom || "") + " " + (membre.prenom || "")
+                    )}
+                </option>
+            `).join("")}
+        `;
+
+        zone.innerHTML = `
+            <h3>Gestion du bureau</h3>
+            <p><strong>Entité :</strong> ${escapeHTML(entite.nom)}</p>
+            <p>
+                Sélectionnez les membres MEDFAH qui occuperont
+                les différents postes.
+            </p>
+
+            <form id="formBureauEntiteMEDFAH">
+                <div id="champsPostesEntiteMEDFAH">
+                    ${postes.map((poste, index) => {
+                        const existant = responsablesEntiteMEDFAHCache.find(
+                            r => r.fonction === poste
+                        );
+
+                        return `
+                            <div class="champ-poste-medfah"
+                                 style="margin:12px 0;padding:12px;
+                                 background:#fff;border:1px solid #d8dde6;
+                                 border-radius:9px;">
+                                <label for="posteEntite_${index}">
+                                    ${escapeHTML(poste)}
+                                </label>
+                                <select
+                                    id="posteEntite_${index}"
+                                    class="select-poste-entite-medfah"
+                                    data-fonction="${escapeHTML(poste)}"
+                                    style="width:100%;padding:11px;
+                                    border:1px solid #cbd5e1;
+                                    border-radius:7px;font-size:16px;">
+                                    ${optionsMembres}
+                                </select>
+                            </div>
+                        `;
+                    }).join("")}
+                </div>
+
+                <div style="margin:12px 0;">
+                    <button type="button" class="view-btn"
+                        id="ajouterConseillereMEDFAH">
+                        + Ajouter une conseillère
+                    </button>
+                </div>
+
+                <label for="dateDebutBureauMEDFAH">
+                    Date de début du mandat
+                </label>
+                <input id="dateDebutBureauMEDFAH"
+                    type="date"
+                    style="width:100%;padding:11px;
+                    box-sizing:border-box;">
+
+                <p id="messageBureauEntiteMEDFAH"
+                   role="status"></p>
+
+                <button type="submit" class="view-btn">
+                    Enregistrer le bureau
+                </button>
+
+                <button type="button" class="view-btn"
+                    onclick="fermerGestionBureauEntiteMEDFAH()">
+                    Fermer
+                </button>
+            </form>
+
+            <hr>
+            <h4>Responsables actuellement en fonction</h4>
+            <div id="listeResponsablesActuelsMEDFAH"></div>
+
+            <h4>Historique des anciens responsables</h4>
+            <div id="historiqueResponsablesMEDFAH"></div>
+        `;
+
+        // Préremplir les postes déjà occupés
+        postes.forEach((poste, index) => {
+            const select = document.getElementById(
+                "posteEntite_" + index
+            );
+
+            const existant = responsablesEntiteMEDFAHCache.find(
+                r => r.fonction === poste
+            );
+
+            if (existant && existant.membre_id) {
+                select.value = String(existant.membre_id);
+            }
+        });
+
+        // Afficher les autres conseillères déjà en fonction
+        const conseilleres = responsablesEntiteMEDFAHCache.filter(
+            r => r.fonction === "Conseillère"
+        );
+
+        const selectConseillere = document.querySelector(
+            '[data-fonction="Conseillère"]'
+        );
+
+        if (selectConseillere && conseilleres.length > 1) {
+            conseilleres.slice(1).forEach(personne => {
+                ajouterChampConseillereMEDFAH(
+                    optionsMembres,
+                    personne.membre_id
+                );
+            });
+        }
+
+        document.getElementById("ajouterConseillereMEDFAH")
+            .addEventListener("click", () => {
+                ajouterChampConseillereMEDFAH(optionsMembres);
+            });
+
+        document.getElementById("formBureauEntiteMEDFAH")
+            .addEventListener("submit", event => {
+                enregistrerBureauEntiteMEDFAH(event, entite);
+            });
+
+        await afficherResponsablesEntiteMEDFAH(entite.id);
+
+        zone.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    } catch (erreur) {
+        console.error("Erreur ouverture bureau :", erreur);
+        zone.innerHTML =
+            "Impossible d'ouvrir le bureau : " + erreur.message;
+    }
+}
+
+
+/* AJOUTER UNE AUTRE CONSEILLÈRE */
+
+function ajouterChampConseillereMEDFAH(optionsMembres, membreId = "") {
+    const zone = document.getElementById(
+        "champsPostesEntiteMEDFAH"
+    );
+
+    if (!zone) return;
+
+    const numero = zone.querySelectorAll(
+        '[data-fonction="Conseillère"]'
+    ).length;
+
+    const bloc = document.createElement("div");
+
+    bloc.className = "champ-poste-medfah";
+    bloc.style.cssText =
+        "margin:12px 0;padding:12px;background:#fff;" +
+        "border:1px solid #d8dde6;border-radius:9px;";
+
+    bloc.innerHTML = `
+        <label>Conseillère supplémentaire</label>
+        <select class="select-poste-entite-medfah"
+            data-fonction="Conseillère"
+            style="width:100%;padding:11px;
+            border:1px solid #cbd5e1;border-radius:7px;
+            font-size:16px;">
+            ${optionsMembres}
+        </select>
+        <button type="button" class="view-btn"
+            style="margin-top:8px;">
+            Retirer ce champ
+        </button>
+    `;
+
+    const select = bloc.querySelector("select");
+    const bouton = bloc.querySelector("button");
+
+    if (membreId) select.value = String(membreId);
+
+    bouton.addEventListener("click", () => bloc.remove());
+
+    zone.appendChild(bloc);
+}
+
+
+/* ENREGISTRER LE BUREAU ET CONSERVER L'HISTORIQUE */
+
+async function enregistrerBureauEntiteMEDFAH(event, entite) {
+    event.preventDefault();
+
+    if (!verifierAccesEntitesMEDFAH()) return;
+
+    const message = document.getElementById(
+        "messageBureauEntiteMEDFAH"
+    );
+
+    const bouton = event.target.querySelector(
+        'button[type="submit"]'
+    );
+
+    bouton.disabled = true;
+    message.textContent = "Enregistrement du bureau en cours...";
+
+    try {
+        const membres = await chargerMembresPourBureauMEDFAH();
+
+        const selects = Array.from(
+            document.querySelectorAll(
+                ".select-poste-entite-medfah"
+            )
+        );
+
+        const selections = [];
+
+        selects.forEach(select => {
+            const membreId = select.value;
+            const fonction = select.dataset.fonction;
+
+            if (!membreId) return;
+
+            const membre = membres.find(
+                m => Number(m.id) === Number(membreId)
+            );
+
+            if (!membre) return;
+
+            selections.push({
+                membre_id: Number(membre.id),
+                nom_complet:
+                    (membre.nom || "") + " " + (membre.prenom || ""),
+                fonction: fonction
+            });
+        });
+
+        const doublons = selections.filter((item, index, tableau) =>
+            tableau.findIndex(
+                autre => autre.membre_id === item.membre_id
+            ) !== index
+        );
+
+        if (doublons.length) {
+            throw new Error(
+                "Un même membre ne peut pas occuper plusieurs postes dans ce bureau."
+            );
+        }
+
+        const dateDebut =
+            document.getElementById("dateDebutBureauMEDFAH").value ||
+            new Date().toISOString().slice(0, 10);
+
+        const { data: anciens, error: erreurLecture } =
+            await supabaseClient
+                .from("entites_responsables")
+                .select("*")
+                .eq("entite_id", entite.id)
+                .is("date_fin", null);
+
+        if (erreurLecture) throw erreurLecture;
+
+        const aConserver = [];
+        const aTerminer = [];
+
+        (anciens || []).forEach(ancien => {
+            const memePoste = selections.find(
+                selection =>
+                    selection.fonction === ancien.fonction &&
+                    Number(selection.membre_id) === Number(ancien.membre_id)
+            );
+
+            if (memePoste) {
+                aConserver.push(ancien);
+            } else {
+                aTerminer.push(ancien);
+            }
+        });
+
+        // Fermer les anciens mandats remplacés ou retirés
+        if (aTerminer.length) {
+            const ids = aTerminer.map(r => r.id);
+
+            const { error } = await supabaseClient
+                .from("entites_responsables")
+                .update({
+                    date_fin: dateDebut,
+                    statut: "Terminé"
+                })
+                .in("id", ids);
+
+            if (error) throw error;
+        }
+
+        // Ajouter seulement les nouveaux responsables
+        const nouveaux = selections.filter(selection =>
+            !aConserver.some(
+                ancien =>
+                    ancien.fonction === selection.fonction &&
+                    Number(ancien.membre_id) === Number(selection.membre_id)
+            )
+        );
+
+        if (nouveaux.length) {
+            const lignes = nouveaux.map((personne, index) => ({
+                entite_id: entite.id,
+                membre_id: personne.membre_id,
+                nom_complet: personne.nom_complet.trim(),
+                fonction: personne.fonction,
+                date_debut: dateDebut,
+                date_fin: null,
+                statut: "En fonction",
+                ordre: selections.indexOf(personne) + 1
+            }));
+
+            const { error } = await supabaseClient
+                .from("entites_responsables")
+                .insert(lignes);
+
+            if (error) throw error;
+        }
+
+        message.textContent =
+            "Le bureau de l'entité a été enregistré avec succès.";
+
+        await afficherResponsablesEntiteMEDFAH(entite.id);
+
+    } catch (erreur) {
+        console.error("Erreur enregistrement bureau :", erreur);
+        message.textContent =
+            "Enregistrement impossible : " + erreur.message;
+    } finally {
+        bouton.disabled = false;
+    }
+}
+
+
+/* AFFICHER LES RESPONSABLES ET L'HISTORIQUE */
+
+async function afficherResponsablesEntiteMEDFAH(entiteId) {
+    const { data, error } = await supabaseClient
+        .from("entites_responsables")
+        .select("*")
+        .eq("entite_id", entiteId)
+        .order("ordre", { ascending: true });
+
+    if (error) throw error;
+
+    const responsables = data || [];
+
+    const actuels = responsables.filter(
+        r => !r.date_fin
+    );
+
+    const anciens = responsables.filter(
+        r => !!r.date_fin
+    );
+
+    const zoneActuels = document.getElementById(
+        "listeResponsablesActuelsMEDFAH"
+    );
+
+    const zoneHistorique = document.getElementById(
+        "historiqueResponsablesMEDFAH"
+    );
+
+    if (zoneActuels) {
+        zoneActuels.innerHTML = actuels.length
+            ? actuels.map(r => `
+                <p>
+                    <strong>${escapeHTML(r.fonction || "")} :</strong>
+                    ${escapeHTML(r.nom_complet || "")}
+                    <br>
+                    <small>Depuis le ${escapeHTML(r.date_debut || "—")}</small>
+                </p>
+            `).join("")
+            : "<p>Aucun responsable enregistré.</p>";
+    }
+
+    if (zoneHistorique) {
+        zoneHistorique.innerHTML = anciens.length
+            ? anciens.map(r => `
+                <p>
+                    <strong>${escapeHTML(r.fonction || "")} :</strong>
+                    ${escapeHTML(r.nom_complet || "")}
+                    <br>
+                    <small>
+                        Du ${escapeHTML(r.date_debut || "—")}
+                        au ${escapeHTML(r.date_fin || "—")}
+                    </small>
+                </p>
+            `).join("")
+            : "<p>Aucun ancien responsable enregistré.</p>";
+    }
+}
+
+
+/* FERMER LA GESTION DU BUREAU */
+
+function fermerGestionBureauEntiteMEDFAH() {
+    const zone = document.getElementById(
+        "gestionBureauEntiteMEDFAH"
+    );
+
+    if (zone) {
+        zone.hidden = true;
+        zone.innerHTML = "";
+    }
+}
+
+
 /* AFFICHER LES ENTITÉS */
 
 async function afficherEntitesMEDFAH() {
@@ -2623,7 +3099,9 @@ async function afficherEntitesMEDFAH() {
     try {
         let donnees = entitesMEDFAHCache;
 
-        const filtre = document.getElementById("filtreEntitesMEDFAH");
+        const filtre = document.getElementById(
+            "filtreEntitesMEDFAH"
+        );
 
         if (filtre && filtre.value) {
             donnees = donnees.filter(
@@ -2684,6 +3162,11 @@ async function afficherEntitesMEDFAH() {
                     </button>
 
                     <button type="button" class="view-btn"
+                        onclick="ouvrirGestionBureauEntiteMEDFAH(${Number(entite.id)})">
+                        Gérer le bureau
+                    </button>
+
+                    <button type="button" class="view-btn"
                         onclick="telechargerPDFEntiteMEDFAH(${Number(entite.id)})">
                         Télécharger PDF
                     </button>
@@ -2717,7 +3200,10 @@ function selectionnerEntiteMEDFAH(id) {
     chargerDetailsEntiteMEDFAH();
 
     document.getElementById("formEntitesMEDFAH")
-        .scrollIntoView({ behavior: "smooth", block: "start" });
+        .scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
 }
 
 
@@ -2740,33 +3226,66 @@ async function preparerDocumentEntiteMEDFAH(id) {
 
     if (error) throw error;
 
-    const lignesBureau = (responsables || [])
-        .map(personne => `
-            <tr>
-                <td>${escapeHTML(personne.fonction || "")}</td>
-                <td>${escapeHTML(personne.nom_complet || "")}</td>
-                <td>${escapeHTML(personne.date_debut || "—")}</td>
-                <td>${escapeHTML(personne.date_fin || "En cours")}</td>
-                <td>${escapeHTML(personne.statut || "")}</td>
-            </tr>
-        `).join("");
+    const actuels = (responsables || []).filter(
+        r => !r.date_fin
+    );
+
+    const anciens = (responsables || []).filter(
+        r => !!r.date_fin
+    );
+
+    const lignesBureau = actuels.map(personne => `
+        <tr>
+            <td>${escapeHTML(personne.fonction || "")}</td>
+            <td>${escapeHTML(personne.nom_complet || "")}</td>
+            <td>${escapeHTML(personne.date_debut || "—")}</td>
+        </tr>
+    `).join("");
 
     const bureauHTML = lignesBureau
         ? `
-            <table style="width:100%;border-collapse:collapse;margin-top:15px;">
+            <table style="
+                width:100%;
+                border-collapse:collapse;
+                margin-top:15px;
+            ">
                 <thead>
                     <tr style="background:#eaf0f8;">
                         <th>Fonction</th>
                         <th>Nom et prénom</th>
                         <th>Début du mandat</th>
-                        <th>Fin du mandat</th>
-                        <th>Statut</th>
                     </tr>
                 </thead>
                 <tbody>${lignesBureau}</tbody>
             </table>
         `
         : "<p>Aucun responsable n'est encore enregistré pour cette entité.</p>";
+
+    const historiqueHTML = anciens.length
+        ? `
+            <h3>Historique des anciens responsables</h3>
+            <table style="width:100%;border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#f1f3f5;">
+                        <th>Fonction</th>
+                        <th>Nom et prénom</th>
+                        <th>Début</th>
+                        <th>Fin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${anciens.map(p => `
+                        <tr>
+                            <td>${escapeHTML(p.fonction || "")}</td>
+                            <td>${escapeHTML(p.nom_complet || "")}</td>
+                            <td>${escapeHTML(p.date_debut || "—")}</td>
+                            <td>${escapeHTML(p.date_fin || "—")}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        `
+        : "";
 
     return `
         <div style="
@@ -2775,6 +3294,7 @@ async function preparerDocumentEntiteMEDFAH(id) {
             background:#fff;
             padding:35px;
             width:100%;
+            box-sizing:border-box;
         ">
             <div style="
                 text-align:center;
@@ -2827,12 +3347,19 @@ async function preparerDocumentEntiteMEDFAH(id) {
             </p>
 
             <h3 style="margin-top:30px;color:#173d70;">
-                COMPOSITION DU BUREAU
+                COMPOSITION ACTUELLE DU BUREAU
             </h3>
 
             ${bureauHTML}
 
-            <div style="margin-top:55px;display:flex;justify-content:space-between;">
+            ${historiqueHTML}
+
+            <div style="
+                margin-top:55px;
+                display:flex;
+                justify-content:space-between;
+                gap:30px;
+            ">
                 <div>
                     __________________________<br>
                     Signature du responsable
@@ -2863,11 +3390,17 @@ async function preparerDocumentEntiteMEDFAH(id) {
 async function telechargerPDFEntiteMEDFAH(id) {
     try {
         if (typeof html2pdf !== "function") {
-            throw new Error("La bibliothèque PDF n'est pas chargée. Vérifiez votre connexion Internet.");
+            throw new Error(
+                "La bibliothèque PDF n'est pas chargée. Vérifiez votre connexion Internet."
+            );
         }
 
         const contenu = await preparerDocumentEntiteMEDFAH(id);
         const zone = document.getElementById("zonePDFEntiteMEDFAH");
+
+        if (!zone) {
+            throw new Error("La zone PDF est introuvable.");
+        }
 
         zone.innerHTML = contenu;
 
@@ -2917,7 +3450,9 @@ async function imprimerEntiteMEDFAH(id) {
         const fenetre = window.open("", "_blank");
 
         if (!fenetre) {
-            throw new Error("Autorisez les fenêtres pop-up pour imprimer.");
+            throw new Error(
+                "Autorisez les fenêtres pop-up pour imprimer."
+            );
         }
 
         fenetre.document.open();
@@ -2932,6 +3467,10 @@ async function imprimerEntiteMEDFAH(id) {
                         font-family:Arial,sans-serif;
                         padding:20px;
                         color:#172033;
+                    }
+                    table {
+                        width:100%;
+                        border-collapse:collapse;
                     }
                     table, th, td {
                         border:1px solid #999;
@@ -2960,6 +3499,7 @@ async function imprimerEntiteMEDFAH(id) {
         alert("Impression impossible : " + erreur.message);
     }
 }
+
 
 
 /* ARCHIVES ET MÉMOIRE DE L'ÉGLISE — MEDFAH */
