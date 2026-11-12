@@ -8,7 +8,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 *{
     box-sizing:border-box;
@@ -1306,88 +1306,71 @@ if (cle === "programmation") {
     }
 
         if (cle === "entites") {
-            zone.innerHTML = `
-                <h2>Entités de l’Église</h2>
-                <p>Gestion des départements et groupes de la MEDFAH.</p>
+    zone.innerHTML = `
+        <h2>Entités de l’Église</h2>
+        <p>Gestion officielle des 15 entités de la MEDFAH.</p>
 
-                <form id="formEntitesMEDFAH">
-                    <label for="entNom">Nom de l’entité *</label>
-                    <select id="entNom" required>
-                        <option value="">Choisir une entité</option>
-                        <option value="Département des Dames">Département des Dames</option>
-                        <option value="Département des Hommes">Département des Hommes</option>
-                        <option value="Département des Jeunes">Département des Jeunes</option>
-                        <option value="Département d’Évaluation">Département d’Évaluation</option>
-                        <option value="Département Accueil et Entretien">Département Accueil et Entretien</option>
-                        <option value="Département de la Musique">Département de la Musique</option>
-                        <option value="Le Grand Chœur de la MEDFAH">Le Grand Chœur de la MEDFAH</option>
-                    </select>
+        <form id="formEntitesMEDFAH">
+            <label for="entNom">Nom de l’entité *</label>
+            <select id="entNom" required>
+                <option value="">Chargement des entités...</option>
+            </select>
 
-                    <label for="entSigle">Sigle ou nom du groupe</label>
-                    <input id="entSigle" type="text" placeholder="Ex. : MARANATHA, COMBATTANT, AJEDFAH">
+            <label for="entSigle">Sigle ou nom du groupe</label>
+            <input id="entSigle" type="text">
 
-                    <label for="entResponsable">Responsable principal</label>
-                    <input id="entResponsable" type="text">
+            <label for="entResponsable">Responsable principal</label>
+            <input id="entResponsable" type="text">
 
-                    <label for="entDate">Date de création</label>
-                    <input id="entDate" type="date">
+            <label for="entDate">Date de création</label>
+            <input id="entDate" type="date">
 
-                    <label for="entMembres">Nombre de membres</label>
-                    <input id="entMembres" type="number" min="0" value="0" required>
+            <label for="entMembres">Nombre de membres</label>
+            <input id="entMembres" type="number" min="0" value="0" required>
 
-                    <label for="entStatut">Statut</label>
-                    <select id="entStatut">
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
+            <label for="entStatut">Statut</label>
+            <select id="entStatut">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
 
-                    <h3>Comité de l’entité</h3>
-                    <p>Remplissez les postes nécessaires : 5 ou 7 membres.</p>
+            <label for="entDescription">Description et informations complémentaires</label>
+            <textarea id="entDescription" rows="4"></textarea>
 
-                    <div id="entComiteChamps">
-                        ${Array.from({length: 7}, (_, i) => `
-                            <fieldset style="margin:12px 0;padding:12px;border:1px solid #ccc;border-radius:8px">
-                                <legend>Membre ${i + 1}</legend>
-                                <label for="entComiteNom${i + 1}">Nom et prénom</label>
-                                <input id="entComiteNom${i + 1}" type="text">
-                                <label for="entComiteFonction${i + 1}">Fonction</label>
-                                <input id="entComiteFonction${i + 1}" type="text"
-                                    placeholder="Ex. : Président, secrétaire, trésorier">
-                            </fieldset>
-                        `).join("")}
-                    </div>
+            <button type="submit" class="view-btn">
+                Enregistrer les modifications
+            </button>
 
-                    <label for="entDescription">Description et informations complémentaires</label>
-                    <textarea id="entDescription" rows="4"></textarea>
+            <p id="messageEntitesMEDFAH" role="status"></p>
+        </form>
 
-                    <button type="submit">Enregistrer l’entité</button>
-                    <p id="messageEntitesMEDFAH" role="status"></p>
-                </form>
+        <hr>
 
-                <hr>
-                <h3>Liste des entités enregistrées</h3>
+        <h3>Liste des entités enregistrées</h3>
 
-                <label for="filtreEntitesMEDFAH">Filtrer par entité</label>
-                <select id="filtreEntitesMEDFAH">
-                    <option value="">Toutes les entités</option>
-                    <option value="Département des Dames">Département des Dames</option>
-                    <option value="Département des Hommes">Département des Hommes</option>
-                    <option value="Département des Jeunes">Département des Jeunes</option>
-                    <option value="Département d’Évaluation">Département d’Évaluation</option>
-                    <option value="Département Accueil et Entretien">Département Accueil et Entretien</option>
-                    <option value="Département de la Musique">Département de la Musique</option>
-                    <option value="Le Grand Chœur de la MEDFAH">Le Grand Chœur de la MEDFAH</option>
-                </select>
+        <label for="filtreEntitesMEDFAH">Filtrer par entité</label>
+        <select id="filtreEntitesMEDFAH">
+            <option value="">Toutes les entités</option>
+        </select>
 
-                <div id="listeEntitesMEDFAH">Chargement des entités...</div>
-            `;
+        <div id="listeEntitesMEDFAH">
+            Chargement des entités...
+        </div>
 
-            document.getElementById("filtreEntitesMEDFAH")
-                .addEventListener("change", afficherEntitesMEDFAH);
+        <div id="zonePDFEntiteMEDFAH"
+             style="position:absolute;left:-10000px;top:0;width:750px;">
+        </div>
+    `;
 
-            await chargerEntitesMEDFAH();
-            return;
-        }
+    document.getElementById("filtreEntitesMEDFAH")
+        .addEventListener("change", afficherEntitesMEDFAH);
+
+    document.getElementById("entNom")
+        .addEventListener("change", chargerDetailsEntiteMEDFAH);
+
+    await chargerEntitesMEDFAH();
+    return;
+}
 
         if (cle === "archives") {
             zone.innerHTML = `
@@ -2458,90 +2441,178 @@ async function afficherActivitesMEDFAH() {
     }
 }
 
-/* ENTITÉS DE L'ÉGLISE — MEDFAH */
+/* =====================================================
+   ENTITÉS DE L'ÉGLISE — MEDFAH
+   15 entités + mise à jour + PDF + impression
+===================================================== */
+
+const LISTE_ENTITES_MEDFAH = [
+    "Le corps des Sages",
+    "Le corps pastoral",
+    "Le comité central",
+    "Le corps diaconat",
+    "Le corps du doyen d’âge",
+    "Le corps des retraités",
+    "Le département de l'école dominicale",
+    "Le département d'évangélisation et de prière",
+    "Le département d'entretien et d'accueil",
+    "Le département des dames",
+    "Le département des hommes",
+    "Le département des jeunes",
+    "Le département des enfants",
+    "Le département de la musique",
+    "Le département des services publics et sociaux"
+];
+
+let entitesMEDFAHCache = [];
+
+
+/* CHARGER LES ENTITÉS */
 
 async function chargerEntitesMEDFAH() {
     const form = document.getElementById("formEntitesMEDFAH");
-    if (!form) return;
+    if (!form || !supabaseClient) return;
 
-    if (!supabaseClient) {
+    const selectNom = document.getElementById("entNom");
+    const filtre = document.getElementById("filtreEntitesMEDFAH");
+
+    try {
+        const { data, error } = await supabaseClient
+            .from("entites_eglise")
+            .select("*")
+            .order("nom", { ascending: true });
+
+        if (error) throw error;
+
+        entitesMEDFAHCache = data || [];
+
+        selectNom.innerHTML =
+            '<option value="">Choisir une entité</option>';
+
+        filtre.innerHTML =
+            '<option value="">Toutes les entités</option>';
+
+        entitesMEDFAHCache.forEach(entite => {
+            const option = document.createElement("option");
+            option.value = entite.nom;
+            option.textContent = entite.nom;
+            selectNom.appendChild(option);
+
+            const optionFiltre = document.createElement("option");
+            optionFiltre.value = entite.nom;
+            optionFiltre.textContent = entite.nom;
+            filtre.appendChild(optionFiltre);
+        });
+
+        if (form.dataset.connecte !== "oui") {
+            form.dataset.connecte = "oui";
+
+            form.addEventListener("submit", enregistrerModificationEntiteMEDFAH);
+        }
+
+        await afficherEntitesMEDFAH();
+
+    } catch (erreur) {
+        console.error("Erreur chargement entités :", erreur);
         document.getElementById("listeEntitesMEDFAH").textContent =
-            "Connexion Supabase indisponible.";
+            "Chargement impossible : " + erreur.message;
+    }
+}
+
+
+/* CHARGER LES INFORMATIONS D'UNE ENTITÉ */
+
+function chargerDetailsEntiteMEDFAH() {
+    const nom = document.getElementById("entNom").value;
+    const entite = entitesMEDFAHCache.find(e => e.nom === nom);
+
+    if (!entite) return;
+
+    document.getElementById("entSigle").value =
+        entite.sigle || "";
+
+    document.getElementById("entResponsable").value =
+        entite.responsable || "";
+
+    document.getElementById("entDate").value =
+        entite.date_creation || "";
+
+    document.getElementById("entMembres").value =
+        Number(entite.nombre_membres || 0);
+
+    document.getElementById("entStatut").value =
+        entite.statut || "Active";
+
+    document.getElementById("entDescription").value =
+        entite.description || "";
+}
+
+
+/* ENREGISTRER LES MODIFICATIONS */
+
+async function enregistrerModificationEntiteMEDFAH(event) {
+    event.preventDefault();
+
+    const form = document.getElementById("formEntitesMEDFAH");
+    const message = document.getElementById("messageEntitesMEDFAH");
+    const bouton = form.querySelector('button[type="submit"]');
+
+    const nom = document.getElementById("entNom").value;
+
+    if (!nom) {
+        message.textContent = "Veuillez choisir une entité.";
         return;
     }
 
-    if (form.dataset.connecte !== "oui") {
-        form.dataset.connecte = "oui";
+    const nombre = Number(
+        document.getElementById("entMembres").value || 0
+    );
 
-        form.addEventListener("submit", async function(event) {
-            event.preventDefault();
-
-            const bouton = form.querySelector('button[type="submit"]');
-            const message = document.getElementById("messageEntitesMEDFAH");
-
-            bouton.disabled = true;
-            message.textContent = "Enregistrement en cours...";
-
-            try {
-                const nom = document.getElementById("entNom").value;
-                if (!nom) throw new Error("Veuillez choisir une entité.");
-
-                const nombre = Number(
-                    document.getElementById("entMembres").value || 0
-                );
-
-                if (!Number.isInteger(nombre) || nombre < 0) {
-                    throw new Error("Le nombre de membres doit être un entier positif ou égal à zéro.");
-                }
-
-                const donnees = {
-                    nom: nom,
-                    sigle: document.getElementById("entSigle").value.trim(),
-                    responsable: document.getElementById("entResponsable").value.trim(),
-                    date_creation: document.getElementById("entDate").value || null,
-                    nombre_membres: nombre,
-                    statut: document.getElementById("entStatut").value,
-                    description: document.getElementById("entDescription").value.trim()
-                };
-
-                for (let i = 1; i <= 7; i++) {
-                    donnees["membre_comite_" + i] =
-                        document.getElementById("entComiteNom" + i).value.trim();
-
-                    donnees["fonction_comite_" + i] =
-                        document.getElementById("entComiteFonction" + i).value.trim();
-                }
-
-                const { error } = await supabaseClient
-                    .from("entites_eglise")
-                    .insert([donnees]);
-
-                if (error) throw error;
-
-                message.textContent = "Entité enregistrée avec succès.";
-                form.reset();
-                document.getElementById("entMembres").value = "0";
-
-                await afficherEntitesMEDFAH();
-
-            } catch (erreur) {
-                console.error("Erreur entités MEDFAH :", erreur);
-
-                if (erreur.code === "23505") {
-                    message.textContent =
-                        "Cette entité existe déjà. Son nom ne peut pas être enregistré une deuxième fois.";
-                } else {
-                    message.textContent =
-                        "Enregistrement impossible : " + erreur.message;
-                }
-            } finally {
-                bouton.disabled = false;
-            }
-        });
+    if (!Number.isInteger(nombre) || nombre < 0) {
+        message.textContent =
+            "Le nombre de membres doit être un entier positif ou égal à zéro.";
+        return;
     }
 
-    await afficherEntitesMEDFAH();
+    bouton.disabled = true;
+    message.textContent = "Mise à jour en cours...";
+
+    try {
+        const donnees = {
+            sigle: document.getElementById("entSigle").value.trim(),
+            responsable: document.getElementById("entResponsable").value.trim(),
+            date_creation: document.getElementById("entDate").value || null,
+            nombre_membres: nombre,
+            statut: document.getElementById("entStatut").value,
+            description: document.getElementById("entDescription").value.trim()
+        };
+
+        const { error } = await supabaseClient
+            .from("entites_eglise")
+            .update(donnees)
+            .eq("nom", nom);
+
+        if (error) throw error;
+
+        message.textContent =
+            "Les informations de l’entité ont été mises à jour.";
+
+        await chargerEntitesMEDFAH();
+
+        document.getElementById("entNom").value = nom;
+        chargerDetailsEntiteMEDFAH();
+
+    } catch (erreur) {
+        console.error("Erreur modification entité :", erreur);
+        message.textContent =
+            "Modification impossible : " + erreur.message;
+    } finally {
+        bouton.disabled = false;
+    }
 }
+
+
+/* AFFICHER LES ENTITÉS */
 
 async function afficherEntitesMEDFAH() {
     const liste = document.getElementById("listeEntitesMEDFAH");
@@ -2550,60 +2621,343 @@ async function afficherEntitesMEDFAH() {
     liste.textContent = "Chargement des entités...";
 
     try {
-        let requete = supabaseClient
-            .from("entites_eglise")
-            .select("*")
-            .order("nom", { ascending: true });
+        let donnees = entitesMEDFAHCache;
 
         const filtre = document.getElementById("filtreEntitesMEDFAH");
 
         if (filtre && filtre.value) {
-            requete = requete.eq("nom", filtre.value);
+            donnees = donnees.filter(
+                entite => entite.nom === filtre.value
+            );
         }
 
-        const { data, error } = await requete;
-        if (error) throw error;
-
-        if (!data || data.length === 0) {
-            liste.textContent = "Aucune entité enregistrée pour le moment.";
+        if (!donnees.length) {
+            liste.innerHTML =
+                '<p class="empty">Aucune entité trouvée.</p>';
             return;
         }
 
-        liste.innerHTML = data.map(entite => {
-            let comite = "";
+        liste.innerHTML = donnees.map(entite => `
+            <article style="
+                background:#fff;
+                border:1px solid #d8dde6;
+                border-radius:12px;
+                padding:16px;
+                margin:14px 0;
+                box-shadow:0 3px 10px rgba(0,0,0,.04);
+            ">
+                <h3>${escapeHTML(entite.nom || "")}</h3>
 
-            for (let i = 1; i <= 7; i++) {
-                const membre = entite["membre_comite_" + i];
-                const fonction = entite["fonction_comite_" + i];
+                <p><strong>Sigle :</strong>
+                    ${escapeHTML(entite.sigle || "Non précisé")}
+                </p>
 
-                if (membre || fonction) {
-                    comite += `
-                        <li>
-                            ${escapeHTML(membre || "Nom non précisé")}
-                            — ${escapeHTML(fonction || "Fonction non précisée")}
-                        </li>`;
-                }
-            }
+                <p><strong>Responsable :</strong>
+                    ${escapeHTML(entite.responsable || "Non précisé")}
+                </p>
 
-            return `
-                <article style="border:1px solid #d8dde6;border-radius:10px;padding:14px;margin:12px 0">
-                    <h3>${escapeHTML(entite.nom || "")}</h3>
-                    <p><strong>Sigle :</strong> ${escapeHTML(entite.sigle || "Non précisé")}</p>
-                    <p><strong>Responsable :</strong> ${escapeHTML(entite.responsable || "Non précisé")}</p>
-                    <p><strong>Date de création :</strong> ${escapeHTML(entite.date_creation || "Non précisée")}</p>
-                    <p><strong>Nombre de membres :</strong> ${Number(entite.nombre_membres || 0)}</p>
-                    <p><strong>Statut :</strong> ${escapeHTML(entite.statut || "")}</p>
-                    <h4>Comité de l'entité</h4>
-                    ${comite ? `<ul>${comite}</ul>` : "<p>Aucun membre du comité renseigné.</p>"}
-                    <p><strong>Informations complémentaires :</strong> ${escapeHTML(entite.description || "Aucune")}</p>
-                </article>`;
-        }).join("");
+                <p><strong>Date de création :</strong>
+                    ${escapeHTML(entite.date_creation || "Non précisée")}
+                </p>
+
+                <p><strong>Nombre de membres :</strong>
+                    ${Number(entite.nombre_membres || 0)}
+                </p>
+
+                <p><strong>Statut :</strong>
+                    ${escapeHTML(entite.statut || "Non précisé")}
+                </p>
+
+                <p><strong>Description :</strong>
+                    ${escapeHTML(entite.description || "Aucune")}
+                </p>
+
+                <div style="
+                    display:flex;
+                    flex-wrap:wrap;
+                    gap:8px;
+                    margin-top:14px;
+                ">
+                    <button type="button" class="view-btn"
+                        onclick="selectionnerEntiteMEDFAH(${Number(entite.id)})">
+                        Modifier
+                    </button>
+
+                    <button type="button" class="view-btn"
+                        onclick="telechargerPDFEntiteMEDFAH(${Number(entite.id)})">
+                        Télécharger PDF
+                    </button>
+
+                    <button type="button" class="view-btn"
+                        onclick="imprimerEntiteMEDFAH(${Number(entite.id)})">
+                        Imprimer
+                    </button>
+                </div>
+            </article>
+        `).join("");
 
     } catch (erreur) {
-        console.error("Erreur chargement entités :", erreur);
+        console.error("Erreur affichage entités :", erreur);
         liste.textContent =
-            "Chargement impossible : " + erreur.message +
-            ". Vérifiez les autorisations Supabase.";
+            "Impossible d'afficher les entités : " + erreur.message;
+    }
+}
+
+
+/* SÉLECTIONNER UNE ENTITÉ POUR MODIFICATION */
+
+function selectionnerEntiteMEDFAH(id) {
+    const entite = entitesMEDFAHCache.find(
+        e => Number(e.id) === Number(id)
+    );
+
+    if (!entite) return;
+
+    document.getElementById("entNom").value = entite.nom;
+    chargerDetailsEntiteMEDFAH();
+
+    document.getElementById("formEntitesMEDFAH")
+        .scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+
+/* PRÉPARER LE DOCUMENT OFFICIEL */
+
+async function preparerDocumentEntiteMEDFAH(id) {
+    const entite = entitesMEDFAHCache.find(
+        e => Number(e.id) === Number(id)
+    );
+
+    if (!entite) {
+        throw new Error("Entité introuvable.");
+    }
+
+    const { data: responsables, error } = await supabaseClient
+        .from("entites_responsables")
+        .select("*")
+        .eq("entite_id", entite.id)
+        .order("ordre", { ascending: true });
+
+    if (error) throw error;
+
+    const lignesBureau = (responsables || [])
+        .map(personne => `
+            <tr>
+                <td>${escapeHTML(personne.fonction || "")}</td>
+                <td>${escapeHTML(personne.nom_complet || "")}</td>
+                <td>${escapeHTML(personne.date_debut || "—")}</td>
+                <td>${escapeHTML(personne.date_fin || "En cours")}</td>
+                <td>${escapeHTML(personne.statut || "")}</td>
+            </tr>
+        `).join("");
+
+    const bureauHTML = lignesBureau
+        ? `
+            <table style="width:100%;border-collapse:collapse;margin-top:15px;">
+                <thead>
+                    <tr style="background:#eaf0f8;">
+                        <th>Fonction</th>
+                        <th>Nom et prénom</th>
+                        <th>Début du mandat</th>
+                        <th>Fin du mandat</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>${lignesBureau}</tbody>
+            </table>
+        `
+        : "<p>Aucun responsable n'est encore enregistré pour cette entité.</p>";
+
+    return `
+        <div style="
+            font-family:Arial,sans-serif;
+            color:#172033;
+            background:#fff;
+            padding:35px;
+            width:100%;
+        ">
+            <div style="
+                text-align:center;
+                border-bottom:4px solid #173d70;
+                padding-bottom:15px;
+                margin-bottom:25px;
+            ">
+                <h2 style="margin:0;color:#173d70;">
+                    MISSION ÉGLISE DE DIEU DE LA FOI APOSTOLIQUE D’HAÏTI
+                </h2>
+                <h3 style="margin:8px 0;color:#b4232f;">
+                    MEDFAH
+                </h3>
+                <p style="margin:4px 0;">
+                    Maïs-Gâté, entre 13 et 15, #73
+                </p>
+                <p style="margin:4px 0;">
+                    Document administratif officiel
+                </p>
+            </div>
+
+            <h2 style="text-align:center;color:#173d70;">
+                FICHE OFFICIELLE DE L’ENTITÉ
+            </h2>
+
+            <h3>${escapeHTML(entite.nom || "")}</h3>
+
+            <p><strong>Sigle :</strong>
+                ${escapeHTML(entite.sigle || "Non précisé")}
+            </p>
+
+            <p><strong>Responsable principal :</strong>
+                ${escapeHTML(entite.responsable || "Non précisé")}
+            </p>
+
+            <p><strong>Date de création :</strong>
+                ${escapeHTML(entite.date_creation || "Non précisée")}
+            </p>
+
+            <p><strong>Nombre de membres :</strong>
+                ${Number(entite.nombre_membres || 0)}
+            </p>
+
+            <p><strong>Statut :</strong>
+                ${escapeHTML(entite.statut || "Non précisé")}
+            </p>
+
+            <p><strong>Description :</strong>
+                ${escapeHTML(entite.description || "Aucune")}
+            </p>
+
+            <h3 style="margin-top:30px;color:#173d70;">
+                COMPOSITION DU BUREAU
+            </h3>
+
+            ${bureauHTML}
+
+            <div style="margin-top:55px;display:flex;justify-content:space-between;">
+                <div>
+                    __________________________<br>
+                    Signature du responsable
+                </div>
+                <div>
+                    __________________________<br>
+                    Validation MEDFAH
+                </div>
+            </div>
+
+            <p style="
+                text-align:center;
+                margin-top:45px;
+                color:#667085;
+                font-size:11px;
+                border-top:1px solid #ccc;
+                padding-top:10px;
+            ">
+                MEDFAH — Document administratif
+            </p>
+        </div>
+    `;
+}
+
+
+/* TÉLÉCHARGER LE PDF */
+
+async function telechargerPDFEntiteMEDFAH(id) {
+    try {
+        if (typeof html2pdf !== "function") {
+            throw new Error("La bibliothèque PDF n'est pas chargée. Vérifiez votre connexion Internet.");
+        }
+
+        const contenu = await preparerDocumentEntiteMEDFAH(id);
+        const zone = document.getElementById("zonePDFEntiteMEDFAH");
+
+        zone.innerHTML = contenu;
+
+        const entite = entitesMEDFAHCache.find(
+            e => Number(e.id) === Number(id)
+        );
+
+        const nomFichier = String(entite.nom || "Entite")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-zA-Z0-9_-]/g, "_");
+
+        await html2pdf().set({
+            margin: 10,
+            filename: "MEDFAH_" + nomFichier + ".pdf",
+            image: {
+                type: "jpeg",
+                quality: 0.98
+            },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: "#ffffff"
+            },
+            jsPDF: {
+                unit: "mm",
+                format: "a4",
+                orientation: "portrait"
+            },
+            pagebreak: {
+                mode: ["css", "legacy"]
+            }
+        }).from(zone).save();
+
+    } catch (erreur) {
+        console.error("Erreur PDF entité :", erreur);
+        alert("Téléchargement PDF impossible : " + erreur.message);
+    }
+}
+
+
+/* IMPRIMER LA FICHE */
+
+async function imprimerEntiteMEDFAH(id) {
+    try {
+        const contenu = await preparerDocumentEntiteMEDFAH(id);
+        const fenetre = window.open("", "_blank");
+
+        if (!fenetre) {
+            throw new Error("Autorisez les fenêtres pop-up pour imprimer.");
+        }
+
+        fenetre.document.open();
+        fenetre.document.write(`
+            <!DOCTYPE html>
+            <html lang="fr">
+            <head>
+                <meta charset="UTF-8">
+                <title>Document MEDFAH</title>
+                <style>
+                    body {
+                        font-family:Arial,sans-serif;
+                        padding:20px;
+                        color:#172033;
+                    }
+                    table, th, td {
+                        border:1px solid #999;
+                        padding:8px;
+                        text-align:left;
+                    }
+                    @media print {
+                        body { margin:0; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${contenu}
+                <script>
+                    window.onload = function() {
+                        window.print();
+                    };
+                <\/script>
+            </body>
+            </html>
+        `);
+        fenetre.document.close();
+
+    } catch (erreur) {
+        console.error("Erreur impression entité :", erreur);
+        alert("Impression impossible : " + erreur.message);
     }
 }
 
