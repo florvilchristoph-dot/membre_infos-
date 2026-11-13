@@ -1580,6 +1580,277 @@ if (cle === "documents") {
         "</ul><p>Ce module sera développé dans une prochaine étape.</p>";
 }
 
+    
+/* =====================================================
+   SECTION 8 — MESSAGES DES MEMBRES
+===================================================== */
+
+async function afficherMessagesMembresMEDFAH(zone) {
+    if (!zone || !supabaseClient) {
+        if (zone) {
+            zone.innerHTML = `
+                <p class="empty">
+                    Connexion Supabase indisponible.
+                </p>
+            `;
+        }
+        return;
+    }
+
+    zone.innerHTML = `
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+            gap:12px;
+            margin-bottom:20px;
+        ">
+            <div>
+                <h2>Messages des membres</h2>
+                <p>
+                    Informations et messages envoyés
+                    par les membres de la MEDFAH.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="view-btn"
+                onclick="chargerMessagesMembresMEDFAH()">
+                Actualiser
+            </button>
+        </div>
+
+        <div id="listeMessagesMembresMEDFAH">
+            <p class="loading">Chargement des messages...</p>
+        </div>
+    `;
+
+    await chargerMessagesMembresMEDFAH();
+}
+
+
+/* CHARGER LA LISTE DES MESSAGES */
+
+async function chargerMessagesMembresMEDFAH() {
+    const liste = document.getElementById(
+        "listeMessagesMembresMEDFAH"
+    );
+
+    if (!liste || !supabaseClient) return;
+
+    liste.innerHTML = `
+        <p class="loading">Chargement des messages...</p>
+    `;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from("messages_membres")
+            .select(`
+                id,
+                nom,
+                prenom,
+                code_membre,
+                message,
+                statut,
+                created_at,
+                lu_at
+            `)
+            .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            liste.innerHTML = `
+                <div class="empty">
+                    <h3>Aucun message pour le moment</h3>
+                    <p>
+                        Les messages envoyés par les membres
+                        apparaîtront ici.
+                    </p>
+                </div>
+            `;
+            return;
+        }
+
+        liste.innerHTML = data.map(function(m) {
+            const date = m.created_at
+                ? new Date(m.created_at).toLocaleString("fr-FR")
+                : "";
+
+            const id = Number(m.id);
+
+            return `
+                <article style="
+                    background:#fff;
+                    border:1px solid #ddd;
+                    border-radius:12px;
+                    padding:18px;
+                    margin-bottom:16px;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+                ">
+
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:flex-start;
+                        flex-wrap:wrap;
+                        gap:10px;
+                    ">
+                        <div>
+                            <h3 style="margin:0 0 7px;color:#17365d;">
+                                ${escapeHTML(m.prenom)} ${escapeHTML(m.nom)}
+                            </h3>
+
+                            <p style="margin:4px 0;">
+                                <strong>Code membre :</strong>
+                                ${escapeHTML(m.code_membre)}
+                            </p>
+
+                            <small style="color:#666;">
+                                Reçu le : ${escapeHTML(date)}
+                            </small>
+                        </div>
+
+                        <span style="
+                            background:#eef3f8;
+                            color:#17365d;
+                            padding:6px 12px;
+                            border-radius:20px;
+                            font-size:13px;
+                            font-weight:bold;
+                        ">
+                            ${escapeHTML(m.statut)}
+                        </span>
+                    </div>
+
+                    <hr style="
+                        border:0;
+                        border-top:1px solid #eee;
+                        margin:15px 0;
+                    ">
+
+                    <div style="
+                        white-space:pre-wrap;
+                        overflow-wrap:anywhere;
+                        line-height:1.7;
+                        color:#333;
+                    ">${escapeHTML(m.message)}</div>
+
+                    <div style="
+                        display:flex;
+                        align-items:center;
+                        flex-wrap:wrap;
+                        gap:10px;
+                        margin-top:18px;
+                    ">
+                        <label for="statutMessage${id}">
+                            <strong>Statut :</strong>
+                        </label>
+
+                        <select
+                            id="statutMessage${id}"
+                            onchange="changerStatutMessageMembreMEDFAH(${id}, this.value)"
+                            style="
+                                padding:9px;
+                                border:1px solid #ccc;
+                                border-radius:7px;
+                                min-width:140px;
+                            ">
+
+                            <option value="Nouveau"
+                                ${m.statut === "Nouveau" ? "selected" : ""}>
+                                Nouveau
+                            </option>
+
+                            <option value="Lu"
+                                ${m.statut === "Lu" ? "selected" : ""}>
+                                Lu
+                            </option>
+
+                            <option value="Traité"
+                                ${m.statut === "Traité" ? "selected" : ""}>
+                                Traité
+                            </option>
+
+                        </select>
+                    </div>
+
+                </article>
+            `;
+        }).join("");
+
+    } catch (error) {
+        console.error(
+            "Erreur chargement messages MEDFAH :",
+            error
+        );
+
+        liste.innerHTML = `
+            <div class="empty">
+                <p>
+                    Impossible de charger les messages.
+                </p>
+                <p>
+                    ${escapeHTML(error.message || String(error))}
+                </p>
+            </div>
+        `;
+    }
+}
+
+
+/* MODIFIER LE STATUT D'UN MESSAGE */
+
+async function changerStatutMessageMembreMEDFAH(id, statut) {
+    const statutsAutorises = [
+        "Nouveau",
+        "Lu",
+        "Traité"
+    ];
+
+    if (!supabaseClient || !statutsAutorises.includes(statut)) {
+        return;
+    }
+
+    try {
+        const modifications = {
+            statut: statut
+        };
+
+        if (statut === "Lu") {
+            modifications.lu_at = new Date().toISOString();
+        }
+
+        if (statut === "Nouveau") {
+            modifications.lu_at = null;
+        }
+
+        const { error } = await supabaseClient
+            .from("messages_membres")
+            .update(modifications)
+            .eq("id", id);
+
+        if (error) throw error;
+
+        await chargerMessagesMembresMEDFAH();
+
+    } catch (error) {
+        console.error(
+            "Erreur modification statut message :",
+            error
+        );
+
+        alert(
+            "Impossible de modifier le statut : " +
+            (error.message || String(error))
+        );
+
+        await chargerMessagesMembresMEDFAH();
+    }
+}
+
 
 /* =====================================================
    SECTION 7 — PRÉSENCES MEDFAH
