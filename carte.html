@@ -770,10 +770,6 @@ function cardHTML(m){
  eglisedelafoiapostolique2007@gmail.com | (+509) 37897370 / 31048016
 </span>
 
-<span class="card-slogan">
- MEDFAH — « Une Église, une famille, une vision. »
-</span>
-
 </div>
 
 <img
@@ -783,16 +779,13 @@ function cardHTML(m){
  onerror="this.style.display='none'"
 >
 <div class="church-photo-fade"></div>
-<div class="pastor">
- Pasteur : Beaulieu Mislet
-</div>
 
 </header>
 
 
 <div class="card-title">
  <span class="card-title-main">
-  CARTE DE PERSÉVÉRANCE — MEMBRE OFFICIEL
+  CARTE DE PERSÉVÉRANCE 
  </span>
 </div>
   <div class="body">
@@ -814,47 +807,42 @@ function cardHTML(m){
 
    <div class="details">
 
-    <div>
-     <b>Nom :</b>
-     ${safe(val(m,"nom")||"—")}
-    </div>
+  <div>
+    <b>Nom :</b>
+    ${safe(val(m,"nom")||"—")}
+  </div>
 
-    <div>
-     <b>Prénom :</b>
-     ${safe(val(m,"prenom","prénom")||"—")}
-    </div>
+  <div>
+    <b>Prénom :</b>
+    ${safe(val(m,"prenom")||"—")}
+  </div>
 
-    <div>
-     <b>Téléphone :</b>
-     ${safe(val(m,"telephone")||"—")}
-    </div>
+  <div>
+    <b>Adresse :</b>
+    ${safe(val(m,"adresse")||"—")}
+  </div>
 
-    <div>
-     <b>Code :</b>
-     ${safe(val(m,"code")||"—")}
-    </div>
+  <div>
+    <b>CIN :</b>
+    ${safe(val(m,"cin")||"—")}
+  </div>
 
-    <div>
-     <b>N° carte :</b>
-     ${safe(val(m,"numero_carte")||"—")}
-    </div>
+  <div>
+    <b>NIF :</b>
+    ${safe(val(m,"nif")||"—")}
+  </div>
 
-    <div>
-     <b>Fonction :</b>
-     ${safe(val(m,"fonction")||"—")}
-    </div>
+  <div>
+    <b>Code :</b>
+    ${safe(val(m,"code")||"—")}
+  </div>
 
-    <div>
-     <b>Assemblée :</b>
-     ${safe(val(m,"assemblee")||"MEDFAH")}
-    </div>
+  <div>
+    <b>Fonction :</b>
+    ${safe(val(m,"fonction")||"—")}
+  </div>
 
-    <div>
-     <b>Adhésion :</b>
-     ${safe(val(m,"date_adhesion")||"—")}
-    </div>
-
-   </div>
+</div>
 
    <div class="qr-box">
 
@@ -863,12 +851,9 @@ function cardHTML(m){
     QR VÉRIFICATION
 
     <div class="valid">
-     ✓ CARTE VALIDE
-    </div>
+ Valide pour 3 ans
+</div>
 
-    <div class="card-number">
-     ${safe(val(m,"numero_carte","code"))}
-    </div>
 
    </div>
 
