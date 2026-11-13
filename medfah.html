@@ -1568,6 +1568,10 @@ if (cle === "documents") {
         return;
     }
 
+    if (cle === "messages") {
+    await afficherMessagesMembresMEDFAH(zone);
+    return;
+}
     zone.innerHTML =
         "<ul style='line-height:2;padding-left:22px'>" +
         (section.details || []).map(item =>
