@@ -732,6 +732,21 @@ td{
     <input type="text" id="nif" name="nif"
            placeholder="Numéro de NIF">
 </div>
+        
+<div class="form-group">
+    <label for="groupe_sanguin">Groupe sanguin — Gwoup san</label>
+    <select id="groupe_sanguin" name="groupe_sanguin">
+        <option value="">Sélectionner</option>
+        <option value="A+">A+</option>
+        <option value="A-">A-</option>
+        <option value="B+">B+</option>
+        <option value="B-">B-</option>
+        <option value="AB+">AB+</option>
+        <option value="AB-">AB-</option>
+        <option value="O+">O+</option>
+        <option value="O-">O-</option>
+    </select>
+</div>
 
 <div class="form-group">
     <label for="nombre_enfants">Nombre d'enfants</label>
@@ -5665,6 +5680,7 @@ const correspondances = {
     sexe: "sexe",
     cin: "cin",
     nif: "nif",
+    groupe_sanguin: "groupe_sanguin",
     nombre_enfants: "nombre_enfants",
 
     date_naissance: "date_naissance",
