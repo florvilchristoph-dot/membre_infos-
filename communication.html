@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#082b83">
+<title>Espace de communication — MEDFAH</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ padding:20px 12px;
+ font-family:Arial,Helvetica,sans-serif;
+ background:linear-gradient(145deg,#dceeff,#f8fbff,#e7efff);
+ color:#172b55;
+}
+.container{
+ max-width:650px;
+ margin:25px auto;
+ background:white;
+ padding:25px;
+ border-radius:18px;
+ box-shadow:0 8px 30px rgba(8,43,131,.12);
+}
+.header{text-align:center;margin-bottom:25px}
+.logo{width:85px;height:85px;object-fit:contain}
+h1{color:#082b83;font-size:25px;margin:12px 0}
+.subtitle{color:#667085;line-height:1.6}
+.welcome{
+ background:#edf4ff;
+ border-left:4px solid #d5a536;
+ padding:15px;
+ border-radius:9px;
+ margin:20px 0;
+ line-height:1.6;
+}
+label{
+ display:block;
+ font-weight:bold;
+ margin:16px 0 7px;
+}
+input,textarea{
+ width:100%;
+ padding:13px;
+ border:1px solid #ccd5e5;
+ border-radius:9px;
+ font-size:16px;
+ outline:none;
+ font-family:Arial,sans-serif;
+}
+input:focus,textarea:focus{
+ border-color:#082b83;
+ box-shadow:0 0 0 2px rgba(8,43,131,.08);
+}
+textarea{min-height:180px;resize:vertical}
+button{
+ width:100%;
+ padding:14px;
+ margin-top:20px;
+ background:#082b83;
+ color:white;
+ border:0;
+ border-radius:10px;
+ font-size:16px;
+ font-weight:bold;
+ cursor:pointer;
+}
+button:disabled{opacity:.6;cursor:wait}
+.message{
+ display:none;
+ padding:14px;
+ border-radius:9px;
+ margin-top:18px;
+ line-height:1.5;
+}
+.success{display:block;background:#e8f7ed;color:#176b36}
+.error{display:block;background:#fff0f0;color:#a51e2b}
+.back{
+ display:block;
+ text-align:center;
+ margin-top:20px;
+ color:#082b83;
+ text-decoration:none;
+}
+footer{text-align:center;color:#667085;font-size:12px;margin:25px 0}
+@media(max-width:480px){
+ .container{padding:19px 15px;margin:10px auto}
+ h1{font-size:21px}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+ <header class="header">
+  <img src="logo-medfah.jpg" class="logo" alt="Logo MEDFAH">
+  <h1>Espace de communication</h1>
+  <p class="subtitle">
+   Mission Église de Dieu de la Foi Apostolique d’Haïti
+  </p>
+ </header>
+
+ <div class="welcome">
+  <strong>Bonsoir et bienvenue !</strong><br>
+  Parlez-nous. Votre message est important pour la MEDFAH.
+  Vous pouvez partager une information, une préoccupation,
+  une suggestion ou toute autre communication destinée
+  aux responsables de l’Église.
+ </div>
+
+ <form id="formCommunicationMEDFAH">
+
+  <label for="nom">Nom *</label>
+  <input id="nom" type="text" maxlength="100" required
+   autocomplete="family-name" placeholder="Votre nom">
+
+  <label for="prenom">Prénom *</label>
+  <input id="prenom" type="text" maxlength="100" required
+   autocomplete="given-name" placeholder="Votre prénom">
+
+  <label for="code">Code du membre *</label>
+  <input id="code" type="text" maxlength="100" required
+   autocomplete="off" placeholder="Votre code de membre">
+
+  <label for="message">Votre message *</label>
+  <textarea id="message" maxlength="10000" minlength="10"
+   required placeholder="Écrivez votre message ici..."></textarea>
+
+  <button id="btnEnvoyer" type="submit">
+   Envoyer mon message
+  </button>
+
+  <div id="resultatCommunication" class="message" role="status"></div>
+ </form>
+
+ <a class="back" href="index.html">← Retour à l’accueil MEDFAH</a>
+</div>
+
+<footer>© 2026 MEDFAH — Tous droits réservés.</footer>
+
+<script>
+(function(){
+
+ const form = document.getElementById("formCommunicationMEDFAH");
+ const bouton = document.getElementById("btnEnvoyer");
+ const resultat = document.getElementById("resultatCommunication");
+
+ let client = null;
+
+ try {
+  if (
+   !window.supabase ||
+   !window.SUPABASE_URL ||
+   !window.SUPABASE_ANON_KEY
+  ) {
+   throw new Error("Configuration Supabase indisponible.");
+  }
+
+  client = window.supabase.createClient(
+   window.SUPABASE_URL,
+   window.SUPABASE_ANON_KEY
+  );
+ } catch(error) {
+  console.error(error);
+  resultat.textContent =
+   "Le service est temporairement indisponible. Veuillez réessayer plus tard.";
+  resultat.className = "message error";
+ }
+
+ form.addEventListener("submit", async function(e){
+  e.preventDefault();
+
+  if(!client) return;
+
+  const nom = document.getElementById("nom").value.trim();
+  const prenom = document.getElementById("prenom").value.trim();
+  const code = document.getElementById("code").value.trim();
+  const message = document.getElementById("message").value.trim();
+
+  if(!nom || !prenom || !code || message.length < 10){
+   resultat.textContent =
+    "Veuillez remplir tous les champs. Le message doit contenir au moins 10 caractères.";
+   resultat.className = "message error";
+   return;
+  }
+
+  bouton.disabled = true;
+  bouton.textContent = "Envoi en cours...";
+  resultat.className = "message";
+  resultat.textContent = "";
+
+  try {
+   const { data, error } = await client.rpc(
+    "envoyer_message_membre",
+    {
+     p_nom: nom,
+     p_prenom: prenom,
+     p_code: code,
+     p_message: message
+    }
+   );
+
+   if(error) throw error;
+
+   if(data !== true){
+    throw new Error("Le message n'a pas été confirmé.");
+   }
+
+   form.reset();
+
+   resultat.textContent =
+    "Votre message a été envoyé avec succès. Merci de communiquer avec la MEDFAH.";
+   resultat.className = "message success";
+
+   bouton.textContent = "Message envoyé";
+
+  } catch(error) {
+   console.error("Erreur communication MEDFAH :", error);
+
+   resultat.textContent =
+    error.message ||
+    "Impossible d'envoyer votre message. Vérifiez vos informations et réessayez.";
+
+   resultat.className = "message error";
+   bouton.disabled = false;
+   bouton.textContent = "Envoyer mon message";
+  }
+ });
+
+})();
+</script>
+</body>
+</html>
