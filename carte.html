@@ -149,24 +149,26 @@ button.gold{background:#b88620}
 
 .church-address{
  display:block;
- font-size:4.8px;
- line-height:1.15;
- font-weight:normal;
+ font-size:5.5px;
+ line-height:1.25;
+ font-weight:700;
  color:#ff5555;
  margin-top:2px;
- white-space:nowrap;
+ white-space:normal;
  text-align:center;
+ overflow-wrap:anywhere;
 }
 
 .church-contact{
  display:block;
- font-size:4.2px;
- line-height:1.15;
- font-weight:normal;
+ font-size:5px;
+ line-height:1.25;
+ font-weight:700;
  color:#f8e49a;
  margin-top:2px;
- white-space:nowrap;
+ white-space:normal;
  text-align:center;
+ overflow-wrap:anywhere;
 }
 
 .card-slogan{
@@ -497,8 +499,12 @@ button.gold{background:#b88620}
 }
 
 .details{
- font-size:5.8pt;
- line-height:1.15;
+ font-size:5.2pt;
+ line-height:1.1;
+}
+
+.details div{
+ padding:.5px 0;
 }
  .qr-box{
   width:16mm;
@@ -824,7 +830,7 @@ function cardHTML(m){
 
   <div>
     <b>Prénom :</b>
-    ${safe(val(m,"prenom")||"—")}
+    ${safe(val(m,"prenom","prénom")||"—")}
   </div>
 
   <div>
