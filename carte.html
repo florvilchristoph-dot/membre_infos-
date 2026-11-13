@@ -457,15 +457,21 @@ button.gold{background:#b88620}
 }
 
 .church-address{
- font-size:3.8pt;
- margin-top:.3mm;
+ font-size:5.2pt;
+ line-height:1.25;
+ font-weight:600;
+ margin-top:.5mm;
  text-align:center;
+ white-space:normal;
 }
 
 .church-contact{
- font-size:3.3pt;
- margin-top:.3mm;
+ font-size:4.8pt;
+ line-height:1.25;
+ font-weight:600;
+ margin-top:.5mm;
  text-align:center;
+ white-space:normal;
 }
 
 .card-slogan{
@@ -825,7 +831,10 @@ function cardHTML(m){
     <b>Adresse :</b>
     ${safe(val(m,"adresse")||"—")}
   </div>
-
+<div>
+  <b>Groupe sanguin :</b>
+  ${safe(val(m,"groupe_sanguin")||"—")}
+</div>
   <div>
     <b>CIN :</b>
     ${safe(val(m,"cin")||"—")}
