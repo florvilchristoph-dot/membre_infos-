@@ -837,10 +837,7 @@ function cardHTML(m){
     <b>Adresse :</b>
     ${safe(val(m,"adresse")||"—")}
   </div>
-<div>
-  <b>Groupe sanguin :</b>
-  ${safe(val(m,"groupe_sanguin")||"—")}
-</div>
+
   <div>
     <b>CIN :</b>
     ${safe(val(m,"cin")||"—")}
@@ -867,10 +864,10 @@ function cardHTML(m){
 
     <div class="qr" id="qr-${safe(m.id)}"></div>
 
-    QR VÉRIFICATION
-
-    <div class="valid">
- Valide pour 3 ans
+    Valide pour 3 ans
+   <div>
+  <b>Groupe sanguin :</b>
+  ${safe(val(m,"groupe_sanguin")||"—")}
 </div>
 
 
