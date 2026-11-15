@@ -1157,7 +1157,22 @@ if (cle === "programmation") {
                 <label for="progResponsable">Responsable</label>
                 <input id="progResponsable"
                     style="width:100%;padding:10px;margin:6px 0 12px">
+<label for="progContenu">Contenu détaillé du programme</label>
+<textarea
+  id="progContenu"
+  rows="12"
+  placeholder="Écrivez ici le programme complet, avec tous les détails..."
+  style="width:100%; min-height:250px; resize:vertical;"
+></textarea>
 
+<label for="progPDF">Joindre le programme en PDF</label>
+<input
+  type="file"
+  id="progPDF"
+  accept="application/pdf,.pdf"
+>
+
+<small>Format accepté : PDF uniquement. Taille maximale : 50 Mo.</small>
                 <label for="progDescription">Description</label>
                 <textarea id="progDescription"
                     style="width:100%;padding:10px;margin:6px 0 12px"></textarea>
@@ -2466,23 +2481,68 @@ async function chargerProgrammationMEDFAH() {
 
                 const periode = valeur("progPeriode") || "semaine";
 
-                const donnees = {
-                    titre: valeur("progTitre"),
-                    categorie: valeur("progCategorie"),
-                    date_debut: new Date(debut).toISOString(),
-                    date_fin: fin ? new Date(fin).toISOString() : null,
-                    lieu: valeur("progLieu"),
-                    responsable: valeur("progResponsable"),
-                    description: valeur("progDescription"),
-                    statut: valeur("progStatut"),
-                    periode_programme: periode,
-                    jour_programme: valeur("progJour"),
-                    heure_programme: valeur("progHeure"),
-                    dirigeant: valeur("progDirigeant"),
-                    lecteur: valeur("progLecteur"),
-                    message: valeur("progMessage"),
-                    autre: valeur("progAutre")
-                };
+const contenuProgramme = valeur("progContenu");
+const fichierPDF = document.getElementById("progPDF")?.files?.[0] || null;
+
+let pdfChemin = null;
+let pdfNom = null;
+
+if (fichierPDF) {
+    if (
+        !fichierPDF.name.toLowerCase().endsWith(".pdf") ||
+        (fichierPDF.type && fichierPDF.type !== "application/pdf")
+    ) {
+        alert("Veuillez sélectionner un fichier PDF valide.");
+        return;
+    }
+
+    if (fichierPDF.size > 50 * 1024 * 1024) {
+        alert("Le fichier PDF ne doit pas dépasser 50 Mo.");
+        return;
+    }
+
+    const nomSecurise = fichierPDF.name
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-zA-Z0-9._-]/g, "_");
+
+    const cheminPDF =
+        "programmes/" + Date.now() + "_" + nomSecurise;
+
+    const { data: fichierCharge, error: erreurPDF } =
+        await supabaseClient.storage
+            .from("medfah-programmes")
+            .upload(cheminPDF, fichierPDF, {
+                upsert: false,
+                contentType: "application/pdf"
+            });
+
+    if (erreurPDF) throw erreurPDF;
+
+    pdfChemin = fichierCharge.path;
+    pdfNom = fichierPDF.name;
+}
+
+const donnees = {
+    titre: valeur("progTitre"),
+    categorie: valeur("progCategorie"),
+    date_debut: new Date(debut).toISOString(),
+    date_fin: fin ? new Date(fin).toISOString() : null,
+    lieu: valeur("progLieu"),
+    responsable: valeur("progResponsable"),
+    description: valeur("progDescription"),
+    contenu_programme: contenuProgramme,
+    pdf_chemin: pdfChemin,
+    pdf_nom: pdfNom,
+    statut: valeur("progStatut"),
+    periode_programme: periode,
+    jour_programme: valeur("progJour"),
+    heure_programme: valeur("progHeure"),
+    dirigeant: valeur("progDirigeant"),
+    lecteur: valeur("progLecteur"),
+    message: valeur("progMessage"),
+    autre: valeur("progAutre")
+};
 
                 const { error } = await supabaseClient
                     .from("programmation_eglise")
@@ -2590,6 +2650,30 @@ async function afficherListeProgrammationMEDFAH() {
                     ${prog.autre ? `<p><strong>Autre :</strong> ${echapper(prog.autre)}</p>` : ""}
                     <p><strong>Statut :</strong> ${echapper(prog.statut || "")}</p>
                     <p><strong>Description :</strong> ${echapper(prog.description || "Aucune")}</p>
+                    ${prog.contenu_programme ? `
+    <div style="margin-top:12px;padding:12px;background:#f4f7fb;border-radius:8px;">
+        <h4>Contenu détaillé du programme</h4>
+        <div style="white-space:pre-wrap;line-height:1.6;">
+            ${echapper(prog.contenu_programme)}
+        </div>
+    </div>
+` : ""}
+
+${prog.pdf_chemin ? `
+    <p style="margin-top:12px;">
+        <strong>Document PDF :</strong>
+        ${echapper(prog.pdf_nom || "Programme PDF")}
+        <br>
+        <a
+            href="${supabaseClient.storage.from("medfah-programmes").getPublicUrl(prog.pdf_chemin).data.publicUrl}"
+            target="_blank"
+            rel="noopener noreferrer"
+            style="display:inline-block;margin-top:6px;padding:9px 14px;background:#174b7a;color:white;border-radius:6px;text-decoration:none;"
+        >
+            Ouvrir / Télécharger le PDF
+        </a>
+    </p>
+` : ""}
                 </article>
             `;
         }).join("");
