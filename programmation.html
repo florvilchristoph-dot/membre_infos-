@@ -285,13 +285,67 @@ footer{
             ajouterDetail(carte, "Responsable", a.responsable);
 
             if(a.description){
-                const description = document.createElement("p");
-                description.className = "description";
-                description.textContent = a.description;
-                carte.appendChild(description);
-            }
+    const description = document.createElement("p");
+    description.className = "description";
+    description.textContent = a.description;
+    carte.appendChild(description);
+}
 
-            liste.appendChild(carte);
+// Contenu détaillé du programme
+if(a.contenu_programme){
+    const contenu = document.createElement("div");
+    contenu.className = "description";
+    contenu.style.marginTop = "15px";
+    contenu.style.padding = "14px";
+    contenu.style.background = "#f4f7fb";
+    contenu.style.borderRadius = "10px";
+
+    const titreContenu = document.createElement("h4");
+    titreContenu.textContent = "Contenu détaillé du programme";
+    titreContenu.style.marginBottom = "10px";
+
+    const texteContenu = document.createElement("p");
+    texteContenu.textContent = a.contenu_programme;
+    texteContenu.style.whiteSpace = "pre-wrap";
+    texteContenu.style.lineHeight = "1.7";
+
+    contenu.appendChild(titreContenu);
+    contenu.appendChild(texteContenu);
+    carte.appendChild(contenu);
+}
+
+// Document PDF
+if(a.pdf_chemin){
+    const lienPDF = document.createElement("a");
+
+    const cheminEncode = a.pdf_chemin
+        .split("/")
+        .map(partie => encodeURIComponent(partie))
+        .join("/");
+
+    lienPDF.href =
+        url.replace(/\/+$/, "") +
+        "/storage/v1/object/public/medfah-programmes/" +
+        cheminEncode;
+
+    lienPDF.target = "_blank";
+    lienPDF.rel = "noopener noreferrer";
+    lienPDF.textContent =
+        "📄 Ouvrir / Télécharger : " +
+        (a.pdf_nom || "Programme PDF");
+
+    lienPDF.style.display = "inline-block";
+    lienPDF.style.marginTop = "12px";
+    lienPDF.style.padding = "10px 14px";
+    lienPDF.style.background = "#174b7a";
+    lienPDF.style.color = "white";
+    lienPDF.style.borderRadius = "8px";
+    lienPDF.style.textDecoration = "none";
+
+    carte.appendChild(lienPDF);
+}
+
+liste.appendChild(carte);
         });
     }
 
@@ -309,8 +363,7 @@ footer{
 
             const endpoint =
                 url.replace(/\/+$/, "") +
-                "/rest/v1/programmation_eglise" +
-                "?select=id,titre,categorie,date_debut,date_fin,lieu,responsable,description,statut" +
+                "?select=id,titre,categorie,date_debut,date_fin,lieu,responsable,description,statut,contenu_programme,pdf_chemin,pdf_nom" +
                 "&order=date_debut.asc";
 
             const reponse = await fetch(endpoint, {
