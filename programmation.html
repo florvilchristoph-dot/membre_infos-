@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -135,6 +136,37 @@ header h1{
     color:#596579;
     line-height:1.6;
     white-space:pre-wrap;
+    overflow-wrap:anywhere;
+}
+
+.contenu-programme{
+    margin-top:15px;
+    padding:14px;
+    background:#f4f7fb;
+    border-radius:10px;
+    line-height:1.7;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+}
+
+.contenu-programme h4{
+    margin-bottom:10px;
+    color:#172033;
+}
+
+.lien-pdf{
+    display:inline-block;
+    margin-top:12px;
+    padding:10px 14px;
+    background:#174b7a;
+    color:white;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:600;
+}
+
+.lien-pdf:hover{
+    background:#10385c;
 }
 
 footer{
@@ -155,6 +187,14 @@ footer{
 
     header h1{
         font-size:15px;
+    }
+
+    .container{
+        width:94%;
+    }
+
+    .activite{
+        padding:16px;
     }
 }
 </style>
@@ -213,7 +253,11 @@ footer{
     }
 
     function ajouterDetail(parent, etiquette, valeur){
-        if(valeur === null || valeur === undefined || valeur === ""){
+        if(
+            valeur === null ||
+            valeur === undefined ||
+            valeur === ""
+        ){
             return;
         }
 
@@ -224,14 +268,28 @@ footer{
         fort.textContent = etiquette + " : ";
 
         p.appendChild(fort);
-        p.appendChild(document.createTextNode(texteSecurise(valeur)));
+        p.appendChild(
+            document.createTextNode(texteSecurise(valeur))
+        );
+
         parent.appendChild(p);
     }
 
     function formaterDate(valeur){
         if(!valeur) return "";
 
-        const date = new Date(valeur + "T00:00:00");
+        let date;
+
+        if(/^\d{4}-\d{2}-\d{2}$/.test(valeur)){
+            const morceaux = valeur.split("-");
+            date = new Date(
+                Number(morceaux[0]),
+                Number(morceaux[1]) - 1,
+                Number(morceaux[2])
+            );
+        }else{
+            date = new Date(valeur);
+        }
 
         if(Number.isNaN(date.getTime())){
             return valeur;
@@ -244,7 +302,33 @@ footer{
         });
     }
 
+    function creerLienPDF(chemin, nom){
+
+        const lien = document.createElement("a");
+
+        const cheminEncode = chemin
+            .split("/")
+            .map(partie => encodeURIComponent(partie))
+            .join("/");
+
+        lien.href =
+            window.SUPABASE_URL.replace(/\/+$/, "") +
+            "/storage/v1/object/public/medfah-programmes/" +
+            cheminEncode;
+
+        lien.target = "_blank";
+        lien.rel = "noopener noreferrer";
+        lien.className = "lien-pdf";
+
+        lien.textContent =
+            "📄 Ouvrir / Télécharger : " +
+            (nom || "Programme PDF");
+
+        return lien;
+    }
+
     function afficherActivites(donnees){
+
         liste.replaceChildren();
 
         const categorieChoisie = filtre.value;
@@ -255,16 +339,20 @@ footer{
         });
 
         if(resultats.length === 0){
+
             message.hidden = false;
+
             message.textContent = donnees.length === 0
                 ? "Aucune activité n’est actuellement disponible."
                 : "Aucune activité ne correspond à cette catégorie.";
+
             return;
         }
 
         message.hidden = true;
 
         resultats.forEach(function(a){
+
             const carte = document.createElement("article");
             carte.className = "activite";
 
@@ -273,85 +361,78 @@ footer{
             carte.appendChild(titre);
 
             if(a.categorie){
+
                 const badge = document.createElement("span");
                 badge.className = "badge";
                 badge.textContent = a.categorie;
+
                 carte.appendChild(badge);
             }
 
-            ajouterDetail(carte, "Date de début", formaterDate(a.date_debut));
-            ajouterDetail(carte, "Date de fin", formaterDate(a.date_fin));
+            ajouterDetail(
+                carte,
+                "Date de début",
+                formaterDate(a.date_debut)
+            );
+
+            ajouterDetail(
+                carte,
+                "Date de fin",
+                formaterDate(a.date_fin)
+            );
+
             ajouterDetail(carte, "Lieu", a.lieu);
             ajouterDetail(carte, "Responsable", a.responsable);
 
             if(a.description){
-    const description = document.createElement("p");
-    description.className = "description";
-    description.textContent = a.description;
-    carte.appendChild(description);
-}
 
-// Contenu détaillé du programme
-if(a.contenu_programme){
-    const contenu = document.createElement("div");
-    contenu.className = "description";
-    contenu.style.marginTop = "15px";
-    contenu.style.padding = "14px";
-    contenu.style.background = "#f4f7fb";
-    contenu.style.borderRadius = "10px";
+                const description = document.createElement("p");
+                description.className = "description";
+                description.textContent = a.description;
 
-    const titreContenu = document.createElement("h4");
-    titreContenu.textContent = "Contenu détaillé du programme";
-    titreContenu.style.marginBottom = "10px";
+                carte.appendChild(description);
+            }
 
-    const texteContenu = document.createElement("p");
-    texteContenu.textContent = a.contenu_programme;
-    texteContenu.style.whiteSpace = "pre-wrap";
-    texteContenu.style.lineHeight = "1.7";
+            // Contenu détaillé du programme
 
-    contenu.appendChild(titreContenu);
-    contenu.appendChild(texteContenu);
-    carte.appendChild(contenu);
-}
+            if(a.contenu_programme){
 
-// Document PDF
-if(a.pdf_chemin){
-    const lienPDF = document.createElement("a");
+                const contenu = document.createElement("div");
+                contenu.className = "contenu-programme";
 
-    const cheminEncode = a.pdf_chemin
-        .split("/")
-        .map(partie => encodeURIComponent(partie))
-        .join("/");
+                const titreContenu = document.createElement("h4");
+                titreContenu.textContent =
+                    "Contenu détaillé du programme";
 
-    lienPDF.href =
-        url.replace(/\/+$/, "") +
-        "/storage/v1/object/public/medfah-programmes/" +
-        cheminEncode;
+                const texteContenu = document.createElement("p");
+                texteContenu.textContent = a.contenu_programme;
 
-    lienPDF.target = "_blank";
-    lienPDF.rel = "noopener noreferrer";
-    lienPDF.textContent =
-        "📄 Ouvrir / Télécharger : " +
-        (a.pdf_nom || "Programme PDF");
+                contenu.appendChild(titreContenu);
+                contenu.appendChild(texteContenu);
 
-    lienPDF.style.display = "inline-block";
-    lienPDF.style.marginTop = "12px";
-    lienPDF.style.padding = "10px 14px";
-    lienPDF.style.background = "#174b7a";
-    lienPDF.style.color = "white";
-    lienPDF.style.borderRadius = "8px";
-    lienPDF.style.textDecoration = "none";
+                carte.appendChild(contenu);
+            }
 
-    carte.appendChild(lienPDF);
-}
+            // Document PDF
 
-liste.appendChild(carte);
+            if(a.pdf_chemin){
+
+                const lienPDF = creerLienPDF(
+                    a.pdf_chemin,
+                    a.pdf_nom
+                );
+
+                carte.appendChild(lienPDF);
+            }
+
+            liste.appendChild(carte);
         });
     }
 
     async function chargerProgrammation(){
 
         try{
+
             const url = window.SUPABASE_URL;
             const cle = window.SUPABASE_ANON_KEY;
 
@@ -363,6 +444,7 @@ liste.appendChild(carte);
 
             const endpoint =
                 url.replace(/\/+$/, "") +
+                "/rest/v1/programmation_eglise" +
                 "?select=id,titre,categorie,date_debut,date_fin,lieu,responsable,description,statut,contenu_programme,pdf_chemin,pdf_nom" +
                 "&order=date_debut.asc";
 
@@ -375,8 +457,13 @@ liste.appendChild(carte);
             });
 
             if(!reponse.ok){
+
                 const details = await reponse.text();
-                console.error("Erreur programmation Supabase:", details);
+
+                console.error(
+                    "Erreur programmation Supabase:",
+                    details
+                );
 
                 throw new Error(
                     "Supabase a refusé la lecture des activités (HTTP " +
@@ -388,7 +475,9 @@ liste.appendChild(carte);
             const donnees = await reponse.json();
 
             if(!Array.isArray(donnees)){
-                throw new Error("La réponse Supabase n’est pas une liste valide.");
+                throw new Error(
+                    "La réponse Supabase n’est pas une liste valide."
+                );
             }
 
             const categories = [...new Set(
@@ -398,9 +487,11 @@ liste.appendChild(carte);
             )].sort();
 
             categories.forEach(function(categorie){
+
                 const option = document.createElement("option");
                 option.value = categorie;
                 option.textContent = categorie;
+
                 filtre.appendChild(option);
             });
 
@@ -411,7 +502,12 @@ liste.appendChild(carte);
             afficherActivites(donnees);
 
         }catch(erreur){
-            console.error("Chargement programmation:", erreur);
+
+            console.error(
+                "Chargement programmation:",
+                erreur
+            );
+
             afficherErreur(
                 erreur.message ||
                 "Impossible de charger la programmation. Réessayez plus tard."
