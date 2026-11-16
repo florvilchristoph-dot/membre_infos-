@@ -1090,7 +1090,7 @@ if (cle === "programmation") {
 
             <form id="formProgrammationMEDFAH">
                 <label for="progTitre">Titre du programme *</label>
-                <input id="progTitre" required
+                <input id="progTitre" 
                     style="width:100%;padding:10px;margin:6px 0 12px">
 
                 <label for="progCategorie">Catégorie</label>
@@ -1104,7 +1104,7 @@ if (cle === "programmation") {
                 </select>
 
                 <label for="progDateDebut">Date et heure *</label>
-                <input id="progDateDebut" type="datetime-local" required
+                <input id="progDateDebut" type="datetime-local" 
                     style="width:100%;padding:10px;margin:6px 0 12px">
 
                 <label for="progDateFin">Date et heure de fin</label>
@@ -2469,10 +2469,10 @@ async function chargerProgrammationMEDFAH() {
                 const debut = valeur("progDateDebut");
                 const fin = valeur("progDateFin");
 
-                if (!debut) {
-                    alert("Veuillez choisir la date du programme.");
-                    return;
-                }
+                if (!debut && !document.getElementById("progPDF")?.files?.[0]) {
+    alert("Veuillez choisir la date du programme.");
+    return;
+}
 
                 if (fin && new Date(fin) < new Date(debut)) {
                     alert("La date de fin doit être égale ou postérieure à la date de début.");
@@ -2524,9 +2524,9 @@ if (fichierPDF) {
 }
 
 const donnees = {
-    titre: valeur("progTitre"),
+    titre: valeur("progTitre") || (fichierPDF ? fichierPDF.name.replace(/\.pdf$/i, "") : "Programme"),
     categorie: valeur("progCategorie"),
-    date_debut: new Date(debut).toISOString(),
+    date_debut: debut ? new Date(debut).toISOString() : new Date().toISOString(),
     date_fin: fin ? new Date(fin).toISOString() : null,
     lieu: valeur("progLieu"),
     responsable: valeur("progResponsable"),
