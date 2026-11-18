@@ -99,7 +99,8 @@ async function verifyCard(value){
   );
 
   if(!response.ok){
-   throw new Error("Erreur Supabase : "+response.status);
+   const details = await response.text();
+throw new Error("Erreur Supabase : "+response.status+" — "+details);
   }
 
   const rows=await response.json();
