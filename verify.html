@@ -82,11 +82,17 @@ async function verifyCard(value){
    throw new Error("Configuration Supabase manquante.");
   }
 
-  const params=new URLSearchParams({
-   select:"nom,prenom,numero_carte,code,status",
-   or:`(qr_token.eq.${value},numero_carte.eq.${value},code.eq.${value})`,
-   limit:"1"
-  });
+  const isUUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+
+const filtre=isUUID
+ ? `qr_token.eq.${value}`
+ : `numero_carte.eq.${value},code.eq.${value}`;
+
+const params=new URLSearchParams({
+ select:"nom,prenom,numero_carte,code,status",
+ or:`(${filtre})`,
+ limit:"1"
+});
 
   const response=await fetch(
    window.SUPABASE_URL+"/rest/v1/membre_infos?"+params.toString(),
