@@ -83,7 +83,7 @@ async function verifyCard(value){
   }
 
   const params=new URLSearchParams({
-   select:"nom,prenom,numero_carte,code,statut",
+   select:"nom,prenom,numero_carte,code,status",
    or:`(qr_token.eq.${value},numero_carte.eq.${value},code.eq.${value})`,
    limit:"1"
   });
@@ -125,7 +125,7 @@ async function verifyCard(value){
   addRow(result,"Prénom",member.prenom);
   addRow(result,"N° carte",member.numero_carte);
   addRow(result,"Code membre",member.code);
-  addRow(result,"Statut",member.statut);
+  addRow(result,"Statut",member.status);
 
   const note=document.createElement("p");
   note.className="small";
