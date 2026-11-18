@@ -82,34 +82,27 @@ async function verifyCard(value){
    throw new Error("Configuration Supabase manquante.");
   }
 
-  const isUUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+  const response = await fetch(
+ window.SUPABASE_URL + "/rest/v1/rpc/verifier_carte_publique",
+ {
+  method: "POST",
+  headers: {
+   apikey: window.SUPABASE_ANON_KEY,
+   Authorization: "Bearer " + window.SUPABASE_ANON_KEY,
+   "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+   p_valeur: value
+  })
+ }
+);
 
-const filtre=isUUID
- ? `qr_token.eq.${value}`
- : `numero_carte.eq.${value},code.eq.${value}`;
+if (!response.ok) {
+ const details = await response.text();
+ throw new Error("Erreur Supabase : " + response.status + " — " + details);
+}
 
-const params=new URLSearchParams({
- select:"nom,prenom,numero_carte,code,status",
- or:`(${filtre})`,
- limit:"1"
-});
-
-  const response=await fetch(
-   window.SUPABASE_URL+"/rest/v1/membre_infos?"+params.toString(),
-   {
-    headers:{
-     apikey:window.SUPABASE_ANON_KEY,
-     Authorization:"Bearer "+window.SUPABASE_ANON_KEY
-    }
-   }
-  );
-
-  if(!response.ok){
-   const details = await response.text();
-throw new Error("Erreur Supabase : "+response.status+" — "+details);
-  }
-
-  const rows=await response.json();
+const rows = await response.json();
 
   if(!rows.length){
    showMessage(
